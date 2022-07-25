@@ -20,6 +20,7 @@ import com.zx.sms.session.cmpp.SessionState;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.timeout.IdleStateHandler;
 
 /**
@@ -41,7 +42,16 @@ public abstract class AbstractSessionLoginManager extends ChannelDuplexHandler {
 
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
 		if (state == SessionState.DisConnect) {
-			logger.error("login error entity : " + entity.toString(), cause);
+			String exceptionMsg = cause.getMessage();
+			if(cause instanceof TooLongFrameException && exceptionMsg != null) {
+				if(exceptionMsg.contains("1195725856")) {
+					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP GET request.", cause);
+				}else if(exceptionMsg.contains("1347375956")){
+					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP POST request.", cause);
+				}
+			}else {
+				logger.error("login error entity : " + entity.toString(), cause);
+			}
 			ctx.close();
 		} else {
 			ctx.fireExceptionCaught(cause);
