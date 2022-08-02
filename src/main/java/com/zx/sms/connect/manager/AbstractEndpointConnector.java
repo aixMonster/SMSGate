@@ -199,12 +199,14 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 			}
 
 			logger.info("Channel added To Endpoint {} .totalCnt:{} ,remoteAddress: {}", endpoint, nowConnCnt + 1, ch.remoteAddress());
-
+			AbstractSessionStateManager sessionManager;
 			if (nowConnCnt == 0 && endpoint.isReSendFailMsg()) {
 				// 如果是第一个连接。要把上次发送失败的消息取出，再次发送一次
-				ch.pipeline().addAfter(GlobalConstance.codecName, GlobalConstance.sessionHandler, createSessionManager(endpoint, storedMap, true));
+				sessionManager =  createSessionManager(endpoint, storedMap, true);
+				ch.pipeline().addAfter(GlobalConstance.codecName, GlobalConstance.sessionHandler,sessionManager);
 			} else {
-				ch.pipeline().addAfter(GlobalConstance.codecName, GlobalConstance.sessionHandler, createSessionManager(endpoint, storedMap, false));
+				sessionManager =  createSessionManager(endpoint, storedMap, false);
+				ch.pipeline().addAfter(GlobalConstance.codecName, GlobalConstance.sessionHandler, sessionManager);
 			}
 
 			// 增加流量整形 ，每个连接每秒发送，接收消息数不超过配置的值
@@ -218,6 +220,9 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 			 * 引起消息未经handler处理就发了出去。
 			 */
 			ch.attr(GlobalConstance.attributeKey).set(SessionState.Connect);
+			
+			ch.attr(GlobalConstance.sessionKey).set(sessionManager);
+			
 			getChannels().add(ch);
 			return true;
 		} else {
@@ -232,6 +237,7 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 
 		if (getChannels().remove(ch)) {
 			ch.attr(GlobalConstance.attributeKey).set(SessionState.DisConnect);
+			ch.attr(GlobalConstance.sessionKey).set(null);
 		}
 	}
 
@@ -361,7 +367,7 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		Channel ch = fetchOneWritable();
 		if (ch == null)
 			return null;
-		AbstractSessionStateManager session = (AbstractSessionStateManager) ch.pipeline().get(GlobalConstance.sessionHandler);
+		AbstractSessionStateManager session =  ch.attr(GlobalConstance.sessionKey).get();
 		if (session == null)
 			return null;
 		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
@@ -376,7 +382,9 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		Channel ch = fetchOneWritable();
 		if (ch == null)
 			return null;
-		AbstractSessionStateManager session = (AbstractSessionStateManager) ch.pipeline().get(GlobalConstance.sessionHandler);
+		AbstractSessionStateManager session = ch.attr(GlobalConstance.sessionKey).get();
+		if (session == null)
+			return null;
 		return session.writeMessagesync(message);
 	}
 

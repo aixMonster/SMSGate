@@ -1,7 +1,5 @@
 package com.zx.sms.common;
 
-import io.netty.util.AttributeKey;
-
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -19,7 +17,10 @@ import com.zx.sms.handler.cmpp.CmppTerminateResponseMessageHandler;
 import com.zx.sms.handler.sgip.SgipServerIdleStateHandler;
 import com.zx.sms.handler.smgp.SMGPServerIdleStateHandler;
 import com.zx.sms.handler.smpp.SMPPServerIdleStateHandler;
+import com.zx.sms.session.AbstractSessionStateManager;
 import com.zx.sms.session.cmpp.SessionState;
+
+import io.netty.util.AttributeKey;
 
 public interface GlobalConstance {
 	public final static int MaxMsgLength = 140;
@@ -38,6 +39,7 @@ public interface GlobalConstance {
     public final static  SgipServerIdleStateHandler sgipidleHandler = new SgipServerIdleStateHandler();
     public final static  SMGPServerIdleStateHandler smgpidleHandler = new SMGPServerIdleStateHandler();
     public final static AttributeKey<SessionState> attributeKey = AttributeKey.newInstance(SessionState.Connect.name());
+    public final static AttributeKey<AbstractSessionStateManager> sessionKey = AttributeKey.newInstance("__sessionStateManager");
 	public final static AttributeKey<AtomicInteger> SENDWINDOWKEY = AttributeKey.newInstance("_SendWindow_");
     public final static BlackHoleHandler blackhole = new BlackHoleHandler();
     public final static String IdleCheckerHandlerName = "IdleStateHandler";
