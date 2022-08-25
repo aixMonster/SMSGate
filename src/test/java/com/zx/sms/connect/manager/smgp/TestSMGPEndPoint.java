@@ -74,7 +74,7 @@ public class TestSMGPEndPoint {
 //		client.setWriteLimit(200);
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
-		clienthandlers.add( new SMGPSessionConnectedHandler(10000)); 
+		clienthandlers.add( new SMGPSessionConnectedHandler(100)); 
 		client.setBusinessHandlerSet(clienthandlers);
 		
 		manager.addEndpointEntity(client);

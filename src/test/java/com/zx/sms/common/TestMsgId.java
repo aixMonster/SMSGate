@@ -32,16 +32,38 @@ public class TestMsgId {
 		
 		Assert.assertEquals(maiyunMsgid, msgid.toHexString(false));
 		System.out.println(Hex.encodeHex(SmsPduUtil.getSeptets("Hello world")));
+		
+		System.out.println(new MsgId(12345L).toString());
 	}
 	
 	@Test
 	public void testperformance() {
-		System.out.println(new MsgId());
+		
 		long start = System.currentTimeMillis();
 		for(int i = 0 ;i<1000000;i++) {
 			new MsgId().toString();
 		}
 		long end = System.currentTimeMillis();
 		System.out.println(end - start);
+		System.out.println(new MsgId());
+	}
+	@Test 
+	public void errMsgid() {
+		try {
+			new MsgId(1000000);
+			Assert.assertTrue(false);
+		}catch(IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			//确保会抛异常到这里
+			Assert.assertTrue(true);
+		}
+		try {
+			new MsgId(0);
+			Assert.assertTrue(false);
+		}catch(IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			//确保会抛异常到这里
+			Assert.assertTrue(true);
+		}
 	}
 }

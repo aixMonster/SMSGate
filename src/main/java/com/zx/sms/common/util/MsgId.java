@@ -4,13 +4,11 @@
 package com.zx.sms.common.util;
 
 import java.io.Serializable;
-import java.lang.management.ManagementFactory;
-import java.security.AccessController;
-import java.security.PrivilegedAction;
 import java.util.Calendar;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 /**
  * 
@@ -19,7 +17,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class MsgId implements Serializable {
 	private static final long serialVersionUID = 945466149547731811L;
-	private static int ProcessID = 1010;
 	private int month;
 	private int day;
 	private int hour;
@@ -28,38 +25,6 @@ public class MsgId implements Serializable {
 	private int gateId;
 	private int sequenceId;
 	
-	static{
-		final String propertiesName = "smsgate.id";
-		String value = null;
-		//解决在docker中运行，进程号都一样的问题
-        try {
-            if (System.getSecurityManager() == null) {
-                value = System.getProperty(propertiesName);
-            } else {
-                value = AccessController.doPrivileged(new PrivilegedAction<String>() {
-                    @Override
-                    public String run() {
-                        return System.getProperty(propertiesName);
-                    }
-                });
-            }
-        } catch (SecurityException e) {
-        }
-        //没有配置gateid就取程序进程号
-		if(StringUtils.isBlank(value)) {
-			String vmName = ManagementFactory.getRuntimeMXBean().getName();
-			if(vmName.contains("@")){
-				value =vmName.split("@")[0];
-			}
-		}
-		
-		try{
-			ProcessID = Integer.valueOf(value);
-		}catch(Exception e){
-			
-		}
-
-	}
 	
 	public MsgId() {
 		this(CachedMillisecondClock.INS.now());
@@ -77,7 +42,7 @@ public class MsgId implements Serializable {
 	 */
 	public MsgId(long timeMillis) {
 		
-		this(timeMillis, ProcessID, (int)DefaultSequenceNumberUtil.getSequenceNo());
+		this(timeMillis, CMPPCommonUtil.RandomGateID, (int)DefaultSequenceNumberUtil.getSequenceNo());
 	}
 	/**
 	 * 
@@ -179,19 +144,20 @@ public class MsgId implements Serializable {
 	 * @param gateId the gateId to set
 	 */
 	public void setGateId(int gateId) {
+		Validate.isTrue(gateId < 10000000 && gateId >= 0 , "gateId must be non-negative  and  less 10000000 . now is " + gateId);
 		this.gateId = gateId;
 	}
 	/**
 	 * @return the sequenceId
 	 */
 	public int getSequenceId() {
-		return sequenceId & 0xffff;
+		return sequenceId;
 	}
 	/**
 	 * @param sequenceId the sequenceId to set
 	 */
 	public void setSequenceId(int sequenceId) {
-		this.sequenceId = sequenceId & 0xffff;
+		this.sequenceId = (sequenceId & 0xfffff)%100000;
 	}
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()

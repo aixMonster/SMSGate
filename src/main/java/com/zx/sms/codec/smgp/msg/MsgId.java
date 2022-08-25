@@ -4,14 +4,15 @@
 package com.zx.sms.codec.smgp.msg;
 
 import java.io.Serializable;
-import java.lang.management.ManagementFactory;
 import java.util.Arrays;
 import java.util.Calendar;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 
 import com.zx.sms.codec.smgp.util.SMGPMsgIdUtil;
+import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 
@@ -21,7 +22,6 @@ import com.zx.sms.common.util.DefaultSequenceNumberUtil;
  */
 public class MsgId implements Serializable {
 	private static final long serialVersionUID = 945466149547731811L;
-	private static int ProcessID = 1010;
 	private int month;
 	private int day;
 	private int hour;
@@ -29,17 +29,6 @@ public class MsgId implements Serializable {
 	private int gateId;
 	private int sequenceId;
 	private byte[] originarr;
-	
-	static{
-		String vmName = ManagementFactory.getRuntimeMXBean().getName();
-		if(vmName.contains("@")){
-			try{
-				ProcessID = Integer.parseInt(vmName.split("@")[0]);
-			}catch(Exception e){
-				
-			}
-		}
-	}
 	
 	public MsgId() {
 		this(CachedMillisecondClock.INS.now());
@@ -49,6 +38,7 @@ public class MsgId implements Serializable {
 	 * @param gateId
 	 */
 	public MsgId(int gateId) {
+		
 		this(CachedMillisecondClock.INS.now(), gateId, (int)DefaultSequenceNumberUtil.getSequenceNo());
 	}
 	/**
@@ -57,7 +47,7 @@ public class MsgId implements Serializable {
 	 */
 	public MsgId(long timeMillis) {
 		
-		this(timeMillis, ProcessID, (int)DefaultSequenceNumberUtil.getSequenceNo());
+		this(timeMillis, CMPPCommonUtil.RandomGateID, (int)DefaultSequenceNumberUtil.getSequenceNo());
 	}
 	
 	public MsgId(byte[] arr) {
@@ -147,13 +137,14 @@ public class MsgId implements Serializable {
 	 * @param gateId the gateId to set
 	 */
 	public void setGateId(int gateId) {
+		Validate.isTrue(gateId < 1000000 && gateId >= 0, "gateId must be non-negative  and  less 1000000 .now is " + gateId);
 		this.gateId = gateId;
 	}
 	/**
 	 * @return the sequenceId
 	 */
 	public int getSequenceId() {
-		return sequenceId & 0xffffff;
+		return sequenceId;
 	}
 	/**
 	 * @param sequenceId the sequenceId to set

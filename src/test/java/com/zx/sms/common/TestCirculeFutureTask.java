@@ -12,6 +12,7 @@ import java.util.concurrent.locks.LockSupport;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Test;
 
+import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
 
@@ -61,7 +62,6 @@ public class TestCirculeFutureTask {
 			public Integer call() throws Exception {
 				cnt++;
 				long now = System.nanoTime();
-				System.out.println(now - lastime);
 				lastime = now;
 				return cnt;
 			}
@@ -86,7 +86,7 @@ public class TestCirculeFutureTask {
 		},0);
 		System.out.println(ManagementFactory.getRuntimeMXBean().getName());
 		
-
+		LockSupport.park();
 	}
 
 }

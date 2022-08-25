@@ -12,6 +12,27 @@ import com.zx.sms.common.util.SequenceNumber;
 
 public class TestSMGPMsgIdUtil {
 	
+	
+	@Test 
+	public void errMsgid() {
+		try {
+			new MsgId(1000000);
+			Assert.assertTrue(false);
+		}catch(IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			//确保会抛异常到这里
+			Assert.assertTrue(true);
+		}
+		try {
+			new MsgId(-1);
+			Assert.assertTrue(false);
+		}catch(IllegalArgumentException e) {
+			System.out.println(e.getMessage());
+			//确保会抛异常到这里
+			Assert.assertTrue(true);
+		}
+	}
+	
 	@Test
 	public void testMsgid() throws Exception{
 		MsgId m = new MsgId();
@@ -46,6 +67,7 @@ public class TestSMGPMsgIdUtil {
 			 m = SMGPMsgIdUtil.bytes2MsgId(Hex.decodeHex("0000ff06121423277475"));
 			 arr = SMGPMsgIdUtil.msgId2Bytes(m);
 			 Assert.assertEquals(m, SMGPMsgIdUtil.bytes2MsgId(arr));
+			 MsgId tt = new MsgId();
+			 System.out.println(tt.toString());
 	}
-
 }
