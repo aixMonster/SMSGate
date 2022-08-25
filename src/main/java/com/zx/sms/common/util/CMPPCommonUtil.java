@@ -2,8 +2,11 @@ package com.zx.sms.common.util;
 
 import java.lang.management.ManagementFactory;
 import java.nio.charset.Charset;
+import java.security.AccessController;
+import java.security.PrivilegedAction;
 
 import org.apache.commons.lang3.RandomUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsTextMessage;
 
@@ -58,12 +61,31 @@ public final class CMPPCommonUtil {
 	public final static int RandomGateID = getRandomGateID();
 	
 	private static int   getRandomGateID() {
-    	String vmName = ManagementFactory.getRuntimeMXBean().getName();
-    	int MaxGateID = 1000000;
-    	int random = RandomUtils.nextInt(1, MaxGateID);
-    	int prime = 31;
-    	int result = prime * vmName.hashCode() + random;
-    	return result > 0?(result % MaxGateID):((-result) % MaxGateID);
+		final String propertiesName = "smsgate.id";
+		String value = null;
+		//解决在docker中运行，进程号都一样的问题
+        try {
+            if (System.getSecurityManager() == null) {
+                value = System.getProperty(propertiesName);
+            } else {
+                value = AccessController.doPrivileged(new PrivilegedAction<String>() {
+                    @Override
+                    public String run() {
+                        return System.getProperty(propertiesName);
+                    }
+                });
+            }
+        } catch (SecurityException e) {
+        }
+        if(StringUtils.isBlank(value) || (!StringUtils.isNumeric(value))) {
+        	String vmName = ManagementFactory.getRuntimeMXBean().getName();
+        	int MaxGateID = 1000000;
+        	int random = RandomUtils.nextInt(1, MaxGateID);
+        	int prime = 31;
+        	int result = prime * vmName.hashCode() + random;
+        	return result > 0?(result % MaxGateID):((-result) % MaxGateID);
+        }else {
+        	return Integer.parseInt(value);
+        }
     }
-
 }
