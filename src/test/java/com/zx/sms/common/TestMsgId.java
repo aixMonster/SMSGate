@@ -50,7 +50,7 @@ public class TestMsgId {
 	@Test 
 	public void errMsgid() {
 		try {
-			new MsgId(1000000);
+			new MsgId(10000000);
 			Assert.assertTrue(false);
 		}catch(IllegalArgumentException e) {
 			System.out.println(e.getMessage());
@@ -58,7 +58,7 @@ public class TestMsgId {
 			Assert.assertTrue(true);
 		}
 		try {
-			new MsgId(0);
+			new MsgId(-1);
 			Assert.assertTrue(false);
 		}catch(IllegalArgumentException e) {
 			System.out.println(e.getMessage());
