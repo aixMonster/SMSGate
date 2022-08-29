@@ -6,8 +6,10 @@ package com.zx.sms.codec.smgp.msg;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -22,6 +24,7 @@ import com.zx.sms.common.util.DefaultSequenceNumberUtil;
  */
 public class MsgId implements Serializable {
 	private static final long serialVersionUID = 945466149547731811L;
+	private final static AtomicInteger _sequenceId = new AtomicInteger(RandomUtils.nextInt());
 	private int month;
 	private int day;
 	private int hour;
@@ -39,7 +42,7 @@ public class MsgId implements Serializable {
 	 */
 	public MsgId(int gateId) {
 		
-		this(CachedMillisecondClock.INS.now(), gateId, (int)DefaultSequenceNumberUtil.getSequenceNo());
+		this(CachedMillisecondClock.INS.now(), gateId, (int)_sequenceId.incrementAndGet());
 	}
 	/**
 	 * 
@@ -47,7 +50,7 @@ public class MsgId implements Serializable {
 	 */
 	public MsgId(long timeMillis) {
 		
-		this(timeMillis, CMPPCommonUtil.RandomGateID, (int)DefaultSequenceNumberUtil.getSequenceNo());
+		this(timeMillis, CMPPCommonUtil.RandomGateID, (int)_sequenceId.incrementAndGet());
 	}
 	
 	public MsgId(byte[] arr) {

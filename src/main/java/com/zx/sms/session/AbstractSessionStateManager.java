@@ -229,6 +229,8 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 					long delay = delaycheck(sendtime);
 					//计算最小时延
 					minDelay =  Math.min(minDelay, delay);
+					
+					//响应延迟超过25%的超时时间,打印告警，并暂停一会
 					if(delay > (entity.getRetryWaitTimeSec() * 1000/4)){
 						errlogger.warn("{} delaycheck . delay :{} , SequenceId :{}", entity.getId(),delay,getSequenceId(response));
 						//接收response回复时延太高，有可能对端已经开始积压了，暂停发送。
@@ -383,7 +385,18 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 							logger.warn("entity : {} , retry send Msg : {}", entity.getId(),message);
 							msgWriteCount++;
 							entry.cnt.incrementAndGet();
-							ctx.write(message, ctx.newPromise());
+							ChannelPromise retryPromise =  ctx.newPromise();
+							ctx.write(message,retryPromise);
+							retryPromise.addListener(new ChannelFutureListener() {
+								@Override
+								public void operationComplete(ChannelFuture future) throws Exception {
+									if (future.isSuccess()) {
+										//超时重发这里再保存一次，是为了更新VersionObject里的version时间
+										//方便后边判断响应延迟时间
+										storeMap.put(seq, new VersionObject<T>(message));
+									}
+								}
+							});
 						}
 					} catch (Throwable e) {
 						logger.error("retry Send Msg Error: {}", message);
