@@ -141,14 +141,15 @@ public class MsgId implements Serializable {
 	 * @return the gateId
 	 */
 	public int getGateId() {
-		return gateId;
+		return gateId & 0x3fffff ;
 	}
 	/**
 	 * @param gateId the gateId to set
 	 */
 	public void setGateId(int gateId) {
-		Validate.isTrue(gateId < 10000000 && gateId >= 0 , "gateId must be non-negative  and  less 10000000 . now is " + gateId);
-		this.gateId = gateId;
+		//gateid最大22个bit，因此最大值不大于0x3fffff
+		Validate.isTrue(gateId <= 0x3fffff && gateId >= 0 , "gateId must be non-negative  and  less than 4194304 . now is %s" , gateId);
+		this.gateId = gateId & 0x3fffff;
 	}
 	/**
 	 * @return the sequenceId
