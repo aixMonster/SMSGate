@@ -234,9 +234,10 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 //		String tmp = "123456尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜123456尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】，请点击支付http://www.10085.cn/web85/page/zyzxpay/wap_order.html?orderId=76DEF9AE1808F506FD4E6CB782E3B8E7EE875E766D3D335C 完成下单。请在60分钟内完成支付，如有疑问，请致电10085咨询，谢谢！中国移动100857890123456789012345678901234尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动中不";
 		final String longlongMsg = tmp + tmp;
 	    //测试10次
-		long start = System.nanoTime();
-		ExecutorService executor = Executors.newFixedThreadPool(100);
-	    for(int i = 0;i<1000;i++) {
+		
+		ExecutorService executor = Executors.newFixedThreadPool(40);
+		long totalTime = 0;
+	    for(int i = 0;i<10000;i++) {
 		    CmppDeliverRequestMessage lmsg = createTestReq(longlongMsg);
 			// 长短信拆分
 			SmsMessage msgcontent = lmsg.getSmsMessage();
@@ -256,7 +257,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 			//随机打乱
 			Collections.shuffle(msgs);
 			
-			final CountDownLatch startSignal = new CountDownLatch(totalSplitMsg);
+			final CountDownLatch startSignal = new CountDownLatch(totalSplitMsg+1);
 			final CountDownLatch stop = new CountDownLatch(totalSplitMsg);
 			final AtomicInteger count = new AtomicInteger();
 			for(final BaseMessage split : msgs) {
@@ -287,10 +288,16 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 				});
 				startSignal.countDown();
 			}
+		
+			startSignal.countDown(); //合并线程同时启动
+			long start = System.nanoTime();
 			stop.await(); //等待结束
+			
 			Assert.assertEquals("合并成功的线程数：",1,count.get());
+			long end = System.nanoTime();
+			totalTime += (end - start);
 		}
-		long end = System.nanoTime();
-		System.out.println("合并耗时 : " + (end - start)/1000000);
+		
+		System.out.println("合并耗时 : " + totalTime/1000000+"ms");
 	}
 }

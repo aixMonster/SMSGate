@@ -67,24 +67,14 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 	
 	private class LongMessageFrameCacheInner implements LongMessageFrameCache{
 
-
-
 		@Override
 		public boolean addAndGet(LongSMSMessage msg, String key, LongMessageFrame currFrame) {
-			
-			List<LongMessageFrame> currFrameList = new ArrayList<LongMessageFrame>() ;
-			currFrameList.add(currFrame);
-			
 			//pkTotal ,pkNumber 是byte，可能为负数
 			int pkTotal = (int) (currFrame.getPktotal() & 0x0ff);
 			int pkNumber =  (int)(currFrame.getPknumber()& 0x0ff);
-			BitSet currBitSet = new BitSet(pkTotal);
-			currBitSet.set(pkNumber);
 			
-			//putIfAbsent是线程安全的
-			 ImmutablePair<BitSet,List<LongMessageFrame>> oldFrameList = map.putIfAbsent(key,ImmutablePair.of(currBitSet, Collections.synchronizedList(currFrameList)));
-
-			if(oldFrameList != null) {
+			ImmutablePair<BitSet,List<LongMessageFrame>> oldFrameList = map.get(key);
+			if(oldFrameList!=null) {
 				//map里已经有其它分片了
 				
 				//List.add操作也要线程安全，避免多线程操作同一个ArrayList,因此上面使用synchronizedList
@@ -96,7 +86,28 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 					return  pkTotal == oldFrameList.left.cardinality();
 				}
 			}else {
-				return false;
+				List<LongMessageFrame> currFrameList = new ArrayList<LongMessageFrame>() ;
+				currFrameList.add(currFrame);
+				BitSet currBitSet = new BitSet(pkTotal);
+				currBitSet.set(pkNumber);
+				
+				//putIfAbsent是线程安全的
+				 oldFrameList = map.putIfAbsent(key,ImmutablePair.of(currBitSet, Collections.synchronizedList(currFrameList)));
+	
+				if(oldFrameList != null) {
+					//map里已经有其它分片了
+					
+					//List.add操作也要线程安全，避免多线程操作同一个ArrayList,因此上面使用synchronizedList
+					oldFrameList.right.add(currFrame);
+					//这里做原子的设置并判断是否接收全部分片
+					synchronized (oldFrameList.left) {
+						oldFrameList.left.set(pkNumber);
+						//返回是否合并成功
+						return  pkTotal == oldFrameList.left.cardinality();
+					}
+				}else {
+					return false;
+				}
 			}
 		}
 
