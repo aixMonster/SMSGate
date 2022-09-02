@@ -11,4 +11,11 @@ public class SmsMessageHolder {
 		this.msg = msg;
 		this.smsMessage = smsMessage;
 	}
+	public SmsMessage getSmsMessage() {
+		return smsMessage;
+	}
+	public LongSMSMessage getMsg() {
+		return msg;
+	}
+	
 }
