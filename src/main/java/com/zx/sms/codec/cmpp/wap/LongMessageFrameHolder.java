@@ -169,7 +169,7 @@ public enum LongMessageFrameHolder {
 	/**
 	 * 获取一条完整的长短信，如果长短信组装未完成，返回null
 	 **/
-	public SmsMessageHolder putAndget(String serviceNum, LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {
+	public SmsMessageHolder putAndget(String longSmsKey, LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {
 		LongMessageFrame frame = msg.generateFrame();
 		/**
         1、根据SMPP协议，融合网关收到短信中心上行的esm_class字段（一个字节）是0100 0000，转换成16进制就是0X40 (64), 01XXXXXX表明是一条长短信。
@@ -186,7 +186,7 @@ public enum LongMessageFrameHolder {
 		} else {
 
 			try {
-				FrameHolder fh = createFrameHolder(serviceNum, frame);
+				FrameHolder fh = createFrameHolder(longSmsKey, frame);
 				
 				if(fh == null)
 					return null;
@@ -197,26 +197,19 @@ public enum LongMessageFrameHolder {
 				}
 
 				// 超过一帧的，进行长短信合并
-				String mapKey = new StringBuilder().append(serviceNum).append(".").append(fh.frameKey).toString();
+				String mapKey = new StringBuilder().append(longSmsKey).append(".").append(fh.frameKey).toString();
 				
-				List<LongMessageFrame> allFrame;
-				//从缓存中获取长短信的其它片断
-				List<LongMessageFrame> oldFrame = get(mapKey,isRecvLongMsgOnMultiLink);
-				if (oldFrame != null) {
-					//把当前帧加入List
-					oldFrame.add(frame);
-					allFrame = oldFrame;
-				} else {
-					//这里收到的第一个片断
-					List<LongMessageFrame> curFrame = new ArrayList<LongMessageFrame>();
-					curFrame.add(frame);
-					allFrame = curFrame;
-				}
+			
+
+				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
+				boolean complete = setAndget(msg,mapKey, frame,isRecvLongMsgOnMultiLink);
+			
 				//判断是否收全了长短信片断 , 接收的分片数可能超过标示分片数，说明存在重复的分片
-				if(fh.getTotalLength() <= allFrame.size()) {
+				if(complete) {
+					List<LongMessageFrame> allFrame = getAndDel(mapKey,isRecvLongMsgOnMultiLink);
 					//总帧数个数虽然够了，还要再判断是不是所有帧都齐了 ，有可能收到相同帧序号的帧
 					//从第一个帧开始偿试合并
-					FrameHolder firstF =createFrameHolder(serviceNum, allFrame.get(0));
+					FrameHolder firstF =createFrameHolder(longSmsKey, allFrame.get(0));
 					for(int i = 1; i< allFrame.size() ;i++) {
 						try {
 							firstF = mergeFrameHolder(firstF, allFrame.get(i));
@@ -225,7 +218,6 @@ public enum LongMessageFrameHolder {
 					}
 					if (firstF.isComplete()) {
 						//合并成功，
-						remove(mapKey,isRecvLongMsgOnMultiLink);
 						
 						//根据分片信息，恢复消息对象，并保存在Fragments 列表中，不包含第一个分片
 						//用第一个到达的分片做为 合并后消息的母本
@@ -244,11 +236,11 @@ public enum LongMessageFrameHolder {
 							fullMsg.addFragment(frag);
 						}
 						return new SmsMessageHolder(generatorSmsMessage(firstF, frame),fullMsg);
+					}else {
+						//正常业务不会到这里
+						throw new NotSupportedException("not here");
 					}
 				}
-
-				//走到这里，说明未完成长短信合并，保存已收到的短信片断，并返回空，
-				set(msg,mapKey, allFrame,frame,isRecvLongMsgOnMultiLink);
 			} catch (Exception ex) {
 				logger.warn("Merge Long SMS Error. dump:{}",ByteBufUtil.hexDump(frame.getMsgContentBytes()) ,ex);
 				throw new NotSupportedException(ex.getMessage());
@@ -263,33 +255,25 @@ public enum LongMessageFrameHolder {
 			logger.warn("you use JVM cache for LongMessageFrameCache .When Long message fragments sent by multiple connections , messages will be lost");
 	}
 	
-	private List<LongMessageFrame> get(String key,boolean isMulti){
+	//这个方法必须是线程安全的
+	private boolean setAndget(LongSMSMessage msg,String key, LongMessageFrame currFrame,boolean isMulti){
 		if(isMulti) {
 			warning(isMulti);
-			return clusterMap.get(key);
+			return clusterMap.addAndGet(msg, key, currFrame);
 		}else {
-			return jvmMap.get(key);
+			return jvmMap.addAndGet(msg, key, currFrame);
 		}
 	}
 	
 
-	private void remove(String key,boolean isMulti) {
+	private List<LongMessageFrame> getAndDel(String key,boolean isMulti) {
 		if(isMulti) {
-			clusterMap.remove(key);
+			return clusterMap.getAndDel(key);
 		}else {
-			jvmMap.remove(key);
+			return jvmMap.getAndDel(key);
 		}
 	}
 	
-	private void set(LongSMSMessage msg,String key,List<LongMessageFrame> list, LongMessageFrame currFrame,boolean isMulti) {
-		if(isMulti) {
-			clusterMap.set(msg,key, list, currFrame);
-		}else {
-			jvmMap.set(msg,key, list, currFrame);
-		}
-	}
-	
-
 	public List<LongMessageFrame> splitmsgcontent(SmsMessage content) throws SmsException {
 
 		List<LongMessageFrame> result = new ArrayList<LongMessageFrame>();
@@ -343,12 +327,12 @@ public enum LongMessageFrameHolder {
 
 			for (InformationElement udhi : header.infoElement) {
 				if (SmsUdhIei.CONCATENATED_8BIT.equals(udhi.udhIei)) {
-
-					fh.merge(frame,frame.getPayloadbytes(header.headerlength), udhi.infoEleData[2] - 1);
+					int idx = byteToInt(udhi.infoEleData[2]);
+					fh.merge(frame,frame.getPayloadbytes(header.headerlength), idx - 1);
 					break;
 				} else if (SmsUdhIei.CONCATENATED_16BIT.equals(udhi.udhIei)) {
-
-					fh.merge(frame,frame.getPayloadbytes(header.headerlength), udhi.infoEleData[3] - 1);
+					int idx = byteToInt(udhi.infoEleData[3]);
+					fh.merge(frame,frame.getPayloadbytes(header.headerlength), idx - 1);
 					break;
 				}
 			}
@@ -359,7 +343,7 @@ public enum LongMessageFrameHolder {
 		throw new NotSupportedException("Not Support LongMsg");
 	}
 
-	private int byteToint(byte b) {
+	private int byteToInt(byte b) {
 		return (int) (b & 0x0ff);
 	}
 
@@ -380,15 +364,15 @@ public enum LongMessageFrameHolder {
 				if (SmsUdhIei.CONCATENATED_8BIT.equals(udhi.udhIei)) {
 					frameKey = udhi.infoEleData[i];
 					i++;
-					pkTotle = byteToint(udhi.infoEleData[i]);
+					pkTotle = byteToInt(udhi.infoEleData[i]);
 					frameholder = new FrameHolder(frameKey, pkTotle);
-					pknumber = byteToint(udhi.infoEleData[i + 1]) - 1;
+					pknumber = byteToInt(udhi.infoEleData[i + 1]) - 1;
 				} else if (SmsUdhIei.CONCATENATED_16BIT.equals(udhi.udhIei)) {
 					frameKey = (((udhi.infoEleData[i] & 0xff) << 8) | (udhi.infoEleData[i + 1] & 0xff) & 0x0ffff);
 					i += 2;
-					pkTotle = byteToint(udhi.infoEleData[i]);
+					pkTotle = byteToInt(udhi.infoEleData[i]);
 					frameholder = new FrameHolder(frameKey,pkTotle );
-					pknumber = byteToint(udhi.infoEleData[i + 1]) - 1;
+					pknumber = byteToInt(udhi.infoEleData[i + 1]) - 1;
 				} else {
 					appudhinfo = udhi;
 				}

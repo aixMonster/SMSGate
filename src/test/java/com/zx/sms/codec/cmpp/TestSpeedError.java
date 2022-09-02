@@ -99,7 +99,7 @@ public class TestSpeedError {
 		resp.setResult(8L);
 		ch.writeOutbound(resp); // 把resp转化为ByteBuf
 		ch.writeInbound(ch.readOutbound());
-		Thread.sleep((reSendTime + 2) * 1000);
+		Thread.sleep((reSendTime - 1) * 1000);
 		// 一共发送了3条MT消息
 		Assert.assertEquals(3, sessionhandler.getWriteCount());
 		// 收到超速错，会再次重发一次
