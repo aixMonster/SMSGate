@@ -37,6 +37,9 @@ package org.marre.sms;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Baseclass for messages that needs to be concatenated.
  * <p>- Only usable for messages that uses the same UDH fields for all message
@@ -49,6 +52,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public abstract class SmsConcatMessage implements SmsMessage
 {
+	private static final Logger logger = LoggerFactory.getLogger(SmsConcatMessage.class);
     private static final AtomicInteger rnd_  = new AtomicInteger((new Random()).nextInt(0xffff));
 
     /**
@@ -103,6 +107,10 @@ public abstract class SmsConcatMessage implements SmsMessage
             if ((ud.getLength() % nMaxConcatChars) > 0)
             {
                 nSms += 1;
+            }
+            if(nSms > 255) {
+            	
+            	logger.error("error SmsConcatMessage pkTotal Number {} .should be less than 256",nSms);
             }
             smsPdus = new SmsPdu[nSms];
 
@@ -172,6 +180,10 @@ public abstract class SmsConcatMessage implements SmsMessage
             {
                 nSms += 1;
             }
+            if(nSms > 255) {
+            	logger.error("error SmsConcatMessage pkTotal Number {} .should be less than 256",nSms);
+            }
+            	
             smsPdus = new SmsPdu[nSms];
 
             // Calculate number of UDHI
@@ -249,6 +261,9 @@ public abstract class SmsConcatMessage implements SmsMessage
             if ((msg.length() % nMaxConcatChars) > 0)
             {
                 nSms += 1;
+            }
+            if(nSms > 255) {
+            	logger.error("error SmsConcatMessage pkTotal Number {} .should be less than 256",nSms);
             }
             smsPdus = new SmsPdu[nSms];
 
