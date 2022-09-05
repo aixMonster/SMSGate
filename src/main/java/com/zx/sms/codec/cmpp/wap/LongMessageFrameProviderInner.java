@@ -106,7 +106,8 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 						return  pkTotal == oldFramePair.left.cardinality();
 					}
 				}else {
-					return  pkTotal == newFramePair.left.cardinality();
+					//只会有第一个到达的分片会执行到这里，如果总分片数是1才返回true.
+					return  pkTotal == 1;
 				}
 			}
 		}
