@@ -111,6 +111,12 @@
 为解决此问题，框架使用SPI机制加载LongMessageFrameCache的实现类,业务侧以SPI方式提供Redis版的LongMessageFrameProvider实现类。
 为了让业务自制的LongMessageFrameProvider实现类生效， 要确保业务自制的LongMessageFrameProvider实现类 order() 大于0 。框架优先使用order最大的实现。
 
+具体为：
+
+1)  打开该通道账号的配置 `EndpointEntity.isRecvLongMsgOnMultiLink`属性，用于标识该通道的长短信要使用集群部署的长短信合并能力（由于只有少量系统有此问题，不需要所有账号打开该特性，会影响合并性能）。
+
+2)  提供一个Redis 的合并实现类，可以参考测试包中的代码：`RedisLongMessageFrameCache`  ; `RedisLongMessageFrameProvider`
+
 - `如何关联状态报告和submit消息?`
 
 运宽商网关响应`submitRequest`消息时，你会收到`submitResponse`消息。在`response`里会有`msgId`。通过这个`msgId`跟之后收到的状态报告(`reportMessage`)里的`msgId`关联。
