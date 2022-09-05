@@ -73,40 +73,40 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 			int pkTotal = (int) (currFrame.getPktotal() & 0x0ff);
 			int pkNumber =  (int)(currFrame.getPknumber()& 0x0ff);
 			
-			ImmutablePair<BitSet,List<LongMessageFrame>> oldFrameList = map.get(key);
-			if(oldFrameList!=null) {
+			ImmutablePair<BitSet,List<LongMessageFrame>> oldFramePair = map.get(key);
+			if(oldFramePair!=null) {
 				//map里已经有其它分片了
 				
 				//List.add操作也要线程安全，避免多线程操作同一个ArrayList,因此上面使用synchronizedList
-				oldFrameList.right.add(currFrame);
+				oldFramePair.right.add(currFrame);
 				//这里做原子的设置并判断是否接收全部分片
-				synchronized (oldFrameList.left) {
-					oldFrameList.left.set(pkNumber);
+				synchronized (oldFramePair.left) {
+					oldFramePair.left.set(pkNumber);
 					//返回是否合并成功
-					return  pkTotal == oldFrameList.left.cardinality();
+					return  pkTotal == oldFramePair.left.cardinality();
 				}
 			}else {
 				List<LongMessageFrame> currFrameList = new ArrayList<LongMessageFrame>() ;
 				currFrameList.add(currFrame);
 				BitSet currBitSet = new BitSet(pkTotal);
 				currBitSet.set(pkNumber);
-				
+				ImmutablePair<BitSet,List<LongMessageFrame>> newFramePair  = ImmutablePair.of(currBitSet, Collections.synchronizedList(currFrameList));
 				//putIfAbsent是线程安全的
-				 oldFrameList = map.putIfAbsent(key,ImmutablePair.of(currBitSet, Collections.synchronizedList(currFrameList)));
+				oldFramePair = map.putIfAbsent(key,newFramePair);
 	
-				if(oldFrameList != null) {
+				if(oldFramePair != null) {
 					//map里已经有其它分片了
 					
 					//List.add操作也要线程安全，避免多线程操作同一个ArrayList,因此上面使用synchronizedList
-					oldFrameList.right.add(currFrame);
+					oldFramePair.right.add(currFrame);
 					//这里做原子的设置并判断是否接收全部分片
-					synchronized (oldFrameList.left) {
-						oldFrameList.left.set(pkNumber);
+					synchronized (oldFramePair.left) {
+						oldFramePair.left.set(pkNumber);
 						//返回是否合并成功
-						return  pkTotal == oldFrameList.left.cardinality();
+						return  pkTotal == oldFramePair.left.cardinality();
 					}
 				}else {
-					return false;
+					return  pkTotal == newFramePair.left.cardinality();
 				}
 			}
 		}

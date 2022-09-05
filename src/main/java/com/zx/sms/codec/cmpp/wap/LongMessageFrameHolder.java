@@ -187,10 +187,10 @@ public enum LongMessageFrameHolder {
 
 			try {
 				FrameHolder fh = createFrameHolder(longSmsKey, frame);
-				
+//
 				if(fh == null)
 					return null;
-				
+//				
 				// 判断是否只有一帧
 				if (fh.isComplete()) {
 					return new SmsMessageHolder(generatorSmsMessage(fh, frame),msg);
@@ -198,14 +198,14 @@ public enum LongMessageFrameHolder {
 
 				// 超过一帧的，进行长短信合并
 				String mapKey = new StringBuilder().append(longSmsKey).append(".").append(fh.frameKey).toString();
-				
-			
 
 				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
 				boolean complete = setAndget(msg,mapKey, frame,isRecvLongMsgOnMultiLink);
 			
 				//判断是否收全了长短信片断 , 接收的分片数可能超过标示分片数，说明存在重复的分片
 				if(complete) {
+					//多线程、或者多进程处理时，只有唯一一个线程能进入到这里
+					
 					List<LongMessageFrame> allFrame = getAndDel(mapKey,isRecvLongMsgOnMultiLink);
 					//总帧数个数虽然够了，还要再判断是不是所有帧都齐了 ，有可能收到相同帧序号的帧
 					//从第一个帧开始偿试合并
@@ -367,12 +367,25 @@ public enum LongMessageFrameHolder {
 					pkTotle = byteToInt(udhi.infoEleData[i]);
 					frameholder = new FrameHolder(frameKey, pkTotle);
 					pknumber = byteToInt(udhi.infoEleData[i + 1]) - 1;
+					//设置frame里的分片序列号，唯一ID
+					frame.setPkseq((short)frameKey);
+					//设置frame里的总分片数
+					frame.setPktotal((byte)pkTotle);
+					//设置frame里的分片序号
+					frame.setPknumber((byte)(pknumber + 1));
+					
 				} else if (SmsUdhIei.CONCATENATED_16BIT.equals(udhi.udhIei)) {
 					frameKey = (((udhi.infoEleData[i] & 0xff) << 8) | (udhi.infoEleData[i + 1] & 0xff) & 0x0ffff);
 					i += 2;
 					pkTotle = byteToInt(udhi.infoEleData[i]);
 					frameholder = new FrameHolder(frameKey,pkTotle );
 					pknumber = byteToInt(udhi.infoEleData[i + 1]) - 1;
+					//设置frame里的分片序列号，唯一ID
+					frame.setPkseq((short)frameKey);
+					//设置frame里的总分片数
+					frame.setPktotal((byte)pkTotle);
+					//设置frame里的分片序号
+					frame.setPknumber((byte)(pknumber + 1));
 				} else {
 					appudhinfo = udhi;
 				}
@@ -389,12 +402,6 @@ public enum LongMessageFrameHolder {
 			frameholder.setServiceNum(serviceNum);
 			frameholder.merge(frame,frame.getPayloadbytes(header.headerlength), pknumber);
 			
-			//设置frame里的分片序列号，唯一ID
-			frame.setPkseq((short)frameKey);
-			//设置frame里的总分片数
-			frame.setPktotal((byte)pkTotle);
-			//设置frame里的分片序号
-			frame.setPknumber((byte)(pknumber + 1));
 			return frameholder;
 		}
 

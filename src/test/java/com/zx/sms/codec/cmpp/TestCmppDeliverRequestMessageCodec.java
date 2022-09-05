@@ -155,7 +155,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 	@Test
 	public void testSIPUSH() {
 		CmppDeliverRequestMessage msg = createTestReq("");
-		WapSIPush si = new WapSIPush("http://www.baidu.com", "baidu");
+		WapSIPush si = new WapSIPush("http://www.baidu.com?", "baidu");
 		SmsMessage wap = new SmsWapPushMessage(si);
 		msg.setMsgContent(wap);
 		CmppDeliverRequestMessage result = testWapCodec(msg);
@@ -230,10 +230,14 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		final String longlongMsg = tmp + tmp;
 		// 测试10次
 
-		ExecutorService executor = Executors.newFixedThreadPool(40);
+		ExecutorService executor = Executors.newFixedThreadPool(100);
 		long totalTime = 0;
-		for (int i = 0; i < 10000; i++) {
-			CmppDeliverRequestMessage lmsg = createTestReq(longlongMsg);
+		final int TOTLE = 10000;
+		long sumsplit = 0;
+		for (int i = 0; i < TOTLE; i++) {
+			final CmppDeliverRequestMessage lmsg = createTestReq(longlongMsg);
+			
+			lmsg.setDestId("102" + i);
 			// 长短信拆分
 			SmsMessage msgcontent = lmsg.getSmsMessage();
 			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
@@ -244,11 +248,10 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 				BaseMessage basemsg = (BaseMessage) lmsg.generateMessage(frame);
 				msgs.add(basemsg);
 			}
-			// 启用多线程进行短信合并
-			final String key = lmsg.getSrcterminalId() + lmsg.getDestId() + RandomUtils.nextLong();
+		
 
 			int totalSplitMsg = msgs.size();
-
+			sumsplit += totalSplitMsg;
 			// 随机打乱
 			Collections.shuffle(msgs);
 
@@ -262,7 +265,8 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 					public Boolean call() throws Exception {
 						// 等待开始信号
 						startSignal.await();
-
+						// 启用多线程进行短信合并
+						final String key = lmsg.getSrcterminalId() + lmsg.getDestId();
 						SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(key, ((LongSMSMessage) split),
 								false);
 						if (hoder != null) {
@@ -288,12 +292,12 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 			long start = System.nanoTime();
 			stop.await(1,TimeUnit.SECONDS); // 等待结束
 
-			Assert.assertEquals("合并成功的线程数：", 1, count.get());
+			Assert.assertEquals("合并成功的消息数：", 1, count.get());
 			long end = System.nanoTime();
 			totalTime += (end - start);
 		}
 
-		logger.info("testConcurrentLongMessageMerge1 合并耗时 : " + totalTime / 1000000 + "ms");
+		logger.info("testConcurrentLongMessageMerge1 合并耗时 : " + totalTime / 1000000 + "ms，" + "长短信总条数: " + TOTLE + " 总分片数："+sumsplit + " 合并速度：" + (sumsplit*1000*1000000)/totalTime+"/s");
 	}
 
 	// 多线程长短信合并
@@ -307,7 +311,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		for(char c: longlongMsg.toCharArray()) {
 			chars.add(Character.valueOf(c));
 		}
-		ExecutorService executor = Executors.newFixedThreadPool(40);
+		ExecutorService executor = Executors.newFixedThreadPool(100);
 		long totalTime = 0;
 		List<BaseMessage> msgs = new ArrayList<BaseMessage>();
 		final int TOTLE = 2500;
@@ -390,6 +394,6 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		long end = System.nanoTime();
 		totalTime += (end - start);
 
-		logger.info("testConcurrentLongMessageMerge2 合并耗时 : " + totalTime / 1000000 + "ms");
+		logger.info("testConcurrentLongMessageMerge2 合并耗时 : " + totalTime / 1000000 + "ms"+ " 合并速度：" + ((long)totalSplitMsg*1000*1000000)/totalTime+"/s");
 	}
 }
