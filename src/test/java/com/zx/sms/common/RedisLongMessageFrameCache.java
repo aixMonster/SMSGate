@@ -16,16 +16,19 @@ import com.zx.sms.common.util.FstObjectSerializeUtil;
 
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.Pipeline;
+import redis.clients.jedis.Response;
 
 public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 	private static final Logger logger = LoggerFactory.getLogger(RedisLongMessageFrameCache.class);
-	final static String BitSetPre = "_BitSetdfj_";
+	final static String BitSetPre = "BitSetdfj_";
 	final static Long ttl = 2 * 3600L;
 	private JedisPool jedispool;
 	private String scriptHash ;
-
-	public RedisLongMessageFrameCache(JedisPool jedispool) {
+	private String userPrefix;
+	public RedisLongMessageFrameCache(JedisPool jedispool, String userPrefix) {
 		this.jedispool = jedispool;
+		this.userPrefix = userPrefix == null?"":userPrefix;
 		init();
 	}
 
@@ -39,24 +42,28 @@ public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 		}
 	}
 	@Override
-	public boolean addAndGet(LongSMSMessage msg, String key, LongMessageFrame currFrame) {
+	public boolean addAndGet(LongSMSMessage msg, String t_key, LongMessageFrame currFrame) {
+		String key = userPrefix + t_key;
 		// pkTotal ,pkNumber 是byte，可能为负数
 		int pkTotal = (int) (currFrame.getPktotal() & 0x0ff);
 		int pkNumber = (int) (currFrame.getPknumber() & 0x0ff);
-		String bitsetKey = BitSetPre + key;
+		String bitsetKey = userPrefix + BitSetPre + t_key;
 		Jedis jedis = jedispool.getResource();
 		try {
-			// 将短信分片加入reids集合
-
-			jedis.sadd(key.getBytes(StandardCharsets.UTF_8), FstObjectSerializeUtil.write(currFrame));
-			jedis.expire(key.getBytes(StandardCharsets.UTF_8), ttl);
+			Pipeline pipe = jedis.pipelined();
 			// 使用原子方法设置bitset并判断是否接收全部分片
 			/*
 			 * 相当于下面代码加全局分布锁，使用Lua实现 jedis.setbit(bitsetKey, pkNumber, true); long bitCount
 			 * = jedis.bitcount(bitsetKey); return pkTotal == bitCount;
 			 */
-
-			long b_count = bitsetAndCount(jedis, bitsetKey, pkNumber);
+			Response<Object> response = pipe.evalsha(scriptHash, Collections.singletonList(bitsetKey), Collections.singletonList(String.valueOf(pkNumber)));
+			
+			// 将短信分片加入reids集合
+			pipe.sadd(key.getBytes(StandardCharsets.UTF_8), FstObjectSerializeUtil.write(currFrame));
+			pipe.expire(key.getBytes(StandardCharsets.UTF_8), ttl);
+			pipe.expire(bitsetKey.getBytes(StandardCharsets.UTF_8), ttl);
+			pipe.sync();
+			Long b_count = (Long) response.get();
 			return pkTotal == b_count;
 
 		} catch (Exception e) {
@@ -69,12 +76,18 @@ public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 	}
 
 	@Override
-	public List<LongMessageFrame> getAndDel(String key) {
+	public List<LongMessageFrame> getAndDel(String t_key) {
+		String key = userPrefix + t_key;
+		String bitsetKey = userPrefix + BitSetPre + t_key;
 		Jedis jedis = jedispool.getResource();
 		try {
-			Set<byte[]> allFrame = jedis.smembers(key.getBytes(StandardCharsets.UTF_8));
+			Pipeline pipe = jedis.pipelined();
+			Response<Set<byte[]>> allFrame = pipe.smembers(key.getBytes(StandardCharsets.UTF_8));
+			pipe.del(bitsetKey.getBytes(StandardCharsets.UTF_8));
+			pipe.del(key.getBytes(StandardCharsets.UTF_8));
+			pipe.sync();
 			List<LongMessageFrame> frames = new ArrayList<LongMessageFrame>();
-			for (byte[] arr : allFrame) {
+			for (byte[] arr : allFrame.get()) {
 				try {
 					LongMessageFrame f = (LongMessageFrame) FstObjectSerializeUtil.read(arr);
 					frames.add(f);
@@ -82,23 +95,12 @@ public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 					logger.warn("", e);
 				}
 			}
-			jedis.del(key.getBytes(StandardCharsets.UTF_8));
-
-			String bitsetKey = BitSetPre + key;
-			jedis.del(bitsetKey.getBytes(StandardCharsets.UTF_8));
 			return frames;
 		} finally {
 			jedis.close();
 		}
 	}
 
-	private static String Lua_ge_64 = "redis.call('setbit',KEYS[1],ARGV[1],1);redis.call('expire',KEYS[1],ARGV[2]);return redis.call('bitcount',KEYS[1])";
+	private static String Lua_ge_64 = "redis.call('setbit',KEYS[1],ARGV[1],1);return redis.call('bitcount',KEYS[1])";
 
-	private long bitsetAndCount(Jedis jedis, String bitsetKey, int pkNumber) {
-		List<String> params = new ArrayList<String>();
-		params.add(String.valueOf(pkNumber));
-		params.add(String.valueOf(ttl));
-		Long b_count = (Long) jedis.evalsha(scriptHash, Collections.singletonList(bitsetKey), params);
-		return b_count.longValue();
-	}
 }

@@ -34,6 +34,7 @@
 - `如何发送闪信?`
 
 ```java
+  //创建一个闪信对象，跟发送普通短信一样
   CmppSubmitRequestMessage msg = CmppSubmitRequestMessage.create(phone, "10690021", "");
   msg.setMsgContent(new SmsTextMessage("你好，我是闪信！",SmsAlphabet.UCS2,SmsMsgClass.CLASS_0));  //class0是闪信
 ```
@@ -85,7 +86,7 @@
 
 |企业名称|企业介绍|使用版本|使用协议|
 |:-----:|:------:|:-----:|:------:|
-| 中移在线 | 中国移动集团专业公司 | 2.1.11 | CMPP|
+| 中移在线 | 中国移动集团专业公司 | 2.1.13.1 | CMPP|
 |||||
 
 # 开发短信网关的常见问题
@@ -115,7 +116,7 @@
 
 1)  打开该通道账号的配置 `EndpointEntity.isRecvLongMsgOnMultiLink`属性，用于标识该通道的长短信要使用集群部署的长短信合并能力（由于只有少量系统有此问题，不需要所有账号打开该特性，会影响合并性能）。
 
-2)  提供一个Redis 的合并实现类，可以参考测试包中的代码：`RedisLongMessageFrameCache`  ; `RedisLongMessageFrameProvider`
+2)  提供一个Redis 的合并实现类，可以参考测试包中的代码：`RedisLongMessageFrameCache` ,  `RedisLongMessageFrameProvider`
 
 - `如何关联状态报告和submit消息?`
 

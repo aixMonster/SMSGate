@@ -220,7 +220,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		System.out.println(result.getMsgContent());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 	}
-
+	ExecutorService executor = Executors.newFixedThreadPool(20);
 	// 多线程长短信合并
 	@Test
 	public void testConcurrentLongMessageMerge() throws Exception {
@@ -240,12 +240,12 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		// 测试10次
 		int randomSize = 0;
 		
-		ExecutorService executor = Executors.newFixedThreadPool(100);
+	
 		long totalTime = 0;
-		final int TOTLE = 2500;
+		final int TOTLE = 100000;
 		long sumsplit = 0;
 		for (int i = 0; i < TOTLE; i++) {
-			randomSize = RandomUtils.nextInt(130, 67 * 255);
+			randomSize = RandomUtils.nextInt(130, 67 * 5);
 			CmppDeliverRequestMessage lmsg = createTestReq(longlongMsg.substring(0, randomSize));
 			
 			lmsg.setDestId("102" + i);
@@ -322,16 +322,15 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		for(char c: longlongMsg.toCharArray()) {
 			chars.add(Character.valueOf(c));
 		}
-		ExecutorService executor = Executors.newFixedThreadPool(100);
 		long totalTime = 0;
 		List<BaseMessage> msgs = new ArrayList<BaseMessage>();
-		final int TOTLE = 2500;
+		final int TOTLE = 100000;
 		final Map<Integer,Integer> contentMap = new ConcurrentHashMap<Integer,Integer>(TOTLE);
 		
 		for (int i = 0; i < TOTLE; i++) {
 			Collections.shuffle(chars);
 			StringBuilder sb = new StringBuilder();
-			int randomSize = RandomUtils.nextInt(671, 67 * 255);
+			int randomSize = RandomUtils.nextInt(70, 67 * 5);
 			int k = 0;
 			for(Character c : chars) {
 				if(k++ > randomSize)
@@ -383,11 +382,12 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 						CmppDeliverRequestMessage result = (CmppDeliverRequestMessage) hoder.getMsg();
 						result.setMsgContent(hoder.getSmsMessage());
 
-						// 完成计数器加1
-						count.incrementAndGet();
+
 						
-						if(contentMap.remove(result.getMsgContent().hashCode()) != null) {
+						if(contentMap.get(result.getMsgContent().hashCode()) != null) {
 							stop.countDown();
+							// 完成计数器加1
+							count.incrementAndGet();
 						}
 						
 						return true;

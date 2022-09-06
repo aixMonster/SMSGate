@@ -17,7 +17,7 @@ public class RedisLongMessageFrameProvider implements LongMessageFrameProvider {
            jedisPoolConfig.setMaxTotal(20);
            jedisPoolConfig.setMaxIdle(10);
            JedisPool pool =  new JedisPool(jedisPoolConfig, "127.0.0.1", 6379);
-		return new RedisLongMessageFrameCache(pool);
+		return new RedisLongMessageFrameCache(pool,"Test_");
 	}
 
 	@Override
