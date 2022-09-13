@@ -46,7 +46,7 @@ public class ByteBufUtil {
      * Read and create a new Address from a buffer.  Checks if there is
      * a minimum number of bytes readable from the buffer.
      * @param buffer
-     * @return
+     * @return Address
      * @throws UnrecoverablePduException
      * @throws RecoverablePduException
      */
@@ -159,7 +159,7 @@ public class ByteBufUtil {
      * Will throw an exception if no null byte is found and it runs out of data
      * in the buffer to read.
      * @param buffer
-     * @return
+     * @return String
      * @throws TerminatingNullByteNotFoundException
      */
     static public String readNullTerminatedString(ByteBuf buffer) throws TerminatingNullByteNotFoundException {

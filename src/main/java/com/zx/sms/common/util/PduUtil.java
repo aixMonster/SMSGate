@@ -33,7 +33,7 @@ public class PduUtil {
      * Calculates size of a "C-String" by returning the length of the String
      * plus 1 (for the NULL byte).  If the parameter is null, will return 1.
      * @param value
-     * @return
+     * @return byteSize
      */
     static public int calculateByteSizeOfNullTerminatedString(String value) {
         if (value == null) {
@@ -46,7 +46,7 @@ public class PduUtil {
      * Calculates the byte size of an Address.  Safe to call with nulls as a
      * parameter since this will then just return the size of an empty address.
      * @param value
-     * @return
+     * @return byteSize
      */
     static public int calculateByteSizeOfAddress(Address value) {
         if (value == null) {

@@ -111,7 +111,7 @@ public class WapSLPush implements WbxmlDocument  , Serializable
     /**
      * Returns the URI.
      * 
-     * @return
+     * @return uri
      */
     public String getUri()
     {

@@ -39,10 +39,8 @@ public class WindowSizeChannelTrafficShapingHandler extends AbstractTrafficShapi
      * Create a new instance using default
      * max time as delay allowed value of 15000 ms.
      *
-     * @param writeLimit
-     *          0 or a limit in bytes/s
-     * @param readLimit
-     *          0 or a limit in bytes/s
+     * @param entity
+     *         EntityPoint
      * @param checkInterval
      *          The delay between two computations of performances for
      *            channels or 0 if no stats are to be computed.

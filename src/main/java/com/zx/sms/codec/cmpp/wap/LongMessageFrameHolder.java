@@ -440,10 +440,10 @@ public enum LongMessageFrameHolder {
 	 * the 7-bit values from the octet stream.
 	 * 
 	 * @param octets
-	 * @param bitSkip
+	 * @param setptetCnt
 	 *            FIXME pass the septet length in here, so if there is a spare
 	 *            septet at the end of the octet, we can ignore that
-	 * @return
+	 * @return byte arrays
 	 */
 
 	public static byte[] octetStream2septetStream(byte[] octets,int setptetCnt) {

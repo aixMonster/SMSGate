@@ -63,7 +63,7 @@ public final class SmsNpi {
 
     /**
      * Returns the NPI value as specified in the GSM spec.
-     * @return
+     * @return value
      */
     public int getValue() {
         return value;

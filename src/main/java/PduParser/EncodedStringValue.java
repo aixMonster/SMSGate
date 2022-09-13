@@ -121,7 +121,7 @@ public class EncodedStringValue implements Cloneable {
             } catch (UnsupportedEncodingException e) {
             	try {
                     return new String(mData, CharacterSets.MIMENAME_ISO_8859_1);
-                } catch (UnsupportedEncodingException _) {
+                } catch (UnsupportedEncodingException ex) {
                     return new String(mData); // system default encoding.
                 }
             }
@@ -191,7 +191,7 @@ public class EncodedStringValue implements Cloneable {
             try {
                 ret[i] = new EncodedStringValue(mCharacterSet,
                         temp[i].getBytes());
-            } catch (NullPointerException _) {
+            } catch (NullPointerException ex) {
                 // Can't arrive here
                 return null;
             }

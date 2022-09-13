@@ -58,7 +58,7 @@ public class SequenceNumber implements Serializable{
 	/**
 	 * 
 	 * @param timeMillis
-	 * @param gateId
+	 * @param nodeIds
 	 * @param sequenceId
 	 */
 	public SequenceNumber(long timeMillis, long nodeIds, int sequenceId) {

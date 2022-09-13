@@ -183,7 +183,6 @@ public abstract class Pdu implements BaseMessage,Cloneable{
      * Adds an optional parameter to this PDU. Does not check if the TLV has
      * already been added (allows duplicates).
      * @param tlv The TLV to add
-     * @see Pdu#setOptionalParameter(com.cloudhopper.smpp.tlv.Tlv)
      */
     public void addOptionalParameter(Tlv tlv) {
         if (this.optionalParameters == null) {

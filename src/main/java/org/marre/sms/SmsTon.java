@@ -76,7 +76,7 @@ public final class SmsTon {
 
     /**
      * Returns the value of the TON as specified in the GSM spec.
-     * @return
+     * @return value
      */
     public int getValue() {
         return value;

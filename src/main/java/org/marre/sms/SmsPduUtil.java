@@ -92,8 +92,7 @@ public final class SmsPduUtil
 	/**
 	 * Convert a list of septet values into an octet stream, with a number of empty bits at the start.
 	 * @param septets
-	 * @param skipBits
-	 * @return
+	 * @return byte arrays
 	 */
 	public static byte[] septetStream2octetStream(byte[] septets) {
 		int octetLength = (int) Math.ceil(((septets.length * 7)) / 8.0);
@@ -145,7 +144,7 @@ public final class SmsPduUtil
      * 
      * @param data
      *            The byte array to read from
-     * @param length
+     * @param setptetCnt
      *            Number of decoded chars to read from the stream
      * @return The decoded string
      */

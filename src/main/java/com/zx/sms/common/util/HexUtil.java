@@ -35,9 +35,6 @@ public class HexUtil {
      * Creates a String from a byte array with each byte in a "Big Endian"
      * hexidecimal format. For example, a byte 0x34 will return a
      * String "34".  A byte array of { 0x34, 035 } would return "3435".
-     * @param buffer The StringBuilder the byte array in hexidecimal format
-     *      will be appended to.  If the buffer is null, this method will throw
-     *      a NullPointerException.
      * @param bytes The byte array that will be converted to a hexidecimal String.
      *      If the byte array is null, this method will append nothing (a noop)
      */
@@ -52,9 +49,6 @@ public class HexUtil {
      * Creates a String from a byte array with each byte in a "Big Endian"
      * hexidecimal format. For example, a byte 0x34 will return a
      * String "34".  A byte array of { 0x34, 035 } would return "3435".
-     * @param buffer The StringBuilder the byte array in hexidecimal format
-     *      will be appended to.  If the buffer is null, this method will throw
-     *      a NullPointerException.
      * @param bytes The byte array that will be converted to a hexidecimal String.
      *      If the byte array is null, this method will append nothing (a noop)
      * @param offset The offset in the byte array to start from. If the offset

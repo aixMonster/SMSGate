@@ -20,7 +20,6 @@ package com.zx.sms.codec.cmpp.wap;
 /**
  *  Implement the WSP data type decoder.
  *
- *  @hide
  */
 public class WspTypeDecoder {
 

@@ -358,9 +358,7 @@ public class CmppSubmitRequestMessage extends DefaultMessage implements LongSMSM
 		return msg;
 	}
 
-	/**
-	 * @return the msgContent
-	 */
+
 	public void setMsgContent(String msgContent) {
 		setMsgContent(CMPPCommonUtil.buildTextMessage(msgContent));
 	}

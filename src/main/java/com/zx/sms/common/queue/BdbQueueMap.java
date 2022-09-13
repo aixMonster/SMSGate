@@ -26,8 +26,6 @@ import com.sleepycat.collections.StoredSortedMap;
  * {@link StoredSortedMap}
  * 
  * @author huzorro(huzorro@gmail.com)
- * @param <K>
- *            the type of map key
  * @param <E>
  *            the type of queue elements
  * 
@@ -121,10 +119,9 @@ public class BdbQueueMap<E> extends AbstractQueue<E> implements BlockingQueue<E>
 	/**
 	 * 使用自定义的{@code key} 插入元素{@code e}到队列
 	 * 
-	 * @see #insert(Object, Object)
 	 * @param k
 	 * @param e
-	 * @return 
+	 * @return  E
 	 * @throws InterruptedException
 	 */
 	public E put(Long k, E e) {
@@ -187,7 +184,7 @@ public class BdbQueueMap<E> extends AbstractQueue<E> implements BlockingQueue<E>
 	 * 
 	 * @param k
 	 * @param e
-	 * @return
+	 * @return remove success
 	 */
 	public boolean remove(Long k, E e) {
 		lock.lock();

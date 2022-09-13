@@ -38,7 +38,6 @@ public class NotEnoughDataInBufferException extends RecoverablePduException {
      * Constructs an instance of <code>AtNotEnoughDataInBufferException</code>
      * with the specified detail message and estimated number of bytes required.
      * An estimate of -1 represents an unknown amount.
-     * @param msg the detail message.
      * @param available Number of bytes that were available
      * @param expected Number of bytes expected or -1 if unknown
      */

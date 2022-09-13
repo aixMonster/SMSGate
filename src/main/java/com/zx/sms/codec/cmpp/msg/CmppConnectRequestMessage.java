@@ -31,10 +31,6 @@ public class CmppConnectRequestMessage extends DefaultMessage {
 		return sourceAddr;
 	}
 
-	/**
-	 * @param SP
-	 *            id，maxLength is 6
-	 */
 	public void setSourceAddr(String sourceAddr) {
 		this.sourceAddr = sourceAddr;
 	}

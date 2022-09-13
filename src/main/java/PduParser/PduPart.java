@@ -271,7 +271,7 @@ public class PduPart {
      /**
       *  Set Content-Type value.
       *
-      *  @param value the value
+      *  @param contentType the value
       *  @throws NullPointerException if the value is null.
       */
      public void setContentType(byte[] contentType) {
@@ -294,7 +294,7 @@ public class PduPart {
      /**
       * Set Content-Transfer-Encoding value
       *
-      * @param contentId the content-id value
+      * @param contentTransferEncoding the content-id value
       * @throws NullPointerException if the value is null.
       */
      public void setContentTransferEncoding(byte[] contentTransferEncoding) {

@@ -250,9 +250,6 @@ public class CmppDeliverRequestMessage extends DefaultMessage implements LongSMS
 		this.msg = msg;
 	}
 
-	/**
-	 * @return the msgContent
-	 */
 	public void setMsgContent(String msgContent) {
 		setMsgContent(CMPPCommonUtil.buildTextMessage(msgContent));
 	}

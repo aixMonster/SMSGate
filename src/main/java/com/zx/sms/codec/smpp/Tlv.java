@@ -90,7 +90,7 @@ public class Tlv implements Serializable{
      * plus the length of the value.  Two bytes for tag and two byte for length
      * and then the length of the value itself.  Primarily used for encoding
      * the PDU.
-     * @return
+     * @return byteSize
      */
     public int calculateByteSize() {
         return 4 + getUnsignedLength();

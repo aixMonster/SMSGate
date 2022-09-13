@@ -58,7 +58,7 @@ public final class StringUtil
      * 
      * @param stringTable
      * @param text
-     * @return
+     * @return String
      */
     public static int findString(String[] stringTable, String text)
     {

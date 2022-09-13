@@ -68,7 +68,7 @@ public final class SmsUdhIei {
 
     /**
      * Returns the UDH IEI value as specified in the GSM spec.
-     * @return
+     * @return value
      */
     public byte getValue() {
         return value;

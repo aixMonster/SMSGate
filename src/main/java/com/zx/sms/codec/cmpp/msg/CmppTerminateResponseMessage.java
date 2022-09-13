@@ -5,11 +5,7 @@ package com.zx.sms.codec.cmpp.msg;
 
 import com.zx.sms.codec.cmpp.packet.CmppPacketType;
 
-/**
- * @author huzorro(huzorro@gmail.com)
- * @param <T>
- *
- */
+
 public class CmppTerminateResponseMessage extends DefaultMessage {
 	private static final long serialVersionUID = -2657187574508760595L;
 

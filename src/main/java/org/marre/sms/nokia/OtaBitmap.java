@@ -166,7 +166,7 @@ public class OtaBitmap implements Serializable
     }
 
     /**
-     * @return
+     * @return height
      */
     public int getHeight()
     {
@@ -174,7 +174,7 @@ public class OtaBitmap implements Serializable
     }
 
     /**
-     * @return
+     * @return width
      */
     public int getWidth()
     {

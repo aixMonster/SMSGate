@@ -28,10 +28,6 @@ public class SgipBindRequestMessage extends SgipDefaultMessage {
 		super(SgipPacketType.BINDREQUEST, header);
 	}
 
-	/**
-	 * 
-	 * @param packetType
-	 */
 	public SgipBindRequestMessage() {
 		super(SgipPacketType.BINDREQUEST);
 	}

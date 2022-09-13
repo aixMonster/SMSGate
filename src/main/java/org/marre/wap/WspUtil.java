@@ -953,7 +953,7 @@ public final class WspUtil
      * Converts from a "multipart/" content type to "vnd.wap..." content type.
      * 
      * @param ct
-     * @return
+     * @return contentType
      */
     public static String convertMultipartContentType(String ct)
     {
