@@ -30,24 +30,20 @@ public class SessionStateManager extends AbstractSessionStateManager<Integer, Me
 
 	@Override
 	protected boolean needSendAgainByResponse(Message req, Message res) {
+		long result = 0;
 		if (res instanceof CmppSubmitResponseMessage) {
 			CmppSubmitResponseMessage submitResp = (CmppSubmitResponseMessage) res;
-			
-			if ((submitResp.getResult() != 0L) && (submitResp.getResult() != 8L)) {
-				logger.error("Receive Err Response result: {} . Req: {} ,Resp:{}",submitResp.getResult(), req, submitResp);
-			}
-
-			return submitResp.getResult() == 8L;
+			result = submitResp.getResult();
 		} else if (res instanceof CmppDeliverResponseMessage) {
 			CmppDeliverResponseMessage deliverResp = (CmppDeliverResponseMessage) res;
-
-			if ((deliverResp.getResult() != 0L) && (deliverResp.getResult() != 8L)) {
-				logger.error("Receive Err Response result: {} . Req: {} ,Resp:{}",deliverResp.getResult(), req, deliverResp);
-			}
-
-			return deliverResp.getResult() == 8L;
+			result = deliverResp.getResult();
 		}
-		return false;
+		
+		if ((result != 0L) && (result != 8L)) {
+			logger.error("Entity {} Receive Err Response result: {} . Req: {} ,Resp:{}",getEntity().getId(),result, req, res);
+		}
+
+		return result == 8L;
 	}
 	
 	protected boolean closeWhenRetryFailed(Message req) {

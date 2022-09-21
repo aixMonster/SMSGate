@@ -36,7 +36,7 @@ public class SMPPSessionStateManager extends AbstractSessionStateManager<Integer
 			result = res.getCommandStatus();
 		}
 		if (result !=  SmppConstants.STATUS_OK && result != SmppConstants.STATUS_THROTTLED) {
-			logger.error("Receive Err Response result: {} . Req: {} ,Resp:{}",result, req, res);
+			logger.error("Entity {} Receive Err Response result: {} . Req: {} ,Resp:{}",getEntity().getId(),result, req, res);
 		}
 		return result ==  SmppConstants.STATUS_THROTTLED;
 	}

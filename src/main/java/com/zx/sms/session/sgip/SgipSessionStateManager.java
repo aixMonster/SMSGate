@@ -40,7 +40,7 @@ public class SgipSessionStateManager extends AbstractSessionStateManager<Long, M
 			result = ((SgipDeliverResponseMessage) res).getResult();
 		}
 		if (result != SmppConstants.STATUS_OK && result != SmppConstants.STATUS_THROTTLED) {
-			logger.error("Receive Err Response result: {} . Req: {} ,Resp:{}",result, req, res);
+			logger.error("Entity {} Receive Err Response result: {} . Req: {} ,Resp:{}",getEntity().getId(),result, req, res);
 		}
 		
 		//Sgip协议 与 Smpp协议的超速错误码相同

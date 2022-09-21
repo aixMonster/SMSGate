@@ -242,7 +242,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		
 	
 		long totalTime = 0;
-		final int TOTLE = 100000;
+		final int TOTLE = 100;
 		long sumsplit = 0;
 		for (int i = 0; i < TOTLE; i++) {
 			randomSize = RandomUtils.nextInt(130, 67 * 5);
@@ -324,7 +324,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		}
 		long totalTime = 0;
 		List<BaseMessage> msgs = new ArrayList<BaseMessage>();
-		final int TOTLE = 100000;
+		final int TOTLE = 100;
 		final Map<Integer,Integer> contentMap = new ConcurrentHashMap<Integer,Integer>(TOTLE);
 		
 		for (int i = 0; i < TOTLE; i++) {
