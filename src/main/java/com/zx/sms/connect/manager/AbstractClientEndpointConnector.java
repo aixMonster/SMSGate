@@ -28,7 +28,7 @@ public abstract class AbstractClientEndpointConnector extends AbstractEndpointCo
 	public AbstractClientEndpointConnector(EndpointEntity endpoint) {
 		super(endpoint);
 		bootstrap.group(EventLoopGroupFactory.INS.getWorker())
-		.channel(NioSocketChannel.class)
+		.channel(EventLoopGroupFactory.selectChannelClass())
 		.option(ChannelOption.TCP_NODELAY, true)
 		.option(ChannelOption.SO_RCVBUF, 16384)
 		.option(ChannelOption.SO_SNDBUF, 8192)

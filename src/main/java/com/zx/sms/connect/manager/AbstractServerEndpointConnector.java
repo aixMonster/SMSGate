@@ -36,7 +36,8 @@ public abstract class AbstractServerEndpointConnector extends AbstractEndpointCo
 
 	public AbstractServerEndpointConnector(EndpointEntity e) {
 		super(e);
-		bootstrap.group(EventLoopGroupFactory.INS.getBoss(), EventLoopGroupFactory.INS.getWorker()).channel(NioServerSocketChannel.class)
+		bootstrap.group(EventLoopGroupFactory.INS.getBoss(), EventLoopGroupFactory.INS.getWorker())
+				.channel(EventLoopGroupFactory.selectServerChannelClass())
 				.option(ChannelOption.SO_BACKLOG, 100)
 				.option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
 				.handler(new LoggingHandler(LogLevel.DEBUG))
