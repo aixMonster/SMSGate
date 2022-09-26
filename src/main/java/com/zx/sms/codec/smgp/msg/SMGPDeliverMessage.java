@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
@@ -289,6 +291,9 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 	}
 
 	public SmsMessage getSmsMessage() {
+		if(msg instanceof SmsConcatMessage){
+			((SmsConcatMessage)msg).setSeqNoKey( this.getSrcTermId()+this.getDestTermId());
+		}
 		return msg;
 	}
 	

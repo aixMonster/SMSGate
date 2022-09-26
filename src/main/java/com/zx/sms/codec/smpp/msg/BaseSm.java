@@ -2,6 +2,7 @@ package com.zx.sms.codec.smpp.msg;
 
 import org.marre.sms.SmppSmsDcs;
 import org.marre.sms.SmsAlphabet;
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
 import org.marre.sms.SmsMsgClass;
@@ -197,6 +198,13 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	}
 
 	public SmsMessage getSmsMessage() {
+		if(smsMsg instanceof SmsConcatMessage){
+			if(this instanceof SubmitSm){
+				((SmsConcatMessage)smsMsg).setSeqNoKey( this.getDestAddress().getAddress()+this.getSourceAddress().getAddress());
+			}else if(this instanceof DeliverSm){
+				((SmsConcatMessage)smsMsg).setSeqNoKey( this.getSourceAddress().getAddress()+this.getDestAddress().getAddress());
+			}
+		}
 		return smsMsg;
 	}
 

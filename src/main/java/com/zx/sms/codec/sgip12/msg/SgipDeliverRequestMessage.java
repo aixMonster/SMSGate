@@ -6,6 +6,7 @@ package com.zx.sms.codec.sgip12.msg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
 
@@ -160,6 +161,9 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 	}
 
 	public SmsMessage getSmsMessage() {
+		if(msg instanceof SmsConcatMessage){
+			((SmsConcatMessage)msg).setSeqNoKey( this.getUsernumber()+this.getSpnumber());
+		}
 		return msg;
 	}
 	

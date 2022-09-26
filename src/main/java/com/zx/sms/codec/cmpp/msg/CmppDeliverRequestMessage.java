@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.marre.sms.SmsAlphabet;
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
 import org.marre.sms.SmsMsgClass;
@@ -259,6 +260,9 @@ public class CmppDeliverRequestMessage extends DefaultMessage implements LongSMS
 	}
 
 	public SmsMessage getSmsMessage() {
+		if(msg instanceof SmsConcatMessage){
+			((SmsConcatMessage)msg).setSeqNoKey(srcterminalId+destId);
+		}
 		return msg;
 	}
 

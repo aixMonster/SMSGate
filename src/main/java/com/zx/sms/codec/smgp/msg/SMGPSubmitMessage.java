@@ -3,6 +3,8 @@ package com.zx.sms.codec.smgp.msg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
 
@@ -470,6 +472,9 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 	}
 
 	public SmsMessage getSmsMessage() {
+		if(msg instanceof SmsConcatMessage){
+			((SmsConcatMessage)msg).setSeqNoKey( StringUtils.join(this.getDestTermIdArray(), "|")+this.getSrcTermId());
+		}
 		return msg;
 	}
 

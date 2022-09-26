@@ -4,16 +4,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsPortAddressedTextMessage;
-import org.marre.sms.SmsSimTookitSecurityMessage;
-import org.marre.sms.SmsTextMessage;
-import org.marre.wap.push.SmsMmsNotificationMessage;
-import org.marre.wap.push.SmsWapPushMessage;
-import org.marre.wap.push.WapSIPush;
-import org.marre.wap.push.WapSLPush;
-import org.marre.wap.wbxml.WbxmlDocument;
 
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.packet.CmppPacketType;
@@ -355,6 +349,9 @@ public class CmppSubmitRequestMessage extends DefaultMessage implements LongSMSM
 	}
 
 	public SmsMessage getSmsMessage() {
+		if(msg instanceof SmsConcatMessage){
+			((SmsConcatMessage)msg).setSeqNoKey(StringUtils.join(this.getDestterminalId(), "|")+this.getSrcId());
+		}
 		return msg;
 	}
 

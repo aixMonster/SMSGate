@@ -35,10 +35,17 @@
 package org.marre.sms;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.zx.sms.config.PropertiesUtils;
 
 /**
  * Baseclass for messages that needs to be concatenated.
@@ -55,6 +62,18 @@ public abstract class SmsConcatMessage implements SmsMessage
 	private static final Logger logger = LoggerFactory.getLogger(SmsConcatMessage.class);
     private static final AtomicInteger rnd_  = new AtomicInteger((new Random()).nextInt(0xffff));
 
+    //长短信拆分，要使用 rnd_ 生成统一的长短信ID,但在针对同一个号码，下发多条长短信，并且高并发情况下，随机生成的ID,有机率带来同一个号码
+    //ID重复，冲突，造成短信无法展示
+    private String seqNoKey;
+    private static final Integer refNoCacheTimeOut = Integer.valueOf(PropertiesUtils.getproperties("refNoCacheTimeOut", "60"));
+    private static final LoadingCache<String,AtomicInteger> refNoCache = CacheBuilder.newBuilder()
+    		.expireAfterAccess(refNoCacheTimeOut, TimeUnit.SECONDS)
+    		.build(new CacheLoader<String,AtomicInteger>(){
+				@Override
+				public AtomicInteger load(String telephone) throws Exception {
+					return  new AtomicInteger(rnd_.incrementAndGet());
+				}
+    		});
     /**
      * Creates an empty SmsConcatMessage.
      */
@@ -80,8 +99,14 @@ public abstract class SmsConcatMessage implements SmsMessage
      */
     public abstract SmsUdhElement[] getUdhElements();
 
+    //考虑在短时间内，针对相同一个号码生成不同的ID
     private int nextRandom(){
-    	return rnd_.incrementAndGet() & 0xffff;
+    	if(StringUtils.isEmpty(seqNoKey))
+    		return rnd_.incrementAndGet() & 0xffff;
+    	else {
+    		AtomicInteger tt = refNoCache.getUnchecked(seqNoKey);
+    		return tt.incrementAndGet() & 0xffff;
+    	}
     }
     
     private SmsPdu[] createOctalPdus(SmsUdhElement[] udhElements, SmsUserData ud, int maxBytes)
@@ -353,4 +378,8 @@ public abstract class SmsConcatMessage implements SmsMessage
 
         return smsPdus;
     }
+
+	public void setSeqNoKey(String seqNoKey) {
+		this.seqNoKey = seqNoKey;
+	}
 }
