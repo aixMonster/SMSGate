@@ -56,7 +56,7 @@ public class WindowSizeChannelTrafficShapingHandler extends AbstractTrafficShapi
         this.entity = entity;
         
         //如果窗口小于1，表示不启动滑动窗口
-        this.useWindow = entity.getWindow() >= 0;
+        this.useWindow = entity.getWindow() >= 1;
     }
     
     private ScheduledFuture sf;
