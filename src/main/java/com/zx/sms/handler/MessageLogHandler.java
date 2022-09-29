@@ -29,17 +29,17 @@ public class MessageLogHandler extends ChannelDuplexHandler {
 			logger = LoggerFactory.getLogger(MessageLogHandler.class);
 	}
 	public void handlerAdded(ChannelHandlerContext ctx) throws Exception{
-		logger.warn("handlerAdded . {}", entity);
+		logger.warn("handlerAdded . {}", entity.toString());
 	}
     @Override
 	public void channelInactive(ChannelHandlerContext ctx) throws Exception {	
-    	logger.warn("Connection close . {}", entity);
+    	logger.warn("Connection close . {}", entity.toString());
 		ctx.fireChannelInactive();
 	}
     
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		logger.debug("Receive:{}", msg);
+		logger.debug("Receive:{}", msg.toString());
 		ctx.fireChannelRead(msg);
 	}
 
@@ -52,9 +52,9 @@ public class MessageLogHandler extends ChannelDuplexHandler {
 			public void operationComplete(Future future) throws Exception {
 				// 如果发送消息失败，记录失败日志
 				if (!future.isSuccess()) {
-					logger.error("ErrSend:{},cause by", finalmsg , future.cause());
+					logger.error("ErrSend:{},cause by", finalmsg.toString() , future.cause());
 				}else{
-					logger.debug("Send:{}", finalmsg);
+					logger.debug("Send:{}", finalmsg.toString());
 				}
 			}
 		});
