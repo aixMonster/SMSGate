@@ -8,6 +8,7 @@ import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMsgClass;
 
 import com.zx.sms.config.PropertiesUtils;
+import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.handler.cmpp.BlackHoleHandler;
 import com.zx.sms.handler.cmpp.CmppActiveTestRequestMessageHandler;
 import com.zx.sms.handler.cmpp.CmppActiveTestResponseMessageHandler;
@@ -38,6 +39,7 @@ public interface GlobalConstance {
     public final static  SMPPServerIdleStateHandler smppidleHandler = new SMPPServerIdleStateHandler();
     public final static  SgipServerIdleStateHandler sgipidleHandler = new SgipServerIdleStateHandler();
     public final static  SMGPServerIdleStateHandler smgpidleHandler = new SMGPServerIdleStateHandler();
+    public final static AttributeKey<EndpointEntity> entityPointKey = AttributeKey.newInstance("__EndpointEntity");
     public final static AttributeKey<SessionState> attributeKey = AttributeKey.newInstance(SessionState.Connect.name());
     public final static AttributeKey<AbstractSessionStateManager> sessionKey = AttributeKey.newInstance("__sessionStateManager");
 	public final static AttributeKey<AtomicInteger> SENDWINDOWKEY = AttributeKey.newInstance("_SendWindow_");

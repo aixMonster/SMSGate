@@ -2,18 +2,14 @@ package com.zx.sms.codec.cmpp;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
-import org.junit.Assert;
 import org.junit.Test;
 import org.marre.sms.SmsUnkownTypeMessage;
 
 import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
-import com.zx.sms.common.util.FstObjectSerializeUtil;
-import com.zx.sms.common.util.NettyByteBufUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
-import io.netty.buffer.Unpooled;
 
 public class TestUnkownTypeSubmitMsg extends AbstractTestMessageCodec<CmppSubmitRequestMessage> {
 

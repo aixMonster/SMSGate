@@ -128,6 +128,43 @@
 
 将消息转发给通道后，当接收到`submitResponse后`，通过`response.getRequest()`获取对应的`request` 。注意此时有两个`msgID`，一个是通道给你的`msgID`，一个是你给来源客户的。在数据库里记录相关信息（至少包括消息来源客户，消息出去的通道，两个`msgId`,消息详情）。之后在接收到状态报告后，通过通道给你的`msgId`更新消息回执状态，并根据来源客户将回执回传给客户，注意回传`reportMessage`里的`msgId`要使用你给客户回复`response`时用的`msgId`.  [详见流程图](https://www.processon.com/view/link/598c16ace4b02e9a26eeed11)
 
+- `集群环境如何平均分配上游连接数?`
+
+网关平台通常会有多个服务节点，而对接的通道给的连接数通常不是服务节点数的整倍数，极端情况连接数小于服务节点数，这样如何平均分配连接数就成了一个问题。
+
+这里介绍一个算法：通过在redis里记录 {全局的服务节点列表}，来计算每个服务节点连几个tcp连接。
+
+```
+var curNodeIndex = getCurNodeIndexFromRedis(thisNode); // 当前节点在全局服务节点的排序号，{0,1,2,3,...}
+var cntNode ; // 从Redis里获取的总的服务进程节点数
+//所有短信通道，逐一计算每一个通道，在当前节点上最大允许的tcp连接数， 
+allEntityPointList.foreach(e->{
+	var curEntityIndex = getCurEntityIndex(e); //所有短信通道根据Id排序后，当前通道的排序号，{0,1,2,3,4,5,6,7,...}
+	var curMaxChannel = e.getMaxChannel(); //当前通道全局允许的最大连接数
+	
+	//连接数不是服务节点数的整倍数，按服务节点数平均分配后一定会有余数， 按当前节点的排序号先后把余下的连接数分完。
+	//但是服务节点排序号是固定不变的，这样排序号靠前的节点总是优先分到余下的连接数，造成全局通道总连接数分配不均，因此要结合"当前通道的排序号" 对 "服务节点排序号"进行位移
+	//因此，当"服务节点"或者"全局通道账号"有任一个变化时，都会影响连接的分配。
+	var shiftNodeIndex = (curNodeIndex + curEntityIndex) % cntNode;
+	//平均分配后,余下的连接数
+	var remainderChannel = curMaxChannel % cntNode;
+	//平均分配连接数
+	var hostMaxChannel = curMaxChannel / cntNode;
+	//余数处理
+	if(remainderChannel > 0 && shiftNodeIndex < remainderChannel){
+		hostMaxChannel = hostMaxChannel + 1;
+	}
+	var hostChannel ;   //当前通道在本节点上的连接数
+	if(hostChannel < hostMaxChannel){
+		openChannel(e); //新建一个连接
+	}else{
+		//关闭该通道超过数量的连接
+		closeSomeChannel(e,hostMaxChannel - hostChannel);
+	}
+});
+
+```
+
 
 # CMPPGate , SMPPGate , SGIPGate, SMGPGate
 中移短信cmpp协议/smpp协议 netty实现编解码

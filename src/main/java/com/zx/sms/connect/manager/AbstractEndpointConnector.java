@@ -213,21 +213,20 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 			ch.pipeline().addAfter(GlobalConstance.codecName, "ChannelTrafficAfter",
 					new WindowSizeChannelTrafficShapingHandler(endpoint, 100));
 
-			bindHandler(ch.pipeline(), getEndpointEntity());
+			bindHandler(ch.pipeline(), endpoint);
 			
-			/* 所有的handler都已加入pipeliner后再标识连接已建立，
+			/* 所有的handler都已加入pipeline后再标识连接已建立，
 			 * 如过早加入connector，遇到有消息发送时，可能业务handler还未加入，
 			 * 引起消息未经handler处理就发了出去。
 			 */
 			ch.attr(GlobalConstance.attributeKey).set(SessionState.Connect);
-			
+			ch.attr(GlobalConstance.entityPointKey).set(endpoint);
 			ch.attr(GlobalConstance.sessionKey).set(sessionManager);
 			
 			getChannels().add(ch);
 			return true;
 		} else {
 			logger.warn("allowed max channel count: {} ,deny to login.{}", endpoint.getMaxChannels(), endpoint);
-
 			return false;
 		}
 
@@ -238,6 +237,7 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		if (getChannels().remove(ch)) {
 			ch.attr(GlobalConstance.attributeKey).set(SessionState.DisConnect);
 			ch.attr(GlobalConstance.sessionKey).set(null);
+			ch.attr(GlobalConstance.entityPointKey).set(null);
 		}
 	}
 

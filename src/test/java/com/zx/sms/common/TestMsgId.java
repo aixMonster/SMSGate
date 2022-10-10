@@ -11,7 +11,6 @@ import org.marre.sms.SmsPduUtil;
 import com.zx.sms.common.util.ByteArrayUtil;
 import com.zx.sms.common.util.DefaultMsgIdUtil;
 import com.zx.sms.common.util.MsgId;
-import com.zx.sms.common.util.StandardCharsets;
 
 public class TestMsgId {
 	@Test

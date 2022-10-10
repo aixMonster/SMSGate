@@ -4,9 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
-import org.apache.commons.io.HexDump;
-import org.marre.sms.SmsMessage;
-
 public class SmsHeader {
 	 // TODO(cleanup): this datastructure is generally referred to as
     // the 'user data header' or UDH, and so the class name should

@@ -1,8 +1,8 @@
 package com.zx.sms.common.util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.nustaq.serialization.FSTConfiguration;
 import org.nustaq.serialization.FSTObjectInput;
 import org.nustaq.serialization.FSTObjectOutput;
