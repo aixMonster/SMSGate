@@ -1,11 +1,13 @@
 package com.zx.sms.codec.smgp.msg;
 
 import java.io.Serializable;
+import com.zx.sms.common.util.StandardCharsets;
 
 import org.apache.commons.codec.binary.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.CharMatcher;
 import com.zx.sms.codec.smgp.util.ByteUtil;
 import com.zx.sms.codec.smgp.util.SMGPMsgIdUtil;
 
@@ -84,7 +86,12 @@ public class SMGPReportData implements Serializable {
 
 			tmp = new byte[20];
 			System.arraycopy(bytes, offset, tmp, 0, bytes.length-offset);
-			txt = new String(ByteUtil.rtrimBytes(tmp));
+			
+			if(isAllOfASCII(tmp)) {
+				txt = new String(ByteUtil.rtrimBytes(tmp),StandardCharsets.US_ASCII);
+			}else {
+				txt = new String(ByteUtil.rtrimBytes(tmp),StandardCharsets.UTF_16BE);
+			}
 			offset += 20;
 
 			return true;
@@ -92,6 +99,16 @@ public class SMGPReportData implements Serializable {
 			logger.warn("parse data err length:{} ; 0x{}",bytes.length,Hex.encodeHexString(bytes));
 			return true;
 		}
+	}
+	
+	private boolean isAllOfASCII(byte[] seq) {
+		//判断是否是ASCII码
+		for(byte b : seq) {
+			if(b < 0 || b > 0x7f) {
+				return false;
+			}
+		}
+		return true;
 	}
 
 	public byte[] toBytes() throws Exception {
@@ -142,8 +159,15 @@ public class SMGPReportData implements Serializable {
 
 		System.arraycopy(" text:".getBytes(), 0, bytes, offset, " text:".length());
 		offset += " text:".length();
+		
+		if(CharMatcher.ASCII.matchesAllOf(txt)) {
+			byte[] tmp = txt.getBytes(StandardCharsets.US_ASCII);
+			ByteUtil.rfillBytes(tmp, 20, bytes, offset);
+		}else {
+			byte[] tmp = txt.getBytes(StandardCharsets.UTF_16BE);
+			ByteUtil.rfillBytes(tmp, 20, bytes, offset);
+		}
 
-		ByteUtil.rfillBytes(txt.getBytes(), 20, bytes, offset);
 		offset += 20;
 
 		return bytes;

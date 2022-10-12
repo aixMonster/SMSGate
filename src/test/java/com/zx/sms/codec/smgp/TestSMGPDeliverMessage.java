@@ -47,7 +47,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 	}
 	
 	@Test
-	public void test3() {
+	public void testReport() {
 		SMGPDeliverMessage msg = new SMGPDeliverMessage();
 		msg.setDestTermId("13800138000");
 		msg.setLinkId("1023rsd");
@@ -59,7 +59,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 		report.setMsgId(new MsgId());
 		report.setSub("asf");
 		report.setSubTime("20180703000111");
-		report.setTxt("www");
+		report.setTxt("通过");
 		msg.setReport(report);
 		msg.setMsgId(new MsgId());
 		msg.setSrcTermId("10086988");
@@ -89,6 +89,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 		System.out.println(result);
 		if (msg.isReport()) {
 			Assert.assertEquals(msg.getReport().getStat(), result.getReport().getStat());
+			Assert.assertEquals(msg.getReport().getTxt(), result.getReport().getTxt());
 		} else {
 			Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 			Assert.assertEquals(msg.getSrcTermId(), result.getSrcTermId());
