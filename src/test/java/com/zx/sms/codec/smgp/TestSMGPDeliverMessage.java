@@ -48,6 +48,12 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 	
 	@Test
 	public void testReport() {
+		dotestReport("【圆通】快递已发出");
+		dotestReport("mmm");
+	}
+	
+	
+	private void dotestReport(String text) {
 		SMGPDeliverMessage msg = new SMGPDeliverMessage();
 		msg.setDestTermId("13800138000");
 		msg.setLinkId("1023rsd");
@@ -59,7 +65,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 		report.setMsgId(new MsgId());
 		report.setSub("asf");
 		report.setSubTime("20180703000111");
-		report.setTxt("通过");
+		report.setTxt(text);
 		msg.setReport(report);
 		msg.setMsgId(new MsgId());
 		msg.setSrcTermId("10086988");
