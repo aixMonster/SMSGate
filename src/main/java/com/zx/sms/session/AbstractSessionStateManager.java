@@ -386,7 +386,7 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 							msgWriteCount++;
 							entry.cnt.incrementAndGet();
 							ChannelPromise retryPromise =  ctx.newPromise();
-							ctx.write(message,retryPromise);
+							ctx.writeAndFlush(message,retryPromise);
 							retryPromise.addListener(new ChannelFutureListener() {
 								@Override
 								public void operationComplete(ChannelFuture future) throws Exception {
@@ -559,10 +559,9 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 						responseFutureDone(entry,future.cause());
 					}
 				}
-
 			});
 			
-			ctx.write(message, promise);
+			ctx.writeAndFlush(message, promise);
 			
 			return tmpentry.resfuture;
 		} else {
