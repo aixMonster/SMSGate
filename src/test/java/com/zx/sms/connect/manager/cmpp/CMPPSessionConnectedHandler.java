@@ -48,7 +48,7 @@ public class CMPPSessionConnectedHandler extends SessionConnectedHandler {
 			msg.setDestterminalId(String.valueOf(System.nanoTime()));
 			msg.setSrcId(String.valueOf(System.nanoTime()));
 			msg.setLinkID("0000");
-			msg.setMsgContent(content);
+			msg.setMsgContent(content+" 16:28:40.453 [busiWo中国rk-6] IN0.453 [busiWork-6] INFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,ToFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,Totle Receive Msg Num:5001,   speed : 0/s");
 			msg.setRegisteredDelivery((short)0);
 			msg.setServiceId("10086");
 			return msg;

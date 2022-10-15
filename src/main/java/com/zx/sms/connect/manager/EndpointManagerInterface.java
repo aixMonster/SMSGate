@@ -9,6 +9,7 @@ public interface EndpointManagerInterface{
 	public void openAll() throws Exception;
 	public void addEndpointEntity(EndpointEntity entity);
 	public void remove(String id);
+	public void removeAll();
 	public Set<EndpointEntity> allEndPointEntity();
 	public EndpointEntity getEndpointEntity(String id);
 	public EndpointConnector getEndpointConnector(EndpointEntity entity);

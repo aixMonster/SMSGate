@@ -1,17 +1,20 @@
 package com.zx.sms.connect.manager;
 
-import io.netty.util.concurrent.Future;
-
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.netty.util.concurrent.Future;
 
 /**
  * @author Lihuanghe(18852780@qq.com) 系统连接的统一管理器，负责连接服务端，或者开启监听端口，等客户端连接 。
@@ -92,6 +95,8 @@ public enum EndpointManager implements EndpointManagerInterface {
 			close(entity);
 		}
 	}
+	
+	
 
 	public void close() {
 		stopConnectionCheckTask();
@@ -152,5 +157,17 @@ public enum EndpointManager implements EndpointManagerInterface {
 	public EndpointConnector getEndpointConnector(String id) {
 		EndpointEntity entity = getEndpointEntity(id);
 		return entity == null ? null : entity.getSingletonConnector();
+	}
+
+	@Override
+	public void removeAll() {
+		// TODO Auto-generated method stub
+		Iterator<Entry<String, EndpointEntity>> itor =  idMap.entrySet().iterator();
+		List<String> ids = new ArrayList<String>();
+		while(itor.hasNext()) {
+			ids.add(itor.next().getKey());
+		}
+		for(String id : ids)
+			remove(id);
 	}
 }

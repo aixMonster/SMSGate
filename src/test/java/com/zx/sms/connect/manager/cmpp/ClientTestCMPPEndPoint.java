@@ -24,7 +24,7 @@ import com.zx.sms.handler.api.BusinessHandlerInterface;
 public class ClientTestCMPPEndPoint {
 	private static final Logger logger = LoggerFactory.getLogger(ClientTestCMPPEndPoint.class);
 
-	@Test
+//	@Test
 	public void testCMPPEndpoint() throws Exception {
 	
 		final EndpointManager manager = EndpointManager.INS;

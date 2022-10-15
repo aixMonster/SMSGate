@@ -89,7 +89,7 @@ public class CMPPChargingDemoTest {
 	 *使用自己扩展的Entity 
 	 */
 	
-	@Test
+//	@Test
 	public void testCharging() throws Exception {
 	
 		final EndpointManager manager = EndpointManager.INS;

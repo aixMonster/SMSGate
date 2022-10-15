@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +17,7 @@ import com.zx.sms.handler.api.BusinessHandlerInterface;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
+
 
 /**
  * 经测试，35个连接，每个连接每200/s条消息 lenovoX250能承担7000/s消息编码解析无压力。
@@ -36,20 +38,20 @@ public class TestCMPPEndPoint {
 		CMPPServerEndpointEntity server = new CMPPServerEndpointEntity();
 		server.setId("server");
 		server.setHost("0.0.0.0");
-		server.setPort(7890);
+		server.setPort(17890);
 		server.setValid(true);
 		// 使用ssl加密数据流
 		server.setUseSSL(false);
 
 		CMPPServerChildEndpointEntity child = new CMPPServerChildEndpointEntity();
-		child.setId("child");
+		child.setId("cmppchild");
 		child.setChartset(Charset.forName("utf-8"));
 		child.setGroupName("test");
-		child.setUserName("901783");
-		child.setPassword("ICP001");
+		child.setUserName("test01");
+		child.setPassword("1qaz2wsx");
 
 		child.setValid(true);
-		child.setVersion((short) 0x30);
+		child.setVersion((short) 0x20);
 
 		child.setMaxChannels((short) 1);
 		child.setRetryWaitTimeSec((short) 30);
@@ -125,8 +127,10 @@ public class TestCMPPEndPoint {
 		while (receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 		}
+		Assert.assertEquals(count+1, receiver.getCnt().get());
 		Thread.sleep(3000);
 		EndpointManager.INS.close();
+		EndpointManager.INS.removeAll();
 		Thread.sleep(4000);
 		System.out.println("end.....");
 	}

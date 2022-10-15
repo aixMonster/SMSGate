@@ -16,7 +16,7 @@ import redis.clients.jedis.JedisPoolConfig;
 public class TestRedis {
 	private static final Logger logger = LoggerFactory.getLogger(TestRedis.class);
 
-	@Test
+//	@Test
 	public void test() {
 		   JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
            jedisPoolConfig.setMaxTotal(20);

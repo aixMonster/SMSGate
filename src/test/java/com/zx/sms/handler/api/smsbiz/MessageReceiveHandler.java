@@ -6,8 +6,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.BaseMessage;
 import com.zx.sms.connect.manager.EndpointConnector;
-import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
@@ -49,7 +49,7 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 							long nowcnt = cnt.get();
 							EndpointConnector conn = getEndpointEntity().getSingletonConnector();
 							
-							logger.info("channels : {},Totle Receive Msg Num:{},   speed : {}/s",
+							logger.info("{} channels : {},Totle Receive Msg Num:{},   speed : {}/s",getEndpointEntity().getId(),
 									conn == null ? 0 : conn.getConnectionNum(), nowcnt, (nowcnt - lastNum) / rate);
 							lastNum = nowcnt;
 							return true;
@@ -73,7 +73,7 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
 
 		ChannelFuture future = reponse(ctx, msg);
-		if (future != null)
+		if (future != null && msg instanceof BaseMessage)
 			future.addListener(new GenericFutureListener() {
 				@Override
 				public void operationComplete(Future future) throws Exception {

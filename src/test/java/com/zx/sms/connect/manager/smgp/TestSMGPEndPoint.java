@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.LockSupport;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,7 @@ import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
+import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 /**
  *经测试，35个连接，每个连接每200/s条消息
  *lenovoX250能承担7000/s消息编码解析无压力。
@@ -53,7 +55,8 @@ public class TestSMGPEndPoint {
 		child.setIdleTimeSec((short)15);
 		child.setSupportLongmsg(SupportLongMessage.SEND);  //接收长短信时不自动合并
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
-		serverhandlers.add(new SMGPMessageReceiveHandler());   
+		MessageReceiveHandler receiver  = new SMGPMessageReceiveHandler();
+		serverhandlers.add(receiver);   
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
 		manager.addEndpointEntity(server);
@@ -74,7 +77,8 @@ public class TestSMGPEndPoint {
 //		client.setWriteLimit(200);
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
-		clienthandlers.add( new SMGPSessionConnectedHandler(100)); 
+		int count = 10000;
+		clienthandlers.add( new SMGPSessionConnectedHandler(count)); 
 		client.setBusinessHandlerSet(clienthandlers);
 		
 		manager.addEndpointEntity(client);
@@ -85,9 +89,14 @@ public class TestSMGPEndPoint {
 		for(int i=0;i<child.getMaxChannels();i++)
 			manager.openEndpoint(client);
 		 System.out.println("start.....");
-		LockSupport.park();
+		
+			while (receiver.getCnt().get() < count) {
+				Thread.sleep(1000);
+			}
+			Assert.assertEquals(count, receiver.getCnt().get());
        
 		EndpointManager.INS.close();
+		EndpointManager.INS.removeAll();
 	}
 	
 }

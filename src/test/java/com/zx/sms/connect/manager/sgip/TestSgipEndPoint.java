@@ -2,8 +2,8 @@ package com.zx.sms.connect.manager.sgip;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.locks.LockSupport;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +12,7 @@ import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
+import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 import com.zx.sms.handler.sgip.SgipReportRequestMessageHandler;
 
 import io.netty.util.ResourceLeakDetector;
@@ -58,7 +59,8 @@ public class TestSgipEndPoint {
 //		child.setReadLimit(200);
 		child.setSupportLongmsg(SupportLongMessage.BOTH);  
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
-		serverhandlers.add(new SGIPMessageReceiveHandler());
+		MessageReceiveHandler receiver = new SGIPMessageReceiveHandler();
+		serverhandlers.add(receiver);
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
 		
@@ -80,7 +82,8 @@ public class TestSgipEndPoint {
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		clienthandlers.add(new SgipReportRequestMessageHandler());
-		clienthandlers.add(new SGIPSessionConnectedHandler(10000));   
+		int count = 10000;
+		clienthandlers.add(new SGIPSessionConnectedHandler(count));   
 		client.setBusinessHandlerSet(clienthandlers);
 		manager.addEndpointEntity(client);
 		manager.openAll();
@@ -88,8 +91,12 @@ public class TestSgipEndPoint {
 	
 		System.out.println("start.....");
       
-        LockSupport.park();
+		while (receiver.getCnt().get() < count) {
+			Thread.sleep(1000);
+		}
+		Assert.assertEquals(count, receiver.getCnt().get());
 
 		EndpointManager.INS.close();
+		EndpointManager.INS.removeAll();
 	}
 }

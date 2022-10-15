@@ -1,7 +1,5 @@
 package com.zx.sms.common;
 
-import io.netty.util.concurrent.Future;
-
 import java.lang.management.ManagementFactory;
 import java.util.Calendar;
 import java.util.concurrent.Callable;
@@ -12,9 +10,11 @@ import java.util.concurrent.locks.LockSupport;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.junit.Test;
 
-import com.zx.sms.common.util.CMPPCommonUtil;
+import com.google.common.util.concurrent.ListenableScheduledFuture;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
+
+import io.netty.util.concurrent.Future;
 
 public class TestCirculeFutureTask {
 	int cnt = 0;
@@ -30,8 +30,8 @@ public class TestCirculeFutureTask {
 	}
 	
 	@Test
-	public void testexp(){
-		EventLoopGroupFactory.INS.getBusiWork().scheduleWithFixedDelay(new Runnable(){
+	public void testexp() throws InterruptedException{
+		ListenableScheduledFuture  future = EventLoopGroupFactory.INS.getBusiWork().scheduleWithFixedDelay(new Runnable(){
 
 			@Override
 			public void run() {
@@ -40,8 +40,9 @@ public class TestCirculeFutureTask {
 				
 			}
 		}, 2,1, TimeUnit.SECONDS);
-		
-		EventLoopGroupFactory.INS.getBusiWork().scheduleWithFixedDelay(new Runnable(){
+		Thread.sleep(5000);
+		future.cancel(false);
+		  future = EventLoopGroupFactory.INS.getBusiWork().scheduleWithFixedDelay(new Runnable(){
 
 			@Override
 			public void run() {
@@ -51,6 +52,8 @@ public class TestCirculeFutureTask {
 			}
 		}, 2,2, TimeUnit.SECONDS);
 		
+		Thread.sleep(5000);
+		future.cancel(false);
 	}
 	
 	@Test

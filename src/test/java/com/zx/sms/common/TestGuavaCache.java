@@ -81,12 +81,13 @@ public class TestGuavaCache {
 		staticcache.refresh("Cache");
 		System.out.println(String.valueOf(System.currentTimeMillis()));
 		
-		while(true) {
+		int i = 10;
+		while(i-->0) {
 			long start = System.currentTimeMillis();
 			System.out.println(get("A") +"-" +String.valueOf(System.currentTimeMillis()-start));
 			
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(100);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

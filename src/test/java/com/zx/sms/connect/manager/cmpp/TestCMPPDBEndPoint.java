@@ -31,7 +31,7 @@ import io.netty.util.ResourceLeakDetector.Level;
 public class TestCMPPDBEndPoint {
 	private static final Logger logger = LoggerFactory.getLogger(TestCMPPDBEndPoint.class);
 
-	@Test
+//	@Test
 	public void testDBCMPPEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		final EndpointManager manager = EndpointManager.INS;
