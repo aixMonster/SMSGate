@@ -53,13 +53,15 @@ public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 			Pipeline pipe = jedis.pipelined();
 			// 使用原子方法设置bitset并判断是否接收全部分片
 			/*
-			 * 相当于下面代码加全局分布锁，使用Lua实现 jedis.setbit(bitsetKey, pkNumber, true); long bitCount
-			 * = jedis.bitcount(bitsetKey); return pkTotal == bitCount;
+			 * 相当于下面代码加全局分布锁，使用Lua实现 jedis.setbit(bitsetKey, pkNumber, true); long bitCount  = jedis.bitcount(bitsetKey); return pkTotal == bitCount;
 			 */
+			//1:先将frame加入Set
+			pipe.sadd(key.getBytes(StandardCharsets.UTF_8), FstObjectSerializeUtil.write(currFrame));
+			
+			//2: 再统计bitset 
 			Response<Object> response = pipe.evalsha(scriptHash, Collections.singletonList(bitsetKey), Collections.singletonList(String.valueOf(pkNumber)));
 			
-			// 将短信分片加入reids集合
-			pipe.sadd(key.getBytes(StandardCharsets.UTF_8), FstObjectSerializeUtil.write(currFrame));
+			//上面两步顺序不能错
 			pipe.expire(key.getBytes(StandardCharsets.UTF_8), ttl);
 			pipe.expire(bitsetKey.getBytes(StandardCharsets.UTF_8), ttl);
 			pipe.sync();

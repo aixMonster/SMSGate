@@ -108,7 +108,7 @@
 - `使用redis实现集群长短信合并`
 
 框架内部自带一个JVM内存缓存(Guava Cache)的LongMessageFrameCache类，用于保存未完成合并的短信片断。
-但集群（多进程，多节点）部署服务时，有可能从不用的节点上（主机上）接收到同一个长短信的不同片断，此时框架默认的JVM内存缓存无法完成长短信合并。
+但集群（多进程，多节点）部署服务时，有可能从不同的节点上（主机上）接收到同一个长短信的不同片断，此时框架默认的JVM内存缓存无法完成长短信合并。
 为解决此问题，框架使用SPI机制加载LongMessageFrameCache的实现类,业务侧以SPI方式提供Redis版的LongMessageFrameProvider实现类。
 为了让业务自制的LongMessageFrameProvider实现类生效， 要确保业务自制的LongMessageFrameProvider实现类 order() 大于0 。框架优先使用order最大的实现。
 
@@ -233,7 +233,7 @@ smgp的协议解析代码是从 [SMS-China 的代码 ](https://github.com/clonal
 用来收集CMPPServerChildEndpointEntity端口下的所有连接。它的open()方法为空.
 
 3. com.zx.sms.connect.manager.cmpp.CMPPClientEndpointConnector
-这个类open()调用netty的Bootstrap.connect()开始一个TCP连接
+这个类open()调用netty的Bootstrap.connect()发起一个TCP连接
 
 ## 端口管理器
 `com.zx.sms.connect.manager.EndpointManager`
@@ -241,7 +241,7 @@ smgp的协议解析代码是从 [SMS-China 的代码 ](https://github.com/clonal
 
 ## CMPP协议的连接登陆管理
 `com.zx.sms.session.cmpp.SessionLoginManager`
-这是一个netty的ChannelHandler实现，主要负责CMPP连接的建立。当CMPP连接建立完成后，会调用EndpointConnector.addChannel(channel)方法，把连接加入连接器管理，连接器负责给channel的pipeline上挂载业务处理的Handler,最后触发
+这是一个netty的ChannelHandler实现，主要负责CMPP连接的建立。当CMPP连接登陆成功、会话建立完成后，会调用EndpointConnector.addChannel(channel)方法，把连接加入连接器管理，连接器负责给channel的pipeline上挂载业务处理的Handler,最后触发
 SessionState.Connect事件，通知业务处理Handler连接已建立成功。
 
 ## CMPP的连接状态管理器
@@ -265,7 +265,7 @@ CMPPMessageCodecAggregator [这是3.0协议]
 5. 如果是CMPPClientEndpointEntity的话，就会向服务器发起TCP连接请求，如果是CMPPServerEndpointEntity则会在本机开启一个服务端口等客户端连接。
 6. TCP连接建立完成后。netty会调用EndpointConnector.initPipeLine()方法初始化PipeLine，把CMPP协议解析器，SessionLoginManager加到PipeLine里去，然后netty触发ChannelActive事件。
 7. 在SessionLoginManager类里，客户端收到ChannelActive事件后会发送一个CMPPConnnect消息，请求建立CMPP连接.
-8. 同样在SessionLoginManager.channelRead()方法里,服务端会收到CMPPConnnect消息，开始对用户名，密码进行鉴权，并给客户端鉴权结果。
+8. 同样在SessionLoginManager.channelRead()方法里,服务端会收到CMPPConnnect消息，开始对用户名，密码进行鉴权，并给客户端返回鉴权结果。
 9. 鉴权通过后，SessionLoginManager调用EndpointConnector.addChannel(channel)方法，把channel加入ArrayList,并给pipeLine上挂载SessionStateManager和业务处理的ChannelHandler，如心跳处理，日志记录，长短信合并拆分处理类。
 10. EndpointConnector.addChannel(channel)完成后，SessionLoginManager调用ctx.fireUserEventTriggered()方法，触发	SessionState.Connect事件。
 
