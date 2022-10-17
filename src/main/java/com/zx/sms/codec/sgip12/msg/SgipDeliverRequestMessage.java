@@ -6,9 +6,11 @@ package com.zx.sms.codec.sgip12.msg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.marre.sms.SgipSmsDcs;
+import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
+import org.marre.sms.SmsMsgClass;
 
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.msg.Header;
@@ -16,7 +18,6 @@ import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.sgip12.packet.SgipPacketType;
 import com.zx.sms.common.GlobalConstance;
-import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 
 /**
@@ -30,7 +31,7 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 	private String spnumber = GlobalConstance.emptyString;
 	private short tppid = 0;
 	private short tpudhi = 0;
-	private SmsDcs msgfmt = GlobalConstance.defaultmsgfmt;
+	private SgipSmsDcs msgfmt = SgipSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.ASCII, SmsMsgClass.CLASS_UNKNOWN);
 	private int messagelength = 120;
 	private String reserve = GlobalConstance.emptyString;
 	private byte[] msgContentBytes = GlobalConstance.emptyBytes;
@@ -44,11 +45,11 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 		super(SgipPacketType.DELIVERREQUEST,header);
 	}
 	
-	public SmsDcs getMsgfmt() {
+	public SgipSmsDcs getMsgfmt() {
 		return msgfmt;
 	}
 
-	public void setMsgfmt(SmsDcs msgfmt) {
+	public void setMsgfmt(SgipSmsDcs msgfmt) {
 		this.msgfmt = msgfmt;
 	}
 	/**
@@ -153,7 +154,7 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 }
 	
 	public void setMsgContent(String msgContent) {
-		setMsgContent(CMPPCommonUtil.buildTextMessage(msgContent));
+		setMsgContent(buildSmsMessage(msgContent));
 	}
 	
 	public void setMsgContent(SmsMessage msg){
@@ -210,7 +211,7 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 		SgipDeliverRequestMessage requestMessage = this.clone();
 		
 		requestMessage.setTpudhi(frame.getTpudhi());
-		requestMessage.setMsgfmt((SmsDcs)frame.getMsgfmt());
+		requestMessage.setMsgfmt((SgipSmsDcs)frame.getMsgfmt());
 		requestMessage.setMsgContentBytes(frame.getMsgContentBytes());
 		requestMessage.setMessagelength((short)frame.getMsgLength());
 		

@@ -90,12 +90,14 @@ public class TestCmpp20SubmitRequestMessageCodec extends AbstractTestMessageCode
 	    while(buf!=null){
 			
 			
-	    	copybuf.writeBytes(buf.copy());
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());
 			Assert.assertEquals(msg.getPacketType().getCommandId(), buf.readInt());
-			
+			buf.release();
 
 			buf =(ByteBuf)channel().readOutbound();
 	    }

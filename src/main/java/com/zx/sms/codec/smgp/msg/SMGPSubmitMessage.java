@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.marre.sms.SMGPSmsDcs;
+import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
+import org.marre.sms.SmsMsgClass;
 
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
@@ -14,8 +16,6 @@ import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.smgp.tlv.TLVByte;
 import com.zx.sms.codec.smgp.tlv.TLVString;
 import com.zx.sms.codec.smgp.util.ByteUtil;
-import com.zx.sms.common.GlobalConstance;
-import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 
 public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage<SMGPSubmitMessage>{
@@ -39,7 +39,7 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 
 	private String fixedFee="000000"; // 6  v3.0新增字段
 
-	private SmsDcs msgFmt = GlobalConstance.defaultmsgfmt;
+	private SMGPSmsDcs msgFmt = SMGPSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.ASCII, SmsMsgClass.CLASS_UNKNOWN);;
 
 	private String validTime=""; // 17
 
@@ -229,7 +229,7 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 			offset += 6;
 		}
 
-		msgFmt = new SmsDcs(bodyBytes[offset]);
+		msgFmt = new SMGPSmsDcs(bodyBytes[offset]);
 		offset += 1;
 
 		tmp = new byte[17];
@@ -405,11 +405,11 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 		this.fixedFee = fixedFee;
 	}
 
-	public SmsDcs getMsgFmt() {
+	public SMGPSmsDcs getMsgFmt() {
 		return this.msgFmt;
 	}
 
-	public void setMsgFmt(SmsDcs msgFmt) {
+	public void setMsgFmt(SMGPSmsDcs msgFmt) {
 		this.msgFmt = msgFmt;
 	}
 
@@ -464,7 +464,7 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 	}
 	
 	public void setMsgContent(String msgContent) {
-		setMsgContent(CMPPCommonUtil.buildTextMessage(msgContent));
+		setMsgContent(buildSmsMessage(msgContent));
 	}
 	
 	public void setMsgContent(SmsMessage msg){
@@ -590,7 +590,7 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 		SMGPSubmitMessage requestMessage = this.clone();
 
 		requestMessage.setTpUdhi((byte)frame.getTpudhi());
-		requestMessage.setMsgFmt((SmsDcs)frame.getMsgfmt());
+		requestMessage.setMsgFmt((SMGPSmsDcs)frame.getMsgfmt());
 		requestMessage.setBMsgContent(frame.getMsgContentBytes());
 		requestMessage.setPkTotal((byte)frame.getPktotal());
 		requestMessage.setPkNumber((byte)frame.getPknumber());

@@ -129,15 +129,25 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 	@Test
 	public void testchinesecode() {
 		CmppDeliverRequestMessage msg = createTestReq(
-				"1234567890123456789中01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
-		testlongCodec(msg);
+				"1234567890123456789中01234567890123456789012345678901234567890123456789"+"a");
+		Assert.assertEquals(2,testlongCodec(msg));
+		
+		//70字拆成1条
+		msg = createTestReq(
+				"1234567890123456789中01234567890123456789012345678901234567890123456789");
+		Assert.assertEquals(1,testlongCodec(msg));
 	}
 
 	@Test
 	public void testASCIIcode() {
+		//159字母拆成1两条
 		CmppDeliverRequestMessage msg = createTestReq(
+				"123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789");
+		Assert.assertEquals(1,testlongCodec(msg));
+		//160字母拆成2两条
+		 msg = createTestReq(
 				"1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890");
-		testlongCodec(msg);
+		Assert.assertEquals(2,testlongCodec(msg));
 	}
 
 	@Test
@@ -184,7 +194,9 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		ByteBuf copybuf = Unpooled.buffer();
 		while (buf != null) {
 
-			copybuf.writeBytes(buf.copy());
+			ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 
 			Assert.assertEquals(length, buf.readInt());
@@ -199,19 +211,20 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		return result;
 	}
 
-	public void testlongCodec(CmppDeliverRequestMessage msg) {
-
+	public int testlongCodec(CmppDeliverRequestMessage msg) {
+		int frameCnt = 0;
 		channel().writeOutbound(msg);
 		ByteBuf buf = (ByteBuf) channel().readOutbound();
 		ByteBuf copybuf = Unpooled.buffer();
 		while (buf != null) {
-
-			copybuf.writeBytes(buf.copy());
+			ByteBuf copy = buf.copy();
+			copybuf.writeBytes(copy);
+			copy.release();
 			int length = buf.readableBytes();
 
 			Assert.assertEquals(length, buf.readInt());
 			Assert.assertEquals(msg.getPacketType().getCommandId(), buf.readInt());
-
+			frameCnt++;
 			buf = (ByteBuf) channel().readOutbound();
 		}
 
@@ -219,6 +232,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 
 		System.out.println(result.getMsgContent());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
+		return frameCnt;
 	}
 	ExecutorService executor = Executors.newFixedThreadPool(20);
 	// 多线程长短信合并
@@ -386,9 +400,11 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 
 						
 						if(contentMap.get(result.getMsgContent().hashCode()) != null) {
-							stop.countDown();
+							
 							// 完成计数器加1
 							count.incrementAndGet();
+							
+							stop.countDown();
 						}
 						
 						return true;

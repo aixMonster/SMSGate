@@ -44,23 +44,7 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 			break;
 		}
 
-		switch (messageClass) {
-		case CLASS_0:
-			dcs |= 0x10;
-			break;
-		case CLASS_1:
-			dcs |= 0x11;
-			break;
-		case CLASS_2:
-			dcs |= 0x12;
-			break;
-		case CLASS_3:
-			dcs |= 0x13;
-			break;
-		case CLASS_UNKNOWN:
-			dcs |= 0x00;
-			break;
-		}
+		dcs = setMessageClass(dcs,messageClass);
 
 		return new SmppSmsDcs(dcs);
 	}

@@ -18,10 +18,14 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 		SMGPDeliverMessage msg = new SMGPDeliverMessage();
 		msg.setDestTermId("13800138000");
 		msg.setLinkId("1023rsd");
-		msg.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefghijklmnopqrstuvwxyzABCE");
+		msg.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefgh");
 		msg.setMsgId(new MsgId());
 		msg.setSrcTermId("10086988");
-		testlongCodec(msg);
+		//140字纯文字符，拆分为1条
+		Assert.assertEquals(1,testlongCodec(msg));
+		//超过140字纯文字符，拆分为2条
+		msg.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefgh"+"a");
+		Assert.assertEquals(2,testlongCodec(msg));
 	}
 	
 	@Test
@@ -43,7 +47,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 		msg.setMsgContent("第一种：通过注解@PostConstruct 和 @PreDestroy 方法 实现初始化和销毁bean之前进行的操作,第一种：通过注解@PostConstruct 和 @PreDestroy 方法 实现初始化和销毁bean之前进行的操作");
 		msg.setMsgId(new MsgId());
 		msg.setSrcTermId("10086988");
-		testlongCodec(msg);
+		Assert.assertEquals(2,testlongCodec(msg));
 	}
 	
 	@Test
@@ -72,21 +76,22 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 		testlongCodec(msg);
 	}
 	
-	public void testlongCodec(SMGPDeliverMessage msg)
+	public int testlongCodec(SMGPDeliverMessage msg)
 	{
 		channel().writeOutbound(msg);
 		ByteBuf buf =(ByteBuf)channel().readOutbound();
 		ByteBuf copybuf = Unpooled.buffer();
+		int frameLength = 0;
 	    while(buf!=null){
-			
-			
-	    	copybuf.writeBytes(buf.copy());
+	    	frameLength++;
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());
 			Assert.assertEquals(msg.getCommandId(), buf.readInt());
 			
-
 			buf =(ByteBuf)channel().readOutbound();
 	    }
 	    
@@ -103,6 +108,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 			Assert.assertEquals(msg.getRecvTime(), result.getRecvTime());
 		}
 		Assert.assertEquals(msg.getSrcTermId(), result.getSrcTermId());
+		return frameLength;
 	}
 	
 }

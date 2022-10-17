@@ -81,7 +81,7 @@ public class SmsPortAddressedTextMessage extends SmsPortAddressedMessage impleme
     public SmsPortAddressedTextMessage(SmsPort destPort, SmsPort origPort, String msg, SmsAlphabet alphabet, SmsMsgClass messageClass)
     {
         super(destPort, origPort);
-        smsTextMessage_ = new SmsTextMessage(msg, alphabet, messageClass);
+        smsTextMessage_ = new SmsTextMessage(msg, SmsDcs.getGeneralDataCodingDcs(alphabet, messageClass));
     }
     
     /**

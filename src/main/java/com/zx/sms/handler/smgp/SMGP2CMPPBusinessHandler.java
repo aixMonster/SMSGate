@@ -1,11 +1,8 @@
 package com.zx.sms.handler.smgp;
 
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.MessageToMessageCodec;
-
 import java.util.List;
+
+import org.marre.sms.SMGPSmsDcs;
 
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
@@ -21,6 +18,11 @@ import com.zx.sms.codec.smgp.msg.SMGPReportData;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitRespMessage;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
+
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.handler.codec.MessageToMessageCodec;
 
 @Sharable
 public class SMGP2CMPPBusinessHandler extends AbstractBusinessHandler {
@@ -82,7 +84,7 @@ public class SMGP2CMPPBusinessHandler extends AbstractBusinessHandler {
 				msgid.setMonth(deliver.getMsgId().getMonth());
 				msgid.setSequenceId(deliver.getMsgId().getSequenceId());
 
-				pdu.setMsgFmt(deliver.getMsgfmt());
+				pdu.setMsgFmt(new SMGPSmsDcs(deliver.getMsgfmt().getValue()));
 		        pdu.setSequenceNo(deliver.getHeader().getSequenceId());
 		        pdu.setLinkId(deliver.getLinkid());
 		        pdu.setDestTermId(deliver.getDestId());

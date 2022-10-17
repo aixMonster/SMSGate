@@ -150,6 +150,28 @@ public abstract class AbstractSmsDcs implements Serializable {
 	
 	abstract public SmsAlphabet getAlphabet();
 	abstract public int getMaxMsglength();
+	
+	protected static byte setMessageClass(byte p_dcs,SmsMsgClass messageClass) {
+		byte dcs = p_dcs;
+		switch (messageClass) {
+		case CLASS_0:
+			dcs |= 0x10;
+			break;
+		case CLASS_1:
+			dcs |= 0x11;
+			break;
+		case CLASS_2:
+			dcs |= 0x12;
+			break;
+		case CLASS_3:
+			dcs |= 0x13;
+			break;
+		case CLASS_UNKNOWN:
+			dcs |= 0x00;
+			break;
+		}
+		return dcs;
+	}
 
 	@Override
 	public String toString() {

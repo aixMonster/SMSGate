@@ -1,11 +1,8 @@
 package com.zx.sms.codec.sgip12.codec;
 
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.handler.codec.MessageToMessageCodec;
-
 import java.util.List;
+
+import org.marre.sms.SgipSmsDcs;
 
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
@@ -20,6 +17,11 @@ import com.zx.sms.codec.sgip12.msg.SgipSubmitRequestMessage;
 import com.zx.sms.codec.sgip12.msg.SgipSubmitResponseMessage;
 import com.zx.sms.common.util.SequenceNumber;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
+
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
+import io.netty.handler.codec.MessageToMessageCodec;
 
 @Sharable
 public class Sgip2CMPPBusinessHandler extends AbstractBusinessHandler {
@@ -62,7 +64,7 @@ public class Sgip2CMPPBusinessHandler extends AbstractBusinessHandler {
         			sgipmsg.setSpnumber(deliver.getSrcterminalId());
         			sgipmsg.setTppid(deliver.getTppid());
         			sgipmsg.setTpudhi(deliver.getTpudhi());
-        			sgipmsg.setMsgfmt(deliver.getMsgfmt());
+        			sgipmsg.setMsgfmt(new SgipSmsDcs(deliver.getMsgfmt().getValue()));
         			sgipmsg.setMsgContent(deliver.getSmsMessage());
         			pdu = sgipmsg;
     			}
@@ -90,7 +92,7 @@ public class Sgip2CMPPBusinessHandler extends AbstractBusinessHandler {
     			requestMessage.setReportflag(submit.getRegisteredDelivery());
     			requestMessage.setTppid(submit.getTppid());
     			requestMessage.setTpudhi(submit.getTpudhi());
-    			requestMessage.setMsgfmt(submit.getMsgfmt());
+    			requestMessage.setMsgfmt(new SgipSmsDcs(submit.getMsgfmt().getValue()));
     			requestMessage.setMsgContent(submit.getSmsMessage());
     			requestMessage.setMessagelength(submit.getMsgLength());
     	        out.add(requestMessage);

@@ -45,8 +45,9 @@ public class TestSMGPSubmitMessage extends AbstractSMGPTestMessageCodec<SMGPSubm
 		ByteBuf copybuf = Unpooled.buffer();
 	    while(buf!=null){
 			
-			
-	    	copybuf.writeBytes(buf.copy());
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());

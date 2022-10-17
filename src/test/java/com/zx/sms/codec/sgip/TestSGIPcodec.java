@@ -8,6 +8,7 @@ import org.marre.sms.SmsDcs;
 
 import com.zx.sms.codec.AbstractSGIPTestMessageCodec;
 import com.zx.sms.codec.sgip12.msg.SgipDefaultMessage;
+import com.zx.sms.codec.sgip12.msg.SgipDeliverRequestMessage;
 import com.zx.sms.codec.sgip12.msg.SgipSubmitRequestMessage;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.common.util.MsgId;
@@ -43,5 +44,81 @@ public class TestSGIPcodec extends AbstractSGIPTestMessageCodec<SgipDefaultMessa
 			Assert.assertEquals(seq.toString(), tTo.toString());
 		}
 
+	}
+	@Test
+	public void testMTLongMsg() {
+		SgipSubmitRequestMessage requestMessage = new SgipSubmitRequestMessage();
+		requestMessage.setSpnumber("10086");
+		requestMessage.setUsernumber("13800138000");
+		requestMessage.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefgh");
+		requestMessage.setReportflag((short)0);
+		//140字纯文字符，拆分为1条
+		Assert.assertEquals(1,testlongCodec(requestMessage));
+		requestMessage.setMsgContent(requestMessage.getMsgContent()+"1");
+		//超过140字纯文字符，拆分为2条
+		Assert.assertEquals(2,testlongCodec(requestMessage));
+		//70字带汉文字符，拆分为1条
+		requestMessage.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567中");
+		Assert.assertEquals(1,testlongCodec(requestMessage));
+		
+		requestMessage.setMsgContent(requestMessage.getMsgContent()+"1");
+		//超过140字纯文字符，拆分为2条
+		Assert.assertEquals(2,testlongCodec(requestMessage));
+	}
+	
+	@Test
+	public void testMOLongMsg() {
+		SgipDeliverRequestMessage requestMessage = new SgipDeliverRequestMessage();
+		requestMessage.setSpnumber("10086");
+		requestMessage.setUsernumber("13800138000");
+		
+		requestMessage.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefgh");
+		//140字纯文字符，拆分为1条
+		Assert.assertEquals(1,testlongCodec(requestMessage));
+		requestMessage.setMsgContent(requestMessage.getMsgContent()+"1");
+		//超过140字纯文字符，拆分为2条
+		Assert.assertEquals(2,testlongCodec(requestMessage));
+		//70字带汉文字符，拆分为1条
+		requestMessage.setMsgContent("12345678901AssBC56789012345678901234567890123456789012345678901234567中");
+		Assert.assertEquals(1,testlongCodec(requestMessage));
+		
+		requestMessage.setMsgContent(requestMessage.getMsgContent()+"1");
+		//超过140字纯文字符，拆分为2条
+		Assert.assertEquals(2,testlongCodec(requestMessage));
+	}
+	
+	
+	public int testlongCodec(SgipDefaultMessage msg)
+	{
+		channel().writeOutbound(msg);
+		ByteBuf buf =(ByteBuf)channel().readOutbound();
+		ByteBuf copybuf = Unpooled.buffer();
+		int frameLength = 0;
+	    while(buf!=null){
+	    	frameLength++;
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
+			int length = buf.readableBytes();
+			
+			Assert.assertEquals(length, buf.readInt());
+			Assert.assertEquals(msg.getHeader().getCommandId(), buf.readInt());
+			
+			buf =(ByteBuf)channel().readOutbound();
+	    }
+	    
+	    SgipDefaultMessage result = decode(copybuf);
+		Assert.assertNotNull(result);
+		System.out.println(result);
+		
+		if(msg instanceof SgipSubmitRequestMessage) {
+			SgipSubmitRequestMessage mt = (SgipSubmitRequestMessage)msg;
+			Assert.assertEquals(mt.getMsgContent(), ((SgipSubmitRequestMessage)result).getMsgContent());
+		}else if(msg instanceof SgipDeliverRequestMessage){
+			SgipDeliverRequestMessage mo = (SgipDeliverRequestMessage)msg;
+			Assert.assertEquals(mo.getMsgContent(), ((SgipDeliverRequestMessage)result).getMsgContent());
+		}
+		
+		return frameLength;
 	}
 }

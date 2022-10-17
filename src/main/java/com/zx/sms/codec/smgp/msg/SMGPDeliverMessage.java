@@ -4,11 +4,12 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.marre.sms.SMGPSmsDcs;
+import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
+import org.marre.sms.SmsMsgClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,8 +20,6 @@ import com.zx.sms.codec.smgp.tlv.TLVByte;
 import com.zx.sms.codec.smgp.tlv.TLVString;
 import com.zx.sms.codec.smgp.util.ByteUtil;
 import com.zx.sms.codec.smgp.util.SMGPMsgIdUtil;
-import com.zx.sms.common.GlobalConstance;
-import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 
 public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessage<SMGPDeliverMessage>{
@@ -34,7 +33,7 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 
 	private boolean isReport; // 1
 
-	private SmsDcs msgFmt = GlobalConstance.defaultmsgfmt;
+	private SMGPSmsDcs msgFmt = SMGPSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.ASCII, SmsMsgClass.CLASS_UNKNOWN);
 
 	private String recvTime = DateFormatUtils.format((new Date()), "yyyyMMddHHmmss"); // 14
 
@@ -133,7 +132,7 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 		isReport = bodyBytes[offset]==1;
 		offset += 1;
 
-		msgFmt = new SmsDcs(bodyBytes[offset]);
+		msgFmt = new SMGPSmsDcs(bodyBytes[offset]);
 		offset += 1;
 
 		tmp = new byte[14];
@@ -238,11 +237,11 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 		return isReport;
 	}
 
-	public SmsDcs getMsgFmt() {
+	public SMGPSmsDcs getMsgFmt() {
 		return this.msgFmt;
 	}
 
-	public void setMsgFmt(SmsDcs msgFmt) {
+	public void setMsgFmt(SMGPSmsDcs msgFmt) {
 		this.msgFmt = msgFmt;
 	}
 
@@ -283,7 +282,7 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 	}
 
 	public void setMsgContent(String msgContent) {
-		setMsgContent(CMPPCommonUtil.buildTextMessage(msgContent));
+		setMsgContent(buildSmsMessage(msgContent));
 	}
 	
 	public void setMsgContent(SmsMessage msg){
@@ -377,7 +376,7 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 		SMGPDeliverMessage requestMessage = this.clone();
 		
 		requestMessage.setTpUdhi((byte)frame.getTpudhi());
-		requestMessage.setMsgFmt((SmsDcs)frame.getMsgfmt());
+		requestMessage.setMsgFmt((SMGPSmsDcs)frame.getMsgfmt());
 		requestMessage.setBMsgContent(frame.getMsgContentBytes());
 		
 		if(frame.getPknumber()!=1){

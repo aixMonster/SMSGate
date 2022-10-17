@@ -3,6 +3,12 @@ package com.zx.sms.codec.smgp.msg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.marre.sms.SMGPSmsDcs;
+import org.marre.sms.SmsAlphabet;
+import org.marre.sms.SmsMessage;
+import org.marre.sms.SmsMsgClass;
+import org.marre.sms.SmsTextMessage;
+
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.smgp.tlv.TLV;
 import com.zx.sms.codec.smgp.tlv.TLVOctets;
@@ -87,7 +93,13 @@ public abstract class SMGPBaseMessage implements BaseMessage ,Cloneable{
 	abstract protected int setBody(byte[] bodyBytes,int version) throws Exception;
 
 	abstract protected byte[] getBody(int version) throws Exception ;
-
+	
+	protected SmsMessage buildSmsMessage(String text) {
+		if (SmsTextMessage.haswidthChar(text))
+			return  new SmsTextMessage(text, SMGPSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
+		else 
+			return  new SmsTextMessage(text, SMGPSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.ASCII, SmsMsgClass.CLASS_UNKNOWN));
+	}
 	
 	private void setOptionalBody(byte[] buffer) throws Exception {
 		short tag;

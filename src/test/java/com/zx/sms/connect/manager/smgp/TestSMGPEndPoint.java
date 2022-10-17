@@ -14,22 +14,21 @@ import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
+
 /**
- *经测试，35个连接，每个连接每200/s条消息
- *lenovoX250能承担7000/s消息编码解析无压力。
- *10000/s的消息服务不稳定，开个网页，或者打开其它程序导致系统抖动，会有大量消息延迟 (超过500ms)
+ * 经测试，35个连接，每个连接每200/s条消息 lenovoX250能承担7000/s消息编码解析无压力。
+ * 10000/s的消息服务不稳定，开个网页，或者打开其它程序导致系统抖动，会有大量消息延迟 (超过500ms)
  *
- *低负载时消息编码解码可控制在10ms以内。
+ * 低负载时消息编码解码可控制在10ms以内。
  *
  */
-
 
 public class TestSMGPEndPoint {
 	private static final Logger logger = LoggerFactory.getLogger(TestSMGPEndPoint.class);
 
 	@Test
 	public void testSMGPEndpoint() throws Exception {
-	
+
 		final EndpointManager manager = EndpointManager.INS;
 
 		SMGPServerEndpointEntity server = new SMGPServerEndpointEntity();
@@ -37,9 +36,9 @@ public class TestSMGPEndPoint {
 		server.setHost("127.0.0.1");
 		server.setPort(9890);
 		server.setValid(true);
-		//使用ssl加密数据流
+		// 使用ssl加密数据流
 		server.setUseSSL(false);
-		
+
 		SMGPServerChildEndpointEntity child = new SMGPServerChildEndpointEntity();
 		child.setId("smgpchild");
 		child.setClientID("333");
@@ -47,20 +46,20 @@ public class TestSMGPEndPoint {
 
 		child.setValid(true);
 		child.setChannelType(ChannelType.DUPLEX);
-		child.setClientVersion((byte)0x13);
-		child.setMaxChannels((short)3);
-		child.setRetryWaitTimeSec((short)30);
-		child.setMaxRetryCnt((short)3);
+		child.setClientVersion((byte) 0x13);
+		child.setMaxChannels((short) 3);
+		child.setRetryWaitTimeSec((short) 30);
+		child.setMaxRetryCnt((short) 3);
 		child.setReSendFailMsg(false);
-		child.setIdleTimeSec((short)15);
-		child.setSupportLongmsg(SupportLongMessage.SEND);  //接收长短信时不自动合并
+		child.setIdleTimeSec((short) 15);
+		child.setSupportLongmsg(SupportLongMessage.SEND); // 接收长短信时不自动合并
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
-		MessageReceiveHandler receiver  = new SMGPMessageReceiveHandler();
-		serverhandlers.add(receiver);   
+		MessageReceiveHandler receiver = new SMGPMessageReceiveHandler();
+		serverhandlers.add(receiver);
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
 		manager.addEndpointEntity(server);
-		
+
 		SMGPClientEndpointEntity client = new SMGPClientEndpointEntity();
 		client.setId("smgpclient");
 		client.setHost("127.0.0.1");
@@ -69,34 +68,35 @@ public class TestSMGPEndPoint {
 		client.setPassword("0555");
 		client.setChannelType(ChannelType.DUPLEX);
 
-		client.setMaxChannels((short)30);
-		client.setRetryWaitTimeSec((short)100);
+		client.setMaxChannels((short) 30);
+		client.setRetryWaitTimeSec((short) 100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
-		client.setClientVersion((byte)0x13);
+		client.setClientVersion((byte) 0x13);
 //		client.setWriteLimit(200);
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		int count = 10000;
-		clienthandlers.add( new SMGPSessionConnectedHandler(count)); 
+		clienthandlers.add(new SMGPSessionConnectedHandler(count));
 		client.setBusinessHandlerSet(clienthandlers);
-		
+
 		manager.addEndpointEntity(client);
-		
+
 		manager.openAll();
-		
+
 		Thread.sleep(1000);
-		for(int i=0;i<child.getMaxChannels();i++)
-			manager.openEndpoint(client);
-		 System.out.println("start.....");
-		
-			while (receiver.getCnt().get() < count) {
-				Thread.sleep(1000);
-			}
-			Assert.assertEquals(count, receiver.getCnt().get());
-       
+
+		System.out.println("start.....");
+
+		while (receiver.getCnt().get() < count) {
+			Thread.sleep(1000);
+		}
+
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
+
+		Assert.assertEquals(count, receiver.getCnt().get());
+
 	}
-	
+
 }

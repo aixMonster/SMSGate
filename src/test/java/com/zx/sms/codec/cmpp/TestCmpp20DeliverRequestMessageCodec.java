@@ -103,7 +103,9 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 	    while(buf!=null){
 			
 			
-	    	copybuf.writeBytes(buf.copy());
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());
@@ -134,7 +136,9 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 	    while(buf!=null){
 			
 			
-	    	copybuf.writeBytes(buf.copy());
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());

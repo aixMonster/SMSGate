@@ -3,27 +3,27 @@
  */
 package com.zx.sms.codec.sgip12.codec;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageCodec;
-import io.netty.util.ReferenceCountUtil;
+import static com.zx.sms.common.util.NettyByteBufUtil.toArray;
 
 import java.util.List;
 
-import org.marre.sms.SmsDcs;
+import org.marre.sms.SgipSmsDcs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.codec.cmpp.msg.Message;
 import com.zx.sms.codec.cmpp.packet.PacketType;
-import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.sgip12.msg.SgipSubmitRequestMessage;
 import com.zx.sms.codec.sgip12.packet.SgipPacketType;
 import com.zx.sms.codec.sgip12.packet.SgipSubmitRequest;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.CMPPCommonUtil;
-import static com.zx.sms.common.util.NettyByteBufUtil.toArray;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToMessageCodec;
+import io.netty.util.ReferenceCountUtil;
 
 /**
  * @author huzorro(huzorro@gmail.com)
@@ -89,7 +89,7 @@ public class SgipSubmitRequestMessageCodec extends MessageToMessageCodec<Message
 		requestMessage.setReportflag(bodyBuffer.readUnsignedByte());
 		requestMessage.setTppid(bodyBuffer.readUnsignedByte());
 		requestMessage.setTpudhi(bodyBuffer.readUnsignedByte());
-		requestMessage.setMsgfmt(new SmsDcs((byte) bodyBuffer.readUnsignedByte()));
+		requestMessage.setMsgfmt(new SgipSmsDcs((byte) bodyBuffer.readUnsignedByte()));
 
 		requestMessage.setMessagetype(bodyBuffer.readUnsignedByte());
 		int msgLength = bodyBuffer.readInt() ;

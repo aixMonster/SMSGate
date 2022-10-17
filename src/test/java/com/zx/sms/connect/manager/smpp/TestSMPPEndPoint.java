@@ -88,9 +88,10 @@ public class TestSMPPEndPoint {
 		while (receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 		}
-		Assert.assertEquals(count, receiver.getCnt().get());
-		
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
+		Assert.assertEquals(count, receiver.getCnt().get());
+		
+
 	}
 }

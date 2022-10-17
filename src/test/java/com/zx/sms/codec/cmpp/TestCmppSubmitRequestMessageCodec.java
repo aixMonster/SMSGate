@@ -164,8 +164,9 @@ public class TestCmppSubmitRequestMessageCodec  extends AbstractTestMessageCodec
 		ByteBuf copybuf = Unpooled.buffer();
 	    while(buf!=null){
 			
-			
-	    	copybuf.writeBytes(buf.copy());
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());
@@ -191,7 +192,9 @@ public class TestCmppSubmitRequestMessageCodec  extends AbstractTestMessageCodec
 	    while(buf!=null){
 			
 			
-	    	copybuf.writeBytes(buf.copy());
+	    	ByteBuf copy = buf.copy();
+	    	copybuf.writeBytes(copy);
+	    	copy.release();
 			int length = buf.readableBytes();
 			
 			Assert.assertEquals(length, buf.readInt());

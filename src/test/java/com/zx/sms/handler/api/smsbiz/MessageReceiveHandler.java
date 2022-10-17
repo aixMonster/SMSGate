@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.LongSMSMessage;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
@@ -70,14 +71,15 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 	protected abstract ChannelFuture reponse(final ChannelHandlerContext ctx, Object msg);
 
 	@Override
-	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+	public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
 
 		ChannelFuture future = reponse(ctx, msg);
 		if (future != null && msg instanceof BaseMessage)
 			future.addListener(new GenericFutureListener() {
 				@Override
 				public void operationComplete(Future future) throws Exception {
-					cnt.incrementAndGet();
+					if(msg instanceof LongSMSMessage)
+						cnt.incrementAndGet();
 				}
 			});
 	}

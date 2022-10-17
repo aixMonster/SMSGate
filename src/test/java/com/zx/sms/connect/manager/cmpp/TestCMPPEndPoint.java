@@ -121,17 +121,15 @@ public class TestCMPPEndPoint {
 
 		manager.openEndpoint(server);
 		manager.openEndpoint(client);
-		Thread.sleep(5000);
+		Thread.sleep(1000);
 		manager.startConnectionCheckTask();
 		System.out.println("start.....");
 		while (receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 		}
-		Assert.assertEquals(count+1, receiver.getCnt().get());
-		Thread.sleep(3000);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
-		Thread.sleep(4000);
+		Assert.assertEquals(count, receiver.getCnt().get());
 		System.out.println("end.....");
 	}
 }
