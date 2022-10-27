@@ -4,12 +4,15 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.common.GlobalConstance;
+import com.zx.sms.common.util.ByteArrayUtil;
 import com.zx.sms.common.util.IPRange;
 import com.zx.sms.connect.manager.ClientEndpoint;
 import com.zx.sms.connect.manager.EndpointConnector;
@@ -28,7 +31,7 @@ import io.netty.handler.timeout.IdleStateHandler;
  */
 public abstract class AbstractSessionLoginManager extends ChannelDuplexHandler {
 	private static final Logger logger = LoggerFactory.getLogger(AbstractSessionLoginManager.class);
-
+	private static final Pattern p = Pattern.compile("[0-9]+\\s*:\\s*([0-9]+)");
 	protected EndpointEntity entity;
 
 	/**
@@ -44,10 +47,13 @@ public abstract class AbstractSessionLoginManager extends ChannelDuplexHandler {
 		if (state == SessionState.DisConnect) {
 			String exceptionMsg = cause.getMessage();
 			if(cause instanceof TooLongFrameException && exceptionMsg != null) {
-				if(exceptionMsg.contains("1195725856")) {
-					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP GET request.", cause);
-				}else if(exceptionMsg.contains("1347375956")){
-					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP POST request.", cause);
+				Matcher  matcher = p.matcher(exceptionMsg);
+				if(matcher.find()) {
+					String length = matcher.group(1);
+					byte[] chars = ByteArrayUtil.toByteArray(Long.parseLong(length));
+					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP "+ (new String(chars)).trim()+" request.", cause);
+				}else {
+					logger.error("login error entity : " + entity.toString(), cause);
 				}
 			}else {
 				logger.error("login error entity : " + entity.toString(), cause);
