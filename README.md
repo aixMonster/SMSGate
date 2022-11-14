@@ -336,14 +336,14 @@ public class TestCMPPEndPoint {
 		server.setUseSSL(false);
 
 		CMPPServerChildEndpointEntity child = new CMPPServerChildEndpointEntity();
-		child.setId("child");
+		child.setId("child");  //自定义通道账号ID，保持全局唯一
 		child.setChartset(Charset.forName("utf-8"));
-		child.setGroupName("test");
-		child.setUserName("901783");
-		child.setPassword("ICP001");
+		child.setGroupName("test");   //自定义通道账号分组ID，用于对通道标识不同组，方便路由实现
+		child.setUserName("901783");  //通道账号，可能和企业代码相同
+		child.setPassword("ICP001");  //密码
 
 		child.setValid(true);
-		child.setVersion((short)0x30);
+		child.setVersion((short)0x30);   //协议版本号，48是3.0 协议，32是2.0协议
 
 		child.setMaxChannels((short)4);
 		child.setRetryWaitTimeSec((short)30);
@@ -359,16 +359,17 @@ public class TestCMPPEndPoint {
 		manager.addEndpointEntity(server);
 	
 		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
-		client.setId("client");  //自定义ID,保持唯一
+		client.setId("client");   //自定义通道账号ID，保持全局唯一
 		client.setHost("127.0.0.1");
 //		client.setLocalhost("127.0.0.1");
 //		client.setLocalport(65521);
 		client.setPort(7890);
 		client.setChartset(Charset.forName("utf-8"));
-		client.setGroupName("test");
-		client.setUserName("901783");
-		client.setPassword("ICP001");
-
+		client.setGroupName("test"); //自定义通道账号分组ID，用于对通道标识不同组，方便路由实现
+		client.setUserName("901783"); //通道账号，可能和企业代码相同
+		client.setPassword("ICP001"); //密码
+		client.setMsgSrc("902176");  //企业代码 ，可能和UserName相同
+		client.setSpCode("10658762"); //服务代码，即显示到手机上的号码
 		client.setMaxChannels((short)10);  //最大连接数
 		client.setVersion((short)0x30);    //协议版本号
 		client.setRetryWaitTimeSec((short)30);//发送request后 等待N秒后没有收到response，则重发消息
