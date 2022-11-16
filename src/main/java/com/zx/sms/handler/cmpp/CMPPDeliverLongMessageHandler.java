@@ -23,6 +23,7 @@ public class CMPPDeliverLongMessageHandler extends AbstractLongMessageHandler<Cm
 		//短信片断未接收完全，直接给网关回复resp，等待其它片断
 		CmppDeliverResponseMessage responseMessage = new CmppDeliverResponseMessage(msg.getHeader());
 		responseMessage.setResult(0);
+		responseMessage.setMsgId(msg.getMsgId());
 		return responseMessage;
 	}
 

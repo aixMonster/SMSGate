@@ -167,6 +167,24 @@ public enum LongMessageFrameHolder {
 	}
 	
 	/**
+	 *获取长短信的UDHI字段里的frameKey ,以方便长短信关联状态报告时使用
+	 */
+	public String parseFrameKey(String longSmsKey,LongSMSMessage msg) {
+		LongMessageFrame frame = msg.generateFrame();
+		StringBuilder mapKeyBuilder = new StringBuilder(longSmsKey);
+		// udhi只取第1个bit和第7个bit同时为0时，表示不包含UDH
+		if ((frame.getTpudhi() & 0x41) != 0) {
+			try {
+				FrameHolder fh = createFrameHolder(longSmsKey, frame);
+				mapKeyBuilder.append(".").append(fh.frameKey);
+				return mapKeyBuilder.toString();
+			}catch(NotSupportedException es) {
+			}
+		}
+		return mapKeyBuilder.toString();
+	}
+	
+	/**
 	 * 获取一条完整的长短信，如果长短信组装未完成，返回null
 	 **/
 	public SmsMessageHolder putAndget(String longSmsKey, LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {

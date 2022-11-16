@@ -23,7 +23,7 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	public AbstractLongMessageHandler(EndpointEntity entity) {
 		this.entity = entity;
 	}
-	
+
 	@Override
 	protected void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && needHandleLongMessage(msg)) {
@@ -42,9 +42,10 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 			} catch (Exception ex) {
 				// 长短信解析失败，直接给网关回复 resp . 并丢弃这个短信
 				logger.error("Decode Message Error ,msg dump :{}", ByteBufUtil.hexDump(((LongSMSMessage)msg).generateFrame().getMsgContentBytes()));
-				BaseMessage res = response(msg);
-				res.setRequest(msg);
-				ctx.writeAndFlush(res);
+				//回复Response的处理全部给业务负责
+//				BaseMessage res = response(msg);
+//				res.setRequest(msg);
+//				ctx.writeAndFlush(res);
 			}
 		} else {
 			out.add(msg);
