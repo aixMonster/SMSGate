@@ -76,7 +76,7 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 		// 取时间，用来查看编码解码时间
 
 		CmppDeliverRequestMessage msg = new CmppDeliverRequestMessage(header);
-		msg.setDestId("13800138000");
+		msg.setDestId("10658909");
 		msg.setLinkid("0000");
 		// 70个汉字
 		msg.setMsgContent(content);
@@ -90,41 +90,18 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 	
 
 
-	
-	
-	
-	public void testlongCodecNoSupport(String content)
+	@Test
+	public void testchinesecode()
 	{
-		CmppDeliverRequestMessage msg = createTestReq(content);
-		
-		channel().writeOutbound(msg);
-		ByteBuf buf =(ByteBuf)channel().readOutbound();
-		ByteBuf copybuf = Unpooled.buffer();
-	    while(buf!=null){
-			
-			
-	    	ByteBuf copy = buf.copy();
-	    	copybuf.writeBytes(copy);
-	    	copy.release();
-			int length = buf.readableBytes();
-			
-			Assert.assertEquals(length, buf.readInt());
-			Assert.assertEquals(msg.getPacketType().getCommandId(), buf.readInt());
-			
-
-			buf =(ByteBuf)channel().readOutbound();
-	    }
-		ch.writeInbound(copybuf);
-	
-	    CmppDeliverRequestMessage result = (CmppDeliverRequestMessage)ch.readInbound();
-	    StringBuilder sb = new StringBuilder();
-	    while(result!=null){
-	    	System.out.println(result.getMsgContent());
-	    	sb.append(result.getMsgContent().substring(5));
-	    	result = (CmppDeliverRequestMessage)ch.readInbound();
-	    }
-	    Assert.assertEquals(msg.getMsgContent(), sb.toString());
+		testlongCodec("1234567890123456789中01234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" );
 	}
+
+	@Test
+	public void testASCIIcode()
+	{
+		testlongCodec("123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890abcdefghij");
+	}
+	
 	
 	public void testlongCodec(String content)
 	{
@@ -152,5 +129,6 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 		
 		System.out.println(result.getMsgContent());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
+		Assert.assertNotNull(result.getUniqueLongMsgId());
 	}
 }

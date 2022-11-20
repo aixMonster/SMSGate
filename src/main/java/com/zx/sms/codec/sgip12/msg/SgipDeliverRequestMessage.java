@@ -16,6 +16,7 @@ import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.msg.Header;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.sgip12.packet.SgipPacketType;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
@@ -234,6 +235,16 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 			fragments = new ArrayList<SgipDeliverRequestMessage>();
 		
 		fragments.add(fragment);
+	}
+	
+	@Override
+	public String getUniqueLongMsgId() {
+		return super.getUniqueLongMsgId();
+	}
+
+	@Override
+	public void setUniqueLongMsgId(UniqueLongMsgId id) {
+		super.setUniqueLongMsgId(id.getId());
 	}
 	
 }

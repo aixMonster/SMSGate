@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smpp.SmppConstants;
 
 public class DeliverSm extends BaseSm<DeliverSmResp> implements LongSMSMessage<DeliverSm> {
@@ -77,5 +78,15 @@ public class DeliverSm extends BaseSm<DeliverSmResp> implements LongSMSMessage<D
 			fragments = new ArrayList<DeliverSm>();
 		
 		fragments.add(fragment);
+	}
+	
+	@Override
+	public String getUniqueLongMsgId() {
+		return super.getUniqueLongMsgId();
+	}
+
+	@Override
+	public void setUniqueLongMsgId(UniqueLongMsgId id) {
+		super.setUniqueLongMsgId(id.getId());
 	}
 }

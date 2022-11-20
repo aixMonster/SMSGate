@@ -38,7 +38,9 @@ public abstract class SMGPBaseMessage implements BaseMessage ,Cloneable{
 	private long timestamp = CachedMillisecondClock.INS.now();
 	//消息的生命周期，单位秒, 0表示永不过期
 	private long lifeTime=0;
-
+	
+	private String uniqueLongMsgId;
+	
 	public boolean fromBytes(byte[] bytes,int version) throws Exception {
 		if (bytes == null) {
 			return false;
@@ -266,6 +268,14 @@ public abstract class SMGPBaseMessage implements BaseMessage ,Cloneable{
 		 sequenceNumber=seq;
 	}
 
+	protected String getUniqueLongMsgId() {
+		return uniqueLongMsgId;
+	}
+
+	protected void setUniqueLongMsgId(String uniqueLongMsgId) {
+		this.uniqueLongMsgId = uniqueLongMsgId;
+	}
+	
 	protected SMGPBaseMessage clone() throws CloneNotSupportedException {
 		SMGPBaseMessage msg =  (SMGPBaseMessage) super.clone();
 		msg.setSequenceNo(sequenceNumber);

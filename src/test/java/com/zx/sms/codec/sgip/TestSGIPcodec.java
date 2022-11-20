@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.marre.sms.SmsDcs;
 
+import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.AbstractSGIPTestMessageCodec;
 import com.zx.sms.codec.sgip12.msg.SgipDefaultMessage;
 import com.zx.sms.codec.sgip12.msg.SgipDeliverRequestMessage;
@@ -110,7 +111,7 @@ public class TestSGIPcodec extends AbstractSGIPTestMessageCodec<SgipDefaultMessa
 	    SgipDefaultMessage result = decode(copybuf);
 		Assert.assertNotNull(result);
 		System.out.println(result);
-		
+		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId());
 		if(msg instanceof SgipSubmitRequestMessage) {
 			SgipSubmitRequestMessage mt = (SgipSubmitRequestMessage)msg;
 			Assert.assertEquals(mt.getMsgContent(), ((SgipSubmitRequestMessage)result).getMsgContent());

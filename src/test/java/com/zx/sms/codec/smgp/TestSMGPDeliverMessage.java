@@ -98,6 +98,7 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 	    SMGPDeliverMessage result = decode(copybuf);
 		Assert.assertNotNull(result);
 		System.out.println(result);
+		System.out.println(result.getUniqueLongMsgId());
 		if (msg.isReport()) {
 			Assert.assertEquals(msg.getReport().getStat(), result.getReport().getStat());
 			Assert.assertEquals(msg.getReport().getTxt(), result.getReport().getTxt());

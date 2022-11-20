@@ -23,6 +23,8 @@ public class DefaultMessage implements Message ,Cloneable {
 	private Message request;
 	private Header header;
 	private byte[] buffer;
+	
+	private String uniqueLongMsgId;
 
 	/**
 	 * CMPP的消息字段太少,增加一个附加字段,方便业务处理,
@@ -163,5 +165,13 @@ public class DefaultMessage implements Message ,Cloneable {
 	@Override
 	public void setSequenceNo(int seq) {
 		getHeader().setSequenceId(seq);
+	}
+
+	protected String getUniqueLongMsgId() {
+		return uniqueLongMsgId;
+	}
+
+	protected void setUniqueLongMsgId(String uniqueLongMsgId) {
+		this.uniqueLongMsgId = uniqueLongMsgId;
 	}
 }

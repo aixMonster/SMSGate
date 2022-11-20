@@ -28,7 +28,8 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	protected void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && needHandleLongMessage(msg)) {
 			
-			String key = generateFrameKey(msg);
+			String key = (entity != null && entity.getId() != null) ? (entity.getId() + generateFrameKey(msg)) : generateFrameKey(msg) ;
+			
 			try {
 				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(key, ((LongSMSMessage)msg),entity !=null && entity.isRecvLongMsgOnMultiLink());
 

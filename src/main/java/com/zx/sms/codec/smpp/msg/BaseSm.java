@@ -1,5 +1,6 @@
 package com.zx.sms.codec.smpp.msg;
 
+import org.apache.commons.lang3.StringUtils;
 import org.marre.sms.SmppSmsDcs;
 import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsConcatMessage;
@@ -49,6 +50,8 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	private byte[] shortMessage; // not present in data_sm
 	private short msglength;
 	private SmsMessage smsMsg;
+	
+	private String uniqueLongMsgId;
 
 	public BaseSm(int commandId, String name) {
 		super(commandId, name);
@@ -173,6 +176,14 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	public void setDestAddress(Address value) {
 		this.destAddress = value;
 	}
+	
+	protected String getUniqueLongMsgId() {
+		return uniqueLongMsgId;
+	}
+
+	protected void setUniqueLongMsgId(String uniqueLongMsgId) {
+		this.uniqueLongMsgId = uniqueLongMsgId;
+	}
 
 	public SmsMessage getSmsMessage() {
 		if(smsMsg instanceof SmsConcatMessage){
@@ -274,6 +285,7 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		if (frame.getPknumber() != 1) {
 			requestMessage.setSequenceNumber((int) DefaultSequenceNumberUtil.getSequenceNo());
 		}
+		
 		requestMessage.setSmsMsg((SmsMessage) null);
 		//已有UDH头进行的分片短信，不用再设置下面三个可选参数
 //		if(frame.getPktotal()>1) {

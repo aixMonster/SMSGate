@@ -13,6 +13,7 @@ import org.marre.sms.SmsMsgClass;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smgp.tlv.TLVByte;
 import com.zx.sms.codec.smgp.tlv.TLVString;
 import com.zx.sms.codec.smgp.util.ByteUtil;
@@ -597,6 +598,7 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 		if(frame.getPknumber()!=1){
 			requestMessage.setSequenceNo(DefaultSequenceNumberUtil.getSequenceNo());
 		}
+		
 		requestMessage.setMsgContent((SmsMessage)null);
 		return requestMessage;
 	}
@@ -615,4 +617,15 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 		
 		fragments.add(fragment);
 	}
+	
+	@Override
+	public String getUniqueLongMsgId() {
+		return super.getUniqueLongMsgId();
+	}
+
+	@Override
+	public void setUniqueLongMsgId(UniqueLongMsgId id) {
+		super.setUniqueLongMsgId(id.getId());
+	}
+	
 }

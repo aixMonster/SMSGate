@@ -16,6 +16,7 @@ import org.marre.sms.SmsMsgClass;
 import org.marre.sms.SmsPduUtil;
 import org.marre.sms.SmsTextMessage;
 
+import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.AbstractSMPPTestMessageCodec;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.smpp.android.gsm.GsmAlphabet;
@@ -143,8 +144,8 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
     @Test
     public void testLongmDeliverSm(){
     	DeliverSm pdu = new DeliverSm();
-    	pdu.setDestAddress(new Address((byte)0,(byte)0,"1111"));
-    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"2222"));
+    	pdu.setDestAddress(new Address((byte)0,(byte)0,"10658987"));
+    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"13800138000"));
     	pdu.setSmsMsg("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】，请点击支付http://www.10085.cn/web85/page/zyzxpay/wap_order.html?orderId=76DEF9AE1808F506FD4E6CB782E3B8E7EE875E766D3D335C 完成下单。请在60分钟内完成支付，如有疑问，请致电10085咨询，谢谢！中国移动10085");
     	testlongCodec(pdu);
     }
@@ -153,8 +154,8 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
     public void testLongmSubmitSm(){
     	
     	SubmitSm pdu = new SubmitSm();
-    	pdu.setDestAddress(new Address((byte)0,(byte)0,"1111"));
-    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"2222"));
+    	pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
+    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"10658987"));
     	pdu.setSmsMsg("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】，请点击支付http://www.10085.cn/web85/page/zyzxpay/wap_order.html?orderId=76DEF9AE1808F506FD4E6CB782E3B8E7EE875E766D3D335C 完成下单。请在60分钟内完成支付，如有疑问，请致电10085咨询，谢谢！中国移动10085");
  
        	testlongCodec(pdu);
@@ -164,8 +165,8 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
 	public void testASCIIcode()
 	{
 		SubmitSm pdu = new SubmitSm();
-    	pdu.setDestAddress(new Address((byte)0,(byte)0,"1111"));
-    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"2222"));
+    	pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
+    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"10658987"));
     	pdu.setSmsMsg(new SmsTextMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN)));
      	testlongCodec(pdu);
 	}
@@ -173,8 +174,8 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
 	public void testdefaultcode()
 	{
 		SubmitSm pdu = new SubmitSm();
-    	pdu.setDestAddress(new Address((byte)0,(byte)0,"1111"));
-    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"2222"));
+    	pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
+    	pdu.setSourceAddress(new Address((byte)0,(byte)0,"10658987"));
     	pdu.setSmsMsg(gsmstr);
      	testlongCodec(pdu);
 	}
@@ -257,6 +258,7 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
 	    BaseSm result = decode(copybuf);
 		
 		System.out.println(result);
+		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId());
 		Assert.assertEquals(((SmsTextMessage)msg.getSmsMessage()).getText(), ((SmsTextMessage)result.getSmsMessage()).getText());
 	}
 	

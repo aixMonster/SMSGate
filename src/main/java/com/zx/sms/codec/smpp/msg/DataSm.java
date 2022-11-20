@@ -27,6 +27,7 @@ import java.util.List;
 
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.codec.smpp.RecoverablePduException;
 import com.zx.sms.codec.smpp.SmppConstants;
@@ -112,6 +113,16 @@ public class DataSm extends BaseSm<DataSmResp>  implements LongSMSMessage<DataSm
 			fragments = new ArrayList<DataSm>();
 		
 		fragments.add(fragment);
+	}
+	
+	@Override
+	public String getUniqueLongMsgId() {
+		return super.getUniqueLongMsgId();
+	}
+
+	@Override
+	public void setUniqueLongMsgId(UniqueLongMsgId id) {
+		super.setUniqueLongMsgId(id.getId());
 	}
 	
 }

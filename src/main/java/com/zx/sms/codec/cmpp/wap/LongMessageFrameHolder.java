@@ -200,6 +200,7 @@ public enum LongMessageFrameHolder {
 		if ((frame.getTpudhi() & 0x41) == 0) {
 			// 短信内容不带协议头，直接获取短信内容
 			SmsTextMessage smsmsg =  buildTextMessage(frame.getPayloadbytes(0), frame.getMsgfmt());
+			
 			return new SmsMessageHolder(smsmsg,msg);
 		} else {
 
@@ -216,6 +217,9 @@ public enum LongMessageFrameHolder {
 
 				// 超过一帧的，进行长短信合并
 				String mapKey = new StringBuilder().append(longSmsKey).append(".").append(fh.frameKey).toString();
+				
+				//设置长短信唯一标识，方便后续长短信处理
+				msg.setUniqueLongMsgId(new UniqueLongMsgId(mapKey));
 
 				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
 				boolean complete = setAndget(msg,mapKey, frame,isRecvLongMsgOnMultiLink);
@@ -227,7 +231,7 @@ public enum LongMessageFrameHolder {
 					List<LongMessageFrame> allFrame = getAndDel(mapKey,isRecvLongMsgOnMultiLink);
 					//总帧数个数虽然够了，还要再判断是不是所有帧都齐了 ，有可能收到相同帧序号的帧
 					//从第一个帧开始偿试合并
-					FrameHolder firstF =createFrameHolder(longSmsKey, allFrame.get(0));
+					FrameHolder firstF = createFrameHolder(longSmsKey, allFrame.get(0));
 					for(int i = 1; i< allFrame.size() ;i++) {
 						try {
 							firstF = mergeFrameHolder(firstF, allFrame.get(i));

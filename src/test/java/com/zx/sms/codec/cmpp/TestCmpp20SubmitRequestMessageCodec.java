@@ -2,22 +2,17 @@ package com.zx.sms.codec.cmpp;
 
 import java.util.UUID;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import org.junit.Assert;
 import org.junit.Test;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsTextMessage;
 
 import com.zx.sms.codec.AbstractTestMessageCodec;
-import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
-import com.zx.sms.codec.cmpp.packet.CmppHead;
-import com.zx.sms.codec.cmpp.packet.CmppSubmitRequest;
-import com.zx.sms.codec.cmpp20.packet.Cmpp20DeliverResponse;
-import com.zx.sms.codec.cmpp20.packet.Cmpp20SubmitRequest;
 import com.zx.sms.common.util.MsgId;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class TestCmpp20SubmitRequestMessageCodec extends AbstractTestMessageCodec<CmppSubmitRequestMessage> {
 	@Override
