@@ -89,4 +89,14 @@ public class DeliverSm extends BaseSm<DeliverSmResp> implements LongSMSMessage<D
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
 		super.setUniqueLongMsgId(id.getId());
 	}
+
+	@Override
+	public boolean needHandleLongMessage() {
+		return !isReport();
+	}
+
+	@Override
+	public String getSrcIdAndDestId() {
+		return this.getSourceAddress().getAddress()+this.getDestAddress().getAddress();
+	}
 }

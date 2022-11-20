@@ -246,5 +246,15 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
 		super.setUniqueLongMsgId(id.getId());
 	}
+
+	@Override
+	public boolean needHandleLongMessage() {
+		return true;
+	}
+
+	@Override
+	public String getSrcIdAndDestId() {
+		return this.getUsernumber()+this.getSpnumber();
+	}
 	
 }

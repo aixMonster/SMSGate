@@ -382,6 +382,7 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 		
 		if(frame.getPknumber()!=1){
 			requestMessage.setSequenceNo(DefaultSequenceNumberUtil.getSequenceNo());
+			requestMessage.setMsgId( new MsgId());
 		}
 		
 		requestMessage.setMsgContent((SmsMessage)null);
@@ -411,6 +412,20 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 	@Override
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
 		super.setUniqueLongMsgId(id.getId());
+	}
+
+
+
+	@Override
+	public boolean needHandleLongMessage() {
+		return !this.isReport();
+	}
+
+
+
+	@Override
+	public String getSrcIdAndDestId() {
+		return this.getSrcTermId()+this.getDestTermId();
 	}
 	
 	

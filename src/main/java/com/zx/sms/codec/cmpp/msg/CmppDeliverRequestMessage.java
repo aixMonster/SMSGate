@@ -304,11 +304,12 @@ public class CmppDeliverRequestMessage extends DefaultMessage implements LongSMS
 		requestMessage.setMsgfmt((SmsDcs)frame.getMsgfmt());
 		requestMessage.setMsgContentBytes(frame.getMsgContentBytes());
 		requestMessage.setMsgLength((short) frame.getMsgLength());
-
+		
 		if (frame.getPknumber() != 1) {
 			requestMessage.getHeader().setSequenceId(DefaultSequenceNumberUtil.getSequenceNo());
+			requestMessage.setMsgId(new MsgId()); //上行短信每条的msgId不一样
 		}
-		
+
 		requestMessage.setMsg(null);
 		return requestMessage;
 	}
@@ -336,6 +337,16 @@ public class CmppDeliverRequestMessage extends DefaultMessage implements LongSMS
 	@Override
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
 		super.setUniqueLongMsgId(id.getId());
+	}
+
+	@Override
+	public boolean needHandleLongMessage() {
+		return !isReport();
+	}
+
+	@Override
+	public String getSrcIdAndDestId() {
+		return this.getSrcterminalId()+this.getDestId();
 	}
 
 }

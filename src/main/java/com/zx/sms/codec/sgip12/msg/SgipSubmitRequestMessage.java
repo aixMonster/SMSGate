@@ -451,4 +451,14 @@ public class SgipSubmitRequestMessage extends SgipDefaultMessage implements Long
 		super.setUniqueLongMsgId(id.getId());
 	}
 
+	@Override
+	public boolean needHandleLongMessage() {
+		return true;
+	}
+
+	@Override
+	public String getSrcIdAndDestId() {
+		return StringUtils.join(this.getUsernumber(), "|")+this.getSpnumber();
+	}
+
 }

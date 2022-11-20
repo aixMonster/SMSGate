@@ -173,7 +173,7 @@ public enum LongMessageFrameHolder {
 		LongMessageFrame frame = msg.generateFrame();
 		StringBuilder mapKeyBuilder = new StringBuilder(longSmsKey);
 		// udhi只取第1个bit和第7个bit同时为0时，表示不包含UDH
-		if ((frame.getTpudhi() & 0x41) != 0) {
+		if (frame.isConcatMsg()) {
 			try {
 				FrameHolder fh = createFrameHolder(longSmsKey, frame);
 				mapKeyBuilder.append(".").append(fh.frameKey);
@@ -187,7 +187,7 @@ public enum LongMessageFrameHolder {
 	/**
 	 * 获取一条完整的长短信，如果长短信组装未完成，返回null
 	 **/
-	public SmsMessageHolder putAndget(String longSmsKey, LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {
+	public SmsMessageHolder putAndget(String longSmsKey ,LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {
 		LongMessageFrame frame = msg.generateFrame();
 		/**
         1、根据SMPP协议，融合网关收到短信中心上行的esm_class字段（一个字节）是0100 0000，转换成16进制就是0X40 (64), 01XXXXXX表明是一条长短信。
@@ -195,9 +195,8 @@ public enum LongMessageFrameHolder {
         2.CMPP协议中没有esm_class字段。根据CMPP长短信TP_udhi的标准是0X01 (1)，即0000 0001，但目前所有网关都是配置接收到0X40（64）表明是一条长短信。
         该问题据说是以前一直遗留下来的，没有正式的文档规范说明，所以一直都是发送0X40(64)。 
 		 */
-		
 		// udhi只取第1个bit和第7个bit同时为0时，表示不包含UDH
-		if ((frame.getTpudhi() & 0x41) == 0) {
+		if (!frame.isConcatMsg()) {
 			// 短信内容不带协议头，直接获取短信内容
 			SmsTextMessage smsmsg =  buildTextMessage(frame.getPayloadbytes(0), frame.getMsgfmt());
 			
@@ -216,10 +215,7 @@ public enum LongMessageFrameHolder {
 				}
 
 				// 超过一帧的，进行长短信合并
-				String mapKey = new StringBuilder().append(longSmsKey).append(".").append(fh.frameKey).toString();
-				
-				//设置长短信唯一标识，方便后续长短信处理
-				msg.setUniqueLongMsgId(new UniqueLongMsgId(mapKey));
+				String mapKey = longSmsKey+fh.frameKey;
 
 				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
 				boolean complete = setAndget(msg,mapKey, frame,isRecvLongMsgOnMultiLink);

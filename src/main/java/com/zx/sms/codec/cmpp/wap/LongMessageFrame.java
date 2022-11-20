@@ -149,6 +149,10 @@ public class LongMessageFrame implements Serializable{
 			return msgContentBytes;
 		}
 	}
+	
+	public boolean isConcatMsg() {
+		return (this.getTpudhi() & 0x41) != 0;
+	}
 
 	@Override
 	public String toString() {

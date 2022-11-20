@@ -506,4 +506,14 @@ public class CmppSubmitRequestMessage extends DefaultMessage implements LongSMSM
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
 		super.setUniqueLongMsgId(id.getId());
 	}
+
+	@Override
+	public boolean needHandleLongMessage() {
+		return true;
+	}
+
+	@Override
+	public String getSrcIdAndDestId() {
+		return StringUtils.join(this.getDestterminalId(), "|")+this.getSrcId();
+	}
 }

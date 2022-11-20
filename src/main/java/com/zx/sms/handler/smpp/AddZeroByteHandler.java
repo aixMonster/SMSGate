@@ -14,7 +14,6 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
-@Sharable
 public class AddZeroByteHandler extends AbstractBusinessHandler {
 	private static final Logger logger = LoggerFactory.getLogger(AddZeroByteHandler.class);
 	public AddZeroByteHandler(EndpointEntity entity) {

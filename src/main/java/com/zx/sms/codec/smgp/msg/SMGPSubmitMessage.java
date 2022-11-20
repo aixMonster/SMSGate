@@ -627,5 +627,13 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
 		super.setUniqueLongMsgId(id.getId());
 	}
+	@Override
+	public boolean needHandleLongMessage() {
+		return true;
+	}
+	@Override
+	public String getSrcIdAndDestId() {
+		return StringUtils.join(this.getDestTermIdArray(), "|")+this.getSrcTermId();
+	}
 	
 }

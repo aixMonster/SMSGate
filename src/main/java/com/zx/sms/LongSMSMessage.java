@@ -29,4 +29,8 @@ public interface LongSMSMessage<T> {
 	public List<T> getFragments();
 
 	public void addFragment(T fragment);
+	
+	public boolean needHandleLongMessage();
+	
+	public String getSrcIdAndDestId();
 }

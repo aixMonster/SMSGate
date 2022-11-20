@@ -25,7 +25,7 @@ public class Test10085MsgDataSubmitRequestDecoder extends AbstractTestMessageCod
 		while(null!= ( result =  (CmppSubmitRequestMessage)ch.readInbound())){
 			
 			Assert.assertNotNull(result);
-			System.out.println(result);
+			System.out.println(result.getUniqueLongMsgId());
 			Assert.assertEquals("1816483568710085.46",result.getUniqueLongMsgId());
 			ch.writeOutbound(result);
 			success = true;
