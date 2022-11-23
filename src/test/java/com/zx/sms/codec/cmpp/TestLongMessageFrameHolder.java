@@ -1,8 +1,5 @@
 package com.zx.sms.codec.cmpp;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import java.util.List;
 
 import org.junit.Assert;
@@ -16,6 +13,9 @@ import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 public class TestLongMessageFrameHolder extends AbstractTestMessageCodec<CmppSubmitRequestMessage>{
 	String s = "尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】，请点击支付http://www.10085.cn/web85/page/zyzxpay/wap_order.html?orderId=76DEF9AE1808F506FD4E6CB782E3B8E7EE875E766D3D335C 完成下单。请在60分钟内完成支付，如有疑问，请";
 	protected int getVersion(){
@@ -24,26 +24,34 @@ public class TestLongMessageFrameHolder extends AbstractTestMessageCodec<CmppSub
 	@Test
 	public void test() throws SmsException{
 		
-		List<LongMessageFrame> l = LongMessageFrameHolder.INS.splitmsgcontent(new SmsTextMessage(s));
+		testSplit(new SmsTextMessage(s));
+	}
+	
+	
+	private void testSplit(SmsTextMessage s ) throws SmsException{
+	List<LongMessageFrame> l = LongMessageFrameHolder.INS.splitmsgcontent(s);
 		
+		StringBuilder sb = new StringBuilder();
 		for(LongMessageFrame frame : l){
 			String stmp = LongMessageFrameHolder.INS.getPartTextMsg(frame);
-			Assert.assertEquals(67, stmp.length());
-			System.out.println(stmp);
+			System.out.println(frame.getMsgLength() + "===" + stmp);
+			sb.append(stmp);
 		}
+		Assert.assertEquals(s.getText(),sb.toString());
 	}
 	
 	@Test
 	public void testGBK() throws SmsException{
-		SmsTextMessage s = new SmsTextMessage("1【温馨提示】移娃没理解您的问题2【温馨提示】移娃没理解您的问题3【温馨提示】移娃没理解您的问题4【温馨提示】移娃没理解您的问题5【温馨提示】移娃没理解您的问题6【温馨提示】移娃没理解您的问题7【温馨提示】移娃没理解您的问题8【温馨提示】移娃没理解您的问题9【温馨提示】移娃没理解您的问题",new SmsDcs((byte)15));
-		List<LongMessageFrame> l = LongMessageFrameHolder.INS.splitmsgcontent(s);
-		
-		Assert.assertEquals(139, l.get(0).getMsgContentBytes().length);
-		Assert.assertEquals(140, l.get(1).getMsgContentBytes().length);
-		for(LongMessageFrame frame : l){
-			String stmp = LongMessageFrameHolder.INS.getPartTextMsg(frame);
-			System.out.println(stmp);
-		}
+		String str = "1【温馨提示】移娃没理解您的问题2【温馨提示】移娃没理解您的问题3【温馨提示】移娃没理解您的问题4【温馨提示】移娃没理解您的问题5【温馨提示】移娃没理解您的问题6【温馨提示】移娃没理解您的问题7【温馨提示】移娃没理解您的问题8【温馨提示】移娃没理解您的问题9【温馨提示】移娃没理解您的问题.";
+		SmsTextMessage s = new SmsTextMessage(str,new SmsDcs((byte)15));
+		testSplit(s);
+	}
+	
+	@Test
+	public void testUCS() throws SmsException{
+		String str = "1【温馨提示】移娃没理解您的问题2【温馨提示】移娃没理解您的问题3【温馨提示】移娃没理解您的问题4【温馨提示】移娃没理解您的问题5【温馨提示】移娃没理解您的问题6【温馨提示】移娃没理解您的问题7【温馨提示】移娃没理解您的问题8【温馨提示】移娃没理解您的问题9【温馨提示】移娃没理解您的问题.";
+		SmsTextMessage s = new SmsTextMessage(str,new SmsDcs((byte)8));
+		testSplit(s);
 	}
 	
 	@Test

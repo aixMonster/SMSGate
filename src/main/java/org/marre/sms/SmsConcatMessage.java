@@ -34,7 +34,6 @@
  * ***** END LICENSE BLOCK ***** */
 package org.marre.sms;
 
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -48,8 +47,6 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.zx.sms.common.util.CMPPCommonUtil;
-import com.zx.sms.common.util.StandardCharsets;
 import com.zx.sms.config.PropertiesUtils;
 
 /**
@@ -305,7 +302,7 @@ public abstract class SmsConcatMessage implements SmsMessage {
 							;
 						}
 					}
-					if (oneByteCharCnt % 2 > 0) {
+					if ((nMaxUdLength + oneByteCharCnt) % 2 > 0) {
 						oneCopyLength--;
 					}
 				}
