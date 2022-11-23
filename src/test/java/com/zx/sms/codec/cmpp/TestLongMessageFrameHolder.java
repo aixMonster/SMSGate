@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsException;
 import org.marre.sms.SmsTextMessage;
 
@@ -28,6 +29,19 @@ public class TestLongMessageFrameHolder extends AbstractTestMessageCodec<CmppSub
 		for(LongMessageFrame frame : l){
 			String stmp = LongMessageFrameHolder.INS.getPartTextMsg(frame);
 			Assert.assertEquals(67, stmp.length());
+			System.out.println(stmp);
+		}
+	}
+	
+	@Test
+	public void testGBK() throws SmsException{
+		SmsTextMessage s = new SmsTextMessage("1【温馨提示】移娃没理解您的问题2【温馨提示】移娃没理解您的问题3【温馨提示】移娃没理解您的问题4【温馨提示】移娃没理解您的问题5【温馨提示】移娃没理解您的问题6【温馨提示】移娃没理解您的问题7【温馨提示】移娃没理解您的问题8【温馨提示】移娃没理解您的问题9【温馨提示】移娃没理解您的问题",new SmsDcs((byte)15));
+		List<LongMessageFrame> l = LongMessageFrameHolder.INS.splitmsgcontent(s);
+		
+		Assert.assertEquals(139, l.get(0).getMsgContentBytes().length);
+		Assert.assertEquals(140, l.get(1).getMsgContentBytes().length);
+		for(LongMessageFrame frame : l){
+			String stmp = LongMessageFrameHolder.INS.getPartTextMsg(frame);
 			System.out.println(stmp);
 		}
 	}

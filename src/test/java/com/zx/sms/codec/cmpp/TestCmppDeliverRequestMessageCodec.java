@@ -9,13 +9,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.io.HexDump;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
+import org.marre.sms.SmsTextMessage;
 import org.marre.wap.push.SmsMmsNotificationMessage;
 import org.marre.wap.push.SmsWapPushMessage;
 import org.marre.wap.push.WapSIPush;
@@ -33,7 +35,9 @@ import com.zx.sms.codec.cmpp.msg.Header;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp.wap.SmsMessageHolder;
+import com.zx.sms.common.util.HexUtil;
 import com.zx.sms.common.util.MsgId;
+import com.zx.sms.common.util.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -128,10 +132,21 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 
 	@Test
 	public void testchinesecode() {
-		CmppDeliverRequestMessage msg = createTestReq(
-				"1234567890123456789中01234567890123456789012345678901234567890123456789"+"a");
-		Assert.assertEquals(2,testlongCodec(msg));
 		
+		CmppDeliverRequestMessage msg =  new CmppDeliverRequestMessage(new DefaultHeader());
+		msg.setDestId("13800138000");
+		msg.setLinkid("0000");
+		msg.setMsgContent(new SmsTextMessage("温馨提示: 移娃没理解您的问题，您换个问法再试问题试可以吗？\n【金秋福利】\n【小时包/7天包】https://dx.10086.cn/lkcdxgw \n【3元抖音/快手包】http://dx.10086.cn/yd3y15ju \n【9.9元5G】https://dx.10086.cn/VglzBg? \n【加速包】http://\n【10元10G通用】 https://dx.10086.cn/ZBltCA \n【1元20G复工流量】 https://dx.10086.cn/fttH【果园山马靖琪】",new SmsDcs((byte)15)));
+		msg.setMsgId(new MsgId());
+		msg.setServiceid("10086");
+		msg.setSrcterminalId("13800138000");
+		msg.setSrcterminalType((short) 1);
+		msg.getHeader().setSequenceId((int) System.nanoTime());
+		Assert.assertEquals(3,testlongCodec(msg));
+		
+		
+		msg.setMsgContent(new SmsTextMessage("温馨提示: 移娃没理解您的问题，您换个问法再试问题试可以吗？\n【金秋福利】\n【小时包/7天包】https://dx.10086.cn/lkcdxgw \n【3元抖音/快手包】http://dx.10086.cn/yd3y15ju \n【9.9元5G】https://dx.10086.cn/VglzBg? \n【加速包】http://\n【10元10G通用】 https://dx.10086.cn/ZBltCA \n【1元20G复工流量】 https://dx.10086.cn/fttH【果园山马靖琪】",new SmsDcs((byte)8)));
+		Assert.assertEquals(4,testlongCodec(msg));
 		//70字拆成1条
 		msg = createTestReq(
 				"1234567890123456789中01234567890123456789012345678901234567890123456789");
