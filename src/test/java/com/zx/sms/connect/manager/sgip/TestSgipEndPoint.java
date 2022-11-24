@@ -88,7 +88,7 @@ public class TestSgipEndPoint {
 		manager.openAll();
 		Thread.sleep(1000);
 
-		System.out.println("start.....");
+		System.out.println("sgip start.....");
 
 		while (receiver.getCnt().get() < count) {
 			Thread.sleep(1000);

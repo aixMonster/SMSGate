@@ -162,14 +162,15 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
     	
     }
 	@Test
-	public void testASCIIcode()
+	public void testGSMASCIIcode()
 	{
 		SubmitSm pdu = new SubmitSm();
     	pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
     	pdu.setSourceAddress(new Address((byte)0,(byte)0,"10658987"));
-    	pdu.setSmsMsg(new SmsTextMessage("1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN)));
+    	pdu.setSmsMsg(new SmsTextMessage("^{}\\[~]|1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890", SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN)));
      	testlongCodec(pdu);
 	}
+	
 	@Test
 	public void testdefaultcode()
 	{

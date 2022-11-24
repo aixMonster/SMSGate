@@ -33,7 +33,7 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 			if(key == null)
 				key = lmsg.getSrcIdAndDestId();
 			try {
-				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(key,lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
+				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,key,lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
 
 				if (hoder != null) {
 					

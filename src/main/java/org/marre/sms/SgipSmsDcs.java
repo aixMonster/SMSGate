@@ -11,6 +11,11 @@ public class SgipSmsDcs extends SmsDcs {
 		SmsDcs smsDcs = SmsDcs.getGeneralDataCodingDcs(alphabet,messageClass);
 		return new SgipSmsDcs(smsDcs.getValue());
 	}
+	@Override
+	
+	public SgipSmsDcs create(SmsAlphabet alphabet, SmsMsgClass messageClass) {
+		return SgipSmsDcs.getGeneralDataCodingDcs(alphabet, messageClass);
+	}
 	
 	public int getMaxMsglength() {
 		switch (getAlphabet()) {

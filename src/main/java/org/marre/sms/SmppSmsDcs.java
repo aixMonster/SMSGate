@@ -2,11 +2,17 @@ package org.marre.sms;
 
 public class SmppSmsDcs extends AbstractSmsDcs {
 	private static final long serialVersionUID = 1L;
+	
+	private SmsAlphabet defaultSmsAlphabet = SmsAlphabet.GSM;
 
 	public SmppSmsDcs(byte dcs) {
 		super(dcs);
 	}
 
+	public SmppSmsDcs(byte dcs,SmsAlphabet defa) {
+		super(dcs);
+		defaultSmsAlphabet = defa;
+	}
 	/**
 	 * Builds a general-data-coding dcs.
 	 *
@@ -64,7 +70,7 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 
 			switch (dcs_) {
 			case 0:
-				return SmsAlphabet.GSM;
+				return defaultSmsAlphabet;
 			case 1:
 				return SmsAlphabet.ASCII;
 			case 3:
@@ -77,13 +83,9 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 				return SmsAlphabet.RESERVED;
 			}
 
-			if (dcs_ == 0x00) {
-				return SmsAlphabet.GSM;
-			}
-
 			switch (dcs_ & 0x0C) {
 			case 0x00:
-				return SmsAlphabet.GSM;
+				return defaultSmsAlphabet;
 			case 0x04:
 				return SmsAlphabet.LATIN1;
 			case 0x08:
@@ -95,7 +97,7 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 			}
 
 		case MESSAGE_WAITING_STORE_GSM:
-			return SmsAlphabet.GSM;
+			return defaultSmsAlphabet;
 
 		case MESSAGE_WAITING_STORE_UCS2:
 			return SmsAlphabet.UCS2;
@@ -103,7 +105,7 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 		case DATA_CODING_MESSAGE:
 			switch (dcs_ & 0x04) {
 			case 0x00:
-				return SmsAlphabet.GSM;
+				return defaultSmsAlphabet;
 			case 0x04:
 				return SmsAlphabet.LATIN1;
 			default:
@@ -118,10 +120,16 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 	public int getMaxMsglength() {
 		switch(getAlphabet()) {
 			case GSM:
-				return 160;
+				return 159;
 			default:
 				return 140;
 		}
+	}
+	
+	@Override
+	public SmppSmsDcs create(SmsAlphabet alphabet, SmsMsgClass messageClass) {
+		SmppSmsDcs dcs =  SmppSmsDcs.getGeneralDataCodingDcs(alphabet, messageClass);
+		return new SmppSmsDcs(dcs.getValue(),defaultSmsAlphabet);
 	}
 
 }

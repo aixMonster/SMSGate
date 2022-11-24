@@ -15,7 +15,7 @@ import com.zx.sms.handler.api.AbstractBusinessHandler;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 
-@Sharable
+
 public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 	
     @Override

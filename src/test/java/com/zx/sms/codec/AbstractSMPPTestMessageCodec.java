@@ -2,6 +2,7 @@ package com.zx.sms.codec;
 
 import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
 import com.zx.sms.common.GlobalConstance;
+import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.smpp.SMPPCodecChannelInitializer;
 import com.zx.sms.handler.smpp.SMPPLongMessageHandler;
 
@@ -24,6 +25,10 @@ public  abstract class AbstractSMPPTestMessageCodec<T> {
 		}
 	});
 	
+	protected EndpointEntity buildEndpointEntity() {
+		return null;
+	}
+	
 	protected void doinitChannel(Channel ch){
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		ChannelPipeline pipeline = ch.pipeline();
@@ -32,7 +37,7 @@ public  abstract class AbstractSMPPTestMessageCodec<T> {
 		pipeline.addLast(codec.pipeName(), codec);
 		LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
 		pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
-		pipeline.addLast( "SMPPLongMessageHandler", new SMPPLongMessageHandler(null));
+		pipeline.addLast( "SMPPLongMessageHandler", new SMPPLongMessageHandler(buildEndpointEntity()));
 	}
 
 	protected ByteBuf encode(T msg){

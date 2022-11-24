@@ -50,141 +50,130 @@ import com.zx.sms.common.util.CMPPCommonUtil;
  * @author Markus Eriksson
  * @version $Id$
  */
-public class SmsTextMessage extends SmsConcatMessage implements Serializable
-{
-    /**
+public class SmsTextMessage extends SmsConcatMessage implements Serializable {
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -2655575183111164853L;
 	private String text_;
-    private AbstractSmsDcs dcs_;
-    
-    /**
-     * Creates an SmsTextMessage with the given dcs.
-     * 
-     * @param msg The message
-     * @param dcs The data coding scheme
-     */
-    public SmsTextMessage(String msg, AbstractSmsDcs dcs)
-    {
-        setText(msg, dcs);
-    }
-    
-    /**
-     * Creates an SmsTextMessage with the given alphabet and message class.
-     *
-     * @param msg The message
-     * @param alphabet The alphabet
-     * @param messageClass The messageclass
-     */
-    public SmsTextMessage(String msg, SmsAlphabet alphabet, SmsMsgClass messageClass)
-    { 
-        this(msg, SmsDcs.getGeneralDataCodingDcs(alphabet, messageClass));
-    }
+	private AbstractSmsDcs dcs_;
 
-    /**
-     * Creates an SmsTextMessage with default 7Bit GSM Alphabet
-     *
-     * @param msg The message
-     */
-    public SmsTextMessage(String msg)
-    {
-    	if(haswidthChar(msg))
-    		 setText(msg, SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
-    	else
-    		 setText(msg, GlobalConstance.defaultmsgfmt);
-    }
-    
-    /**
-     * Returns the text message. 
-     */
-    public String getText()
-    {
-        return text_;
-    }
-    
-    /**
-     * Sets the text.
-     * 
-     * @param text
-     */
-    public void setText(String text)
-    {
-        if (text == null)
-        {
-            throw new IllegalArgumentException("Text cannot be null, use an empty string instead.");
-        }
-        
-        text_ = text;
-    }
+	/**
+	 * Creates an SmsTextMessage with the given dcs.
+	 * 
+	 * @param msg The message
+	 * @param dcs The data coding scheme
+	 */
+	public SmsTextMessage(String msg, AbstractSmsDcs dcs) {
 
-    /**
-     * Sets the text.
-     * 
-     * @param text
-     */
-    public void setText(String text, AbstractSmsDcs dcs)
-    {
-        // Check input for null
-        if (text == null)
-        {
-        	 text_ = "";
-        }
-        
-        if (dcs == null)
-        {
-            throw new IllegalArgumentException("dcs cannot be null.");
-        }
-        
-        text_ = text;
-        dcs_ = dcs;
-    }
-    
-    /**
-     * Returns the dcs.
-     */
-    public AbstractSmsDcs getDcs()
-    {
-        return dcs_;
-    }
+		setText(msg, dcs);
+ 
+	}
 
-    /**
-     * Returns the user data.
-     * @return user data
-     */
-    public SmsUserData getUserData()
-    {
-        SmsUserData ud;
-        SmsAlphabet alp = dcs_.getAlphabet();
-        switch (alp)
-        {
-        case GSM:
-        	byte[] bs = SmsPduUtil.stringToUnencodedSeptets(text_);
-            ud = new SmsUserData(bs, bs.length, dcs_);
-            break;
-        case ASCII:
-        case LATIN1:
-        case UCS2:
-        case RESERVED:
-            ud = new SmsUserData(text_.getBytes(CMPPCommonUtil.switchCharset(alp)),  dcs_);
-            break;
-        default:
-            ud = new SmsUserData(text_.getBytes(CMPPCommonUtil.switchCharset(SmsAlphabet.UCS2)),  SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
-            break;
-        }
+	/**
+	 * Creates an SmsTextMessage with the given alphabet and message class.
+	 *
+	 * @param msg          The message
+	 * @param alphabet     The alphabet
+	 * @param messageClass The messageclass
+	 */
+	public SmsTextMessage(String msg, SmsAlphabet alphabet, SmsMsgClass messageClass) {
+		this(msg, SmsDcs.getGeneralDataCodingDcs(alphabet, messageClass));
+	}
 
-        return ud;
-    }
+	/**
+	 * Creates an SmsTextMessage with default 7Bit GSM Alphabet
+	 *
+	 * @param msg The message
+	 */
+	public SmsTextMessage(String msg) {
+		if (haswidthChar(msg))
+			setText(msg, SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
+		else
+			setText(msg, GlobalConstance.defaultmsgfmt);
+	}
 
-    /**
-     * Returns null.
-     */
-    public SmsUdhElement[] getUdhElements()
-    {
-        return null;
-    }
-    
-	
+	/**
+	 * Returns the text message.
+	 */
+	public String getText() {
+		return text_;
+	}
+
+	/**
+	 * Sets the text.
+	 * 
+	 * @param text
+	 */
+	public void setText(String text) {
+		if (text == null) {
+			throw new IllegalArgumentException("Text cannot be null, use an empty string instead.");
+		}
+
+		text_ = text;
+	}
+
+	/**
+	 * Sets the text.
+	 * 
+	 * @param text
+	 */
+	public void setText(String text, AbstractSmsDcs dcs) {
+		// Check input for null
+		if (text == null) {
+			text_ = "";
+		}
+
+		if (dcs == null) {
+			throw new IllegalArgumentException("dcs cannot be null.");
+		}
+
+		text_ = text;
+		dcs_ = dcs;
+	}
+
+	/**
+	 * Returns the dcs.
+	 */
+	public AbstractSmsDcs getDcs() {
+		return dcs_;
+	}
+
+	/**
+	 * Returns the user data.
+	 * 
+	 * @return user data
+	 */
+	public SmsUserData getUserData() {
+		SmsUserData ud;
+		SmsAlphabet alp = dcs_.getAlphabet();
+		switch (alp) {
+		case GSM:
+			byte[] bs = SmsPduUtil.stringToUnencodedSeptets(text_);
+			ud = new SmsUserData(bs, bs.length, dcs_);
+			break;
+		case ASCII:
+		case LATIN1:
+		case UCS2:
+		case RESERVED:
+			ud = new SmsUserData(text_.getBytes(CMPPCommonUtil.switchCharset(alp)), dcs_);
+			break;
+		default:
+			ud = new SmsUserData(text_.getBytes(CMPPCommonUtil.switchCharset(SmsAlphabet.UCS2)),
+					SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
+			break;
+		}
+
+		return ud;
+	}
+
+	/**
+	 * Returns null.
+	 */
+	public SmsUdhElement[] getUdhElements() {
+		return null;
+	}
+
 	public static boolean haswidthChar(String content) {
 		if (StringUtils.isEmpty(content))
 			return false;
@@ -203,6 +192,5 @@ public class SmsTextMessage extends SmsConcatMessage implements Serializable
 	public String toString() {
 		return getText();
 	}
-	
-	
+
 }

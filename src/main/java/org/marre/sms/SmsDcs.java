@@ -73,10 +73,6 @@ public class SmsDcs extends AbstractSmsDcs {
 				return SmsAlphabet.RESERVED;
 			}
 
-			if (dcs_ == 0x00) {
-				return SmsAlphabet.ASCII;
-			}
-
 			switch (dcs_ & 0x0C) {
 			case 0x00:
 				return SmsAlphabet.ASCII;
@@ -118,5 +114,10 @@ public class SmsDcs extends AbstractSmsDcs {
 		default:
 			return 140;
 		}
+	}
+
+	@Override
+	public SmsDcs create(SmsAlphabet alphabet, SmsMsgClass messageClass) {
+		return SmsDcs.getGeneralDataCodingDcs(alphabet, messageClass);
 	}
 }

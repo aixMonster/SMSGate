@@ -18,4 +18,8 @@ public class SMGPSmsDcs extends SmsDcs {
 			return 140;
 		}
 	}
+	@Override
+	public SMGPSmsDcs create(SmsAlphabet alphabet, SmsMsgClass messageClass) {
+		return SMGPSmsDcs.getGeneralDataCodingDcs(alphabet, messageClass);
+	}
 }

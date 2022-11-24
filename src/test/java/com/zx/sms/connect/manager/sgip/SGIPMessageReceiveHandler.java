@@ -7,7 +7,6 @@ import com.zx.sms.codec.sgip12.msg.SgipDeliverResponseMessage;
 import com.zx.sms.codec.sgip12.msg.SgipReportRequestMessage;
 import com.zx.sms.codec.sgip12.msg.SgipSubmitRequestMessage;
 import com.zx.sms.codec.sgip12.msg.SgipSubmitResponseMessage;
-import com.zx.sms.common.util.SequenceNumber;
 import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 
 import io.netty.channel.ChannelFuture;

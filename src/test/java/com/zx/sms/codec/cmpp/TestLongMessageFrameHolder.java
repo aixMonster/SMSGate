@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.marre.sms.SmppSmsDcs;
+import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsException;
 import org.marre.sms.SmsTextMessage;
@@ -12,39 +14,67 @@ import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.common.util.HexUtil;
+import com.zx.sms.config.PropertiesUtils;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 public class TestLongMessageFrameHolder extends AbstractTestMessageCodec<CmppSubmitRequestMessage>{
 	String s = "尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】，请点击支付http://www.10085.cn/web85/page/zyzxpay/wap_order.html?orderId=76DEF9AE1808F506FD4E6CB782E3B8E7EE875E766D3D335C 完成下单。请在60分钟内完成支付，如有疑问，请";
+	
+	Boolean Use8bit = Boolean.valueOf(PropertiesUtils.getproperties("smsUse8bit", "true"));
 	protected int getVersion(){
 		return 0x20;
 	}
 	@Test
 	public void test() throws SmsException{
 		
-		testSplit(new SmsTextMessage(s));
+		List<LongMessageFrame>  l = testSplit(new SmsTextMessage(s));
+		Assert.assertEquals(	Use8bit?140:139,l.get(0).getMsgLength());
+		Assert.assertEquals(	Use8bit?140:139,l.get(1).getMsgLength());
+		
 	}
 	
+	@Test
+	public void testGSMDefaultGSM() throws SmsException{
+		String gsmstr = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./01234656789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnoqprstuvwxyzäöñüà^{}\\[~]|€^{}\\[~]|€^{}\\[~]|€@£$¥èéùìòÇ\\nØø\\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\\\"#¤%&'()*+,-./0123465556789:;<=>?¡ABCDEFGHIJLMNOPQRSTUVWXYZÄÖÑÜ§¿qprstuvwxyzäöñüà^{}\\\\[~]|€^{}\\\\[~]|€^{}\\\\[~]|€";
+		List<LongMessageFrame> l = testSplit(new SmsTextMessage(gsmstr,new SmppSmsDcs((byte)0)));
+		Assert.assertEquals(	Use8bit?158:159,l.get(0).getMsgLength());
+		Assert.assertEquals(	Use8bit?158:159,l.get(1).getMsgLength());
+	}
 	
-	private void testSplit(SmsTextMessage s ) throws SmsException{
+	@Test
+	public void testGSMDefaultASCII() throws SmsException{
+		String gsmstr = "@£$¥èéùìòÇ\nØø\rÅåÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnoqprstuvwxyzäöñüà^{}\\[~]|^{}\\[~]|^{}\\[~]|";
+		List<LongMessageFrame> l = testSplit(new SmsTextMessage(gsmstr+gsmstr,new SmppSmsDcs((byte)0,SmsAlphabet.ASCII)));
+		Assert.assertEquals(140,	l.get(0).getMsgLength());
+		Assert.assertEquals(140,	l.get(1).getMsgLength());
+	}
+	
+	private List<LongMessageFrame> testSplit(SmsTextMessage s ) throws SmsException{
 	List<LongMessageFrame> l = LongMessageFrameHolder.INS.splitmsgcontent(s);
 		
 		StringBuilder sb = new StringBuilder();
 		for(LongMessageFrame frame : l){
 			String stmp = LongMessageFrameHolder.INS.getPartTextMsg(frame);
-			System.out.println(frame.getMsgLength() + "===" + stmp);
+			System.out.println(frame.getMsgLength() + "===" + HexUtil.toHexString(frame.getMsgContentBytes()));
+			System.out.println(stmp);
 			sb.append(stmp);
+			Assert.assertEquals(frame.getMsgLength() ,frame.getMsgContentBytes().length);
 		}
 		Assert.assertEquals(s.getText(),sb.toString());
+		return l;
 	}
 	
 	@Test
 	public void testGBK() throws SmsException{
 		String str = "1【温馨提示】移娃没理解您的问题2【温馨提示】移娃没理解您的问题3【温馨提示】移娃没理解您的问题4【温馨提示】移娃没理解您的问题5【温馨提示】移娃没理解您的问题6【温馨提示】移娃没理解您的问题7【温馨提示】移娃没理解您的问题8【温馨提示】移娃没理解您的问题9【温馨提示】移娃没理解您的问题.";
 		SmsTextMessage s = new SmsTextMessage(str,new SmsDcs((byte)15));
-		testSplit(s);
+		List<LongMessageFrame> l = testSplit(s);
+		Assert.assertEquals(	Use8bit?139:140,l.get(0).getMsgLength());
+		Assert.assertEquals(	Use8bit?140:139,l.get(1).getMsgLength());
+
 	}
 	
 	@Test

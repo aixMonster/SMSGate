@@ -309,7 +309,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 						// 启用多线程进行短信合并
 						CmppDeliverRequestMessage splitMsg = (CmppDeliverRequestMessage) split;
 						String key = splitMsg.getSrcterminalId() + splitMsg.getDestId();
-						SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(key, ((LongSMSMessage) split),useredis);
+						SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(null,key, ((LongSMSMessage) split),useredis);
 						if (hoder != null) {
 							// 只有一个线程能到达这里
 							CmppDeliverRequestMessage result = (CmppDeliverRequestMessage) hoder.getMsg();
@@ -406,7 +406,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 					// 等待开始信号
 					startSignal.await();
 					
-					SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(key, ((LongSMSMessage) split), useredis);
+					SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(null,key, ((LongSMSMessage) split), useredis);
 					if (hoder != null) {
 						// 只有一个线程能到达这里
 						CmppDeliverRequestMessage result = (CmppDeliverRequestMessage) hoder.getMsg();

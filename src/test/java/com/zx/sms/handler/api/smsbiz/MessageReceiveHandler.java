@@ -20,7 +20,7 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
-@Sharable
+
 public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 	private static final Logger logger = LoggerFactory.getLogger(MessageReceiveHandler.class);
 	private int rate = 1;
@@ -86,8 +86,6 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 
 	public MessageReceiveHandler clone() throws CloneNotSupportedException {
 		MessageReceiveHandler ret = (MessageReceiveHandler) super.clone();
-		ret.cnt = new AtomicLong();
-		ret.lastNum = 0;
 		return ret;
 	}
 

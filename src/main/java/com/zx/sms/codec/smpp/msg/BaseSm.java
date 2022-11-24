@@ -1,6 +1,5 @@
 package com.zx.sms.codec.smpp.msg;
 
-import org.apache.commons.lang3.StringUtils;
 import org.marre.sms.SmppSmsDcs;
 import org.marre.sms.SmsAlphabet;
 import org.marre.sms.SmsConcatMessage;
@@ -201,10 +200,16 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	}
 
 	public void setSmsMsg(String smsMsg) {
-		if (SmsPduUtil.hasUnGsmchar(smsMsg))
-			this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
-		else 
-			this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN));
+		if (SmsPduUtil.hasUnGsmchar(smsMsg)) {
+			if (SmsTextMessage.haswidthChar(smsMsg))
+				this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
+			else 
+				this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.ASCII, SmsMsgClass.CLASS_UNKNOWN));
+		}
+		else {
+			this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN));			
+		}
+
 	}
 
 	public String getMsgContent() {

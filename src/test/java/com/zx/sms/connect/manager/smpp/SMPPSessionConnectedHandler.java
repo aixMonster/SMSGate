@@ -2,14 +2,7 @@ package com.zx.sms.connect.manager.smpp;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsMsgClass;
-import org.marre.sms.SmsTextMessage;
-
 import com.zx.sms.BaseMessage;
-import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
-import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.msg.DeliverSm;
 import com.zx.sms.codec.smpp.msg.DeliverSmReceipt;

@@ -42,7 +42,7 @@ import java.io.Serializable;
  * @version $Id$
  * @author Markus Eriksson
  */
-public abstract class AbstractSmsDcs implements Serializable {
+public abstract class AbstractSmsDcs<T extends AbstractSmsDcs> implements Serializable {
 
 	/**
 	 * 
@@ -150,6 +150,9 @@ public abstract class AbstractSmsDcs implements Serializable {
 	
 	abstract public SmsAlphabet getAlphabet();
 	abstract public int getMaxMsglength();
+	abstract public T create(SmsAlphabet alphabet, SmsMsgClass messageClass);
+	
+	
 	
 	protected static byte setMessageClass(byte p_dcs,SmsMsgClass messageClass) {
 		byte dcs = p_dcs;

@@ -39,6 +39,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 
@@ -58,12 +60,18 @@ public final class SmsPduUtil
     {
     }
     private static String gsmstr = "@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|€";
+    private static Map<Character,Boolean> gsmStrMap = new HashMap<Character,Boolean>();
+    static {
+    	for(char c : gsmstr.toCharArray())
+    		gsmStrMap.put(c, true);
+    }
     
     public static boolean hasUnGsmchar(String content) {
     	
 		for (int i = 0; i < content.length(); i++) {
-			if(gsmstr.indexOf(content.charAt(i)) < 0)
+			if(!gsmStrMap.containsKey(content.charAt(i))) {
 				return true;
+			}
 		}
     	return false;
     }

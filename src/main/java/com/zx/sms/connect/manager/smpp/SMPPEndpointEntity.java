@@ -1,8 +1,9 @@
 package com.zx.sms.connect.manager.smpp;
 
+import org.marre.sms.SmsAlphabet;
+
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.connect.manager.EndpointEntity;
-import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 
 public abstract class SMPPEndpointEntity extends EndpointEntity {
     /**
@@ -19,6 +20,8 @@ public abstract class SMPPEndpointEntity extends EndpointEntity {
     // short_message 字段必须是为 0 结尾的字节
     //为兼容此问题，增加这样一个配置。当 配置为true时，自动处理short_message字段尾部的0
     private boolean isAddZeroByte = false;
+    
+    private SmsAlphabet defauteSmsAlphabet = SmsAlphabet.GSM;
     
 	public String getSystemId() {
 		return systemId;
@@ -55,5 +58,11 @@ public abstract class SMPPEndpointEntity extends EndpointEntity {
 	}
 	public void setAddZeroByte(boolean isAddZeroByte) {
 		this.isAddZeroByte = isAddZeroByte;
+	}
+	public SmsAlphabet getDefauteSmsAlphabet() {
+		return defauteSmsAlphabet;
+	}
+	public void setDefauteSmsAlphabet(SmsAlphabet defauteSmsAlphabet) {
+		this.defauteSmsAlphabet = defauteSmsAlphabet;
 	}
 }

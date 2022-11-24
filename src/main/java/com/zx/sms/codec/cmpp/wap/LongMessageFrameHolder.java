@@ -18,6 +18,7 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
 import org.marre.sms.AbstractSmsDcs;
+import org.marre.sms.SmppSmsDcs;
 import org.marre.sms.SmsException;
 import org.marre.sms.SmsMessage;
 import org.marre.sms.SmsPdu;
@@ -45,9 +46,12 @@ import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.LongMessageFrameCache;
 import com.zx.sms.codec.LongMessageFrameProvider;
+import com.zx.sms.codec.smpp.msg.BaseSm;
 import com.zx.sms.common.NotSupportedException;
 import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.StandardCharsets;
+import com.zx.sms.connect.manager.EndpointEntity;
+import com.zx.sms.connect.manager.smpp.SMPPEndpointEntity;
 
 import PduParser.GenericPdu;
 import PduParser.NotificationInd;
@@ -187,8 +191,15 @@ public enum LongMessageFrameHolder {
 	/**
 	 * 获取一条完整的长短信，如果长短信组装未完成，返回null
 	 **/
-	public SmsMessageHolder putAndget(String longSmsKey ,LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {
+	public SmsMessageHolder putAndget(EndpointEntity  entity,String longSmsKey ,LongSMSMessage msg,boolean isRecvLongMsgOnMultiLink) throws NotSupportedException {
 		LongMessageFrame frame = msg.generateFrame();
+		if(entity != null && entity instanceof SMPPEndpointEntity && msg instanceof BaseSm) {
+			BaseSm smppMsg = (BaseSm)msg;
+			SMPPEndpointEntity smppSMPPEndpointEntity = (SMPPEndpointEntity)entity;
+			//根据entity的默认字符表配置修改Frame的SmsDcs字段
+			frame.setMsgfmt(new SmppSmsDcs(smppMsg.getDataCoding(),smppSMPPEndpointEntity.getDefauteSmsAlphabet()));
+		}
+		
 		/**
         1、根据SMPP协议，融合网关收到短信中心上行的esm_class字段（一个字节）是0100 0000，转换成16进制就是0X40 (64), 01XXXXXX表明是一条长短信。
         网关默认透传所有信息，即网关直接透传了0100 0000。所以接收到64是指短信属于长短信。（网关与短信中心采用SMPP协议）
