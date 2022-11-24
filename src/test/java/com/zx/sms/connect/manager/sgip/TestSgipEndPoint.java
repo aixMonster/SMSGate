@@ -34,7 +34,7 @@ public class TestSgipEndPoint {
 	public void testsgipEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		final EndpointManager manager = EndpointManager.INS;
-		int port = RandomUtils.nextInt(10000, 65000);
+		int port = RandomUtils.nextInt(57000, 58000);
 		SgipServerEndpointEntity server = new SgipServerEndpointEntity();
 		server.setId("sgipserver");
 		server.setHost("127.0.0.1");

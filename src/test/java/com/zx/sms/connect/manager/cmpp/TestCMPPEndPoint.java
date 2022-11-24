@@ -35,7 +35,7 @@ public class TestCMPPEndPoint {
 	public void testCMPPEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		final EndpointManager manager = EndpointManager.INS;
-		int port = RandomUtils.nextInt(10000, 65000);
+		int port = RandomUtils.nextInt(59000, 60000);
 		CMPPServerEndpointEntity server = new CMPPServerEndpointEntity();
 		server.setId("server");
 		server.setHost("0.0.0.0");

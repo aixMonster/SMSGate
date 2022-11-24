@@ -2,6 +2,8 @@ package com.zx.sms.connect.manager.smpp;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.marre.sms.SmsAlphabet;
+
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.msg.DeliverSm;
@@ -36,7 +38,7 @@ public class SMPPSessionConnectedHandler extends SessionConnectedHandler {
 	        pdu.setSourceAddress(new Address((byte)0,(byte)0,"10086"));
 	        pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
 //	        pdu.setSmsMsg(new SmsTextMessage(content,SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM,SmsMsgClass.CLASS_UNKNOWN)));
-	        pdu.setSmsMsg(str);
+	        pdu.setSmsMsg(str,SmsAlphabet.ASCII); //设置默认字符为ACSII
 	        return pdu;
 		}
 	}

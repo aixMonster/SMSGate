@@ -200,16 +200,23 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	}
 
 	public void setSmsMsg(String smsMsg) {
-		if (SmsPduUtil.hasUnGsmchar(smsMsg)) {
+		if (SmsPduUtil.hasUnGsmchar(smsMsg))
+			this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
+		else 
+			this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN));
+	}
+	
+	
+	public void setSmsMsg(String smsMsg,SmsAlphabet defaultAlp) {
+		
+		if(SmsAlphabet.GSM == defaultAlp) {
+			setSmsMsg(smsMsg);
+		}else {
 			if (SmsTextMessage.haswidthChar(smsMsg))
 				this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN));
-			else 
-				this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.ASCII, SmsMsgClass.CLASS_UNKNOWN));
-		}
-		else {
-			this.smsMsg = new SmsTextMessage(smsMsg, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM, SmsMsgClass.CLASS_UNKNOWN));			
-		}
-
+			else
+				this.smsMsg = new SmsTextMessage(smsMsg, new SmppSmsDcs((byte)0,SmsAlphabet.ASCII));
+		}	
 	}
 
 	public String getMsgContent() {
