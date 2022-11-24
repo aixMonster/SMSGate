@@ -3,6 +3,7 @@ package com.zx.sms.connect.manager.sgip;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -33,11 +34,11 @@ public class TestSgipEndPoint {
 	public void testsgipEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		final EndpointManager manager = EndpointManager.INS;
-
+		int port = RandomUtils.nextInt(10000, 65000);
 		SgipServerEndpointEntity server = new SgipServerEndpointEntity();
 		server.setId("sgipserver");
 		server.setHost("127.0.0.1");
-		server.setPort(8001);
+		server.setPort(port);
 		server.setValid(true);
 		// 使用ssl加密数据流
 		server.setUseSSL(false);
@@ -67,7 +68,7 @@ public class TestSgipEndPoint {
 		SgipClientEndpointEntity client = new SgipClientEndpointEntity();
 		client.setId("sgipclient");
 		client.setHost("127.0.0.1");
-		client.setPort(8001);
+		client.setPort(port);
 		client.setLoginName("333");
 		client.setLoginPassowrd("0555");
 		client.setChannelType(ChannelType.DUPLEX);
@@ -89,10 +90,12 @@ public class TestSgipEndPoint {
 		Thread.sleep(1000);
 
 		System.out.println("sgip start.....");
-
-		while (receiver.getCnt().get() < count) {
+		boolean connection = false;
+		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
+			connection = true;
 		}
+		Assert.assertEquals(true, connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 		Assert.assertEquals(count, receiver.getCnt().get());

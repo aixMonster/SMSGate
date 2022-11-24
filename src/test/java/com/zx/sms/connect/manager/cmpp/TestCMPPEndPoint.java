@@ -4,6 +4,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -34,11 +35,11 @@ public class TestCMPPEndPoint {
 	public void testCMPPEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		final EndpointManager manager = EndpointManager.INS;
-
+		int port = RandomUtils.nextInt(10000, 65000);
 		CMPPServerEndpointEntity server = new CMPPServerEndpointEntity();
 		server.setId("server");
 		server.setHost("0.0.0.0");
-		server.setPort(17890);
+		server.setPort(port);
 		server.setValid(true);
 		// 使用ssl加密数据流
 		server.setUseSSL(false);
@@ -95,7 +96,7 @@ public class TestCMPPEndPoint {
 //		client.setLocalhost("127.0.0.1");
 		// client.setLocalport(65521);
 		client.setHost("127.0.0.1");
-		client.setPort(17890);
+		client.setPort(port);
 		client.setChartset(Charset.forName("utf-8"));
 		client.setGroupName("test");
 		client.setUserName("test01");
@@ -124,9 +125,12 @@ public class TestCMPPEndPoint {
 		Thread.sleep(1000);
 		manager.startConnectionCheckTask();
 		System.out.println("start.....");
-		while (receiver.getCnt().get() < count) {
+		boolean connection = false;
+		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
+			connection = true;
 		}
+		Assert.assertEquals(true, connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 		Assert.assertEquals(count, receiver.getCnt().get());

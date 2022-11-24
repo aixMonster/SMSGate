@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.LockSupport;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ public class TestSMPPEndPoint {
 	public void testSMPPEndpoint() throws Exception {
 	
 		final EndpointManager manager = EndpointManager.INS;
-		int port =27761;
+		int port = RandomUtils.nextInt(10000, 65000);
 		SMPPServerEndpointEntity server = new SMPPServerEndpointEntity();
 		server.setId("smppserver");
 		server.setHost("127.0.0.1");
@@ -85,9 +86,12 @@ public class TestSMPPEndPoint {
 		manager.openAll();
 		Thread.sleep(1000);
 		System.out.println("start.....");
-		while (receiver.getCnt().get() < count) {
+		boolean connection = false;
+		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 &&   receiver.getCnt().get() < count) {
+			connection = true;
 			Thread.sleep(1000);
 		}
+		Assert.assertEquals(true, connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 		Assert.assertEquals(count, receiver.getCnt().get());

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.LockSupport;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -30,11 +31,11 @@ public class TestSMGPEndPoint {
 	public void testSMGPEndpoint() throws Exception {
 
 		final EndpointManager manager = EndpointManager.INS;
-
+		int port = RandomUtils.nextInt(10000, 65000);
 		SMGPServerEndpointEntity server = new SMGPServerEndpointEntity();
 		server.setId("smgpserver");
 		server.setHost("127.0.0.1");
-		server.setPort(9890);
+		server.setPort(port);
 		server.setValid(true);
 		// 使用ssl加密数据流
 		server.setUseSSL(false);
@@ -63,7 +64,7 @@ public class TestSMGPEndPoint {
 		SMGPClientEndpointEntity client = new SMGPClientEndpointEntity();
 		client.setId("smgpclient");
 		client.setHost("127.0.0.1");
-		client.setPort(9890);
+		client.setPort(port);
 		client.setClientID("333");
 		client.setPassword("0555");
 		client.setChannelType(ChannelType.DUPLEX);
@@ -87,11 +88,12 @@ public class TestSMGPEndPoint {
 		Thread.sleep(1000);
 
 		System.out.println("start.....");
-
-		while (receiver.getCnt().get() < count) {
+		boolean connection = false;
+		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
+			 connection = true;
 		}
-
+		Assert.assertEquals(true, connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 
