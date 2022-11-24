@@ -123,14 +123,14 @@ public class TestCMPPEndPoint {
 		manager.openEndpoint(server);
 		manager.openEndpoint(client);
 		Thread.sleep(1000);
-		manager.startConnectionCheckTask();
+//		manager.startConnectionCheckTask();
 		System.out.println("start.....");
-		boolean connection = false;
+		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
 		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 			connection = true;
 		}
-		Assert.assertEquals(true, connection);
+		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 		Assert.assertEquals(count, receiver.getCnt().get());

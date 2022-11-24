@@ -73,7 +73,7 @@ public class TestSgipEndPoint {
 		client.setLoginPassowrd("0555");
 		client.setChannelType(ChannelType.DUPLEX);
 		client.setNodeId(3073100002L);
-		client.setMaxChannels((short) 10);
+		client.setMaxChannels((short) 1);
 		client.setRetryWaitTimeSec((short) 100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
@@ -90,12 +90,12 @@ public class TestSgipEndPoint {
 		Thread.sleep(1000);
 
 		System.out.println("sgip start.....");
-		boolean connection = false;
+		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
 		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 			connection = true;
 		}
-		Assert.assertEquals(true, connection);
+		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 		Assert.assertEquals(count, receiver.getCnt().get());

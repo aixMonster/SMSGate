@@ -69,7 +69,7 @@ public class TestSMPPEndPoint {
 		client.setPassword("ICP");
 		client.setChannelType(ChannelType.DUPLEX);
 
-		client.setMaxChannels((short)12);
+		client.setMaxChannels((short)1);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
 		client.setReSendFailMsg(false);
@@ -86,16 +86,16 @@ public class TestSMPPEndPoint {
 		manager.openAll();
 		Thread.sleep(1000);
 		System.out.println("start.....");
-		boolean connection = false;
-		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 &&   receiver.getCnt().get() < count) {
+		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
+		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0 &&   receiver.getCnt().get() < count) {
 			connection = true;
 			Thread.sleep(1000);
 		}
-		Assert.assertEquals(true, connection);
+		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
 		EndpointManager.INS.close();
 		EndpointManager.INS.removeAll();
 		Assert.assertEquals(count, receiver.getCnt().get());
-		
+			
 
 	}
 }
