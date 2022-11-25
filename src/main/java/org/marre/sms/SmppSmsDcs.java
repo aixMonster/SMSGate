@@ -120,7 +120,7 @@ public class SmppSmsDcs extends AbstractSmsDcs {
 	public int getMaxMsglength() {
 		switch(getAlphabet()) {
 			case GSM:
-				return 159;
+				return 159;  //HongKong smpp Maxlength 159
 			default:
 				return 140;
 		}

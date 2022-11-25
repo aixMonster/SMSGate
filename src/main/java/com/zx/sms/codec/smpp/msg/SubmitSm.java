@@ -3,6 +3,9 @@ package com.zx.sms.codec.smpp.msg;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /*
  * #%L
  * ch-smpp
@@ -29,7 +32,7 @@ import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smpp.SmppConstants;
 
 public class SubmitSm extends BaseSm<SubmitSmResp>  implements LongSMSMessage<SubmitSm> {
-
+	private static final Logger logger = LoggerFactory.getLogger(SubmitSm.class);
     /**
 	 * 
 	 */
@@ -60,6 +63,7 @@ public class SubmitSm extends BaseSm<SubmitSmResp>  implements LongSMSMessage<Su
 		try {
 			return (SubmitSm)doGenerateMessage(frame);
 		} catch (Exception e) {
+			logger.error("generate SubmitSm Message Error",e);
 			return null;
 		}
 	}

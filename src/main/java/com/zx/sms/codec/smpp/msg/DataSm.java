@@ -1,5 +1,20 @@
 package com.zx.sms.codec.smpp.msg;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.zx.sms.LongSMSMessage;
+import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
+import com.zx.sms.codec.smpp.RecoverablePduException;
+import com.zx.sms.codec.smpp.SmppConstants;
+import com.zx.sms.codec.smpp.UnrecoverablePduException;
+import com.zx.sms.common.util.ByteBufUtil;
+import com.zx.sms.common.util.PduUtil;
+
 /*
  * #%L
  * ch-smpp
@@ -22,21 +37,8 @@ package com.zx.sms.codec.smpp.msg;
 
 import io.netty.buffer.ByteBuf;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.zx.sms.LongSMSMessage;
-import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
-import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
-import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
-import com.zx.sms.codec.smpp.RecoverablePduException;
-import com.zx.sms.codec.smpp.SmppConstants;
-import com.zx.sms.codec.smpp.UnrecoverablePduException;
-import com.zx.sms.common.util.ByteBufUtil;
-import com.zx.sms.common.util.PduUtil;
-
 public class DataSm extends BaseSm<DataSmResp>  implements LongSMSMessage<DataSm>{
-
+	private static final Logger logger = LoggerFactory.getLogger(DataSm.class);
     /**
 	 * 
 	 */
@@ -96,6 +98,7 @@ public class DataSm extends BaseSm<DataSmResp>  implements LongSMSMessage<DataSm
 		try {
 			return (DataSm)doGenerateMessage(frame);
 		} catch (Exception e) {
+			logger.error("generate DataSm Message Error",e);
 			return null;
 		}
 	}
