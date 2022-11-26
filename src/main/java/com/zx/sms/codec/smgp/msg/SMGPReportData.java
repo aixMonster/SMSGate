@@ -4,6 +4,7 @@ import java.io.Serializable;
 import com.zx.sms.common.util.StandardCharsets;
 
 import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,14 +87,28 @@ public class SMGPReportData implements Serializable {
 
 			tmp = new byte[20];
 			System.arraycopy(bytes, offset, tmp, 0, bytes.length-offset);
-			
-			if(isAllOfASCII(tmp)) {
-				txt = new String(ByteUtil.rtrimBytes(tmp),StandardCharsets.US_ASCII);
+			byte[] text_length = new byte[] {tmp[0],tmp[1],tmp[2]};
+			String t_text_length = StringUtils.trim(new String(text_length,StandardCharsets.US_ASCII));
+			if(tmp[0]>0 && tmp[1] > 0 && tmp[2]>0 && isAllOfASCII(text_length) && StringUtils.isNumeric(t_text_length)) {
+				
+				
+				byte[] t_text_txt = new byte[17];
+				System.arraycopy(bytes, offset+3, t_text_txt, 0, 17);
+				
+				if(isAllOfASCII(t_text_txt)) {
+					txt = t_text_length+new String(ByteUtil.rtrimBytes(t_text_txt),StandardCharsets.US_ASCII);
+				}else {
+					txt = t_text_length+new String(ByteUtil.rtrimBytes(t_text_txt),StandardCharsets.UTF_16BE);
+				}
 			}else {
-				txt = new String(ByteUtil.rtrimBytes(tmp),StandardCharsets.UTF_16BE);
+				if(isAllOfASCII(tmp)) {
+					txt = new String(ByteUtil.rtrimBytes(tmp),StandardCharsets.US_ASCII);
+				}else {
+					txt = new String(ByteUtil.rtrimBytes(tmp),StandardCharsets.UTF_16BE);
+				}
 			}
-			offset += 20;
 
+			offset += 20;
 			return true;
 		} catch (Exception ex) {
 			logger.warn("parse data err length:{} ; 0x{}",bytes.length,Hex.encodeHexString(bytes));
@@ -160,12 +175,24 @@ public class SMGPReportData implements Serializable {
 		System.arraycopy(" text:".getBytes(), 0, bytes, offset, " text:".length());
 		offset += " text:".length();
 		
-		if(CharMatcher.ASCII.matchesAllOf(txt)) {
-			byte[] tmp = txt.getBytes(StandardCharsets.US_ASCII);
-			ByteUtil.rfillBytes(tmp, 20, bytes, offset);
+		if(StringUtils.isNotBlank(txt) && txt.length()>3 && isAllOfASCII(txt.substring(0, 3).getBytes()) && StringUtils.isNumeric(txt.substring(0, 3))) {
+			ByteUtil.rfillBytes(txt.substring(0, 3).getBytes(), 3, bytes, offset);
+			String txt_content = txt.substring(3);
+			if(CharMatcher.ASCII.matchesAllOf(txt_content)) {
+				byte[] tmp = txt_content.getBytes(StandardCharsets.US_ASCII);
+				ByteUtil.rfillBytes(tmp, 17, bytes, offset+3);
+			}else {
+				byte[] tmp = txt_content.getBytes(StandardCharsets.UTF_16BE);
+				ByteUtil.rfillBytes(tmp, 17, bytes, offset+3);
+			}
 		}else {
-			byte[] tmp = txt.getBytes(StandardCharsets.UTF_16BE);
-			ByteUtil.rfillBytes(tmp, 20, bytes, offset);
+			if(CharMatcher.ASCII.matchesAllOf(txt)) {
+				byte[] tmp = txt.getBytes(StandardCharsets.US_ASCII);
+				ByteUtil.rfillBytes(tmp, 20, bytes, offset);
+			}else {
+				byte[] tmp = txt.getBytes(StandardCharsets.UTF_16BE);
+				ByteUtil.rfillBytes(tmp, 20, bytes, offset);
+			}
 		}
 
 		offset += 20;
@@ -234,7 +261,7 @@ public class SMGPReportData implements Serializable {
 	}
 
 	public void setTxt(String txt) {
-		this.txt = txt;
+		this.txt = txt == null?"":txt;
 	}
 
 	private String msgIdString() {

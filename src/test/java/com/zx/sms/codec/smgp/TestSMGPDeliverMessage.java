@@ -52,8 +52,20 @@ public class TestSMGPDeliverMessage extends AbstractSMGPTestMessageCodec<SMGPDel
 	
 	@Test
 	public void testReport() {
-		dotestReport("【圆通】快递已发出");
-		dotestReport("mmm");
+		dotestReport("【圆通】快递已");
+		dotestReport("0【圆通】快递已");
+		dotestReport("04【圆通】快递已");
+		dotestReport("040【圆通】快递已");
+		dotestReport("a【圆通】快递已");
+		dotestReport("0b【圆通】快递已");
+		dotestReport("abc【圆通】快递已");
+		dotestReport("040【圆通】快递已");
+		dotestReport("081mmm993");
+		dotestReport("0asdf");
+		dotestReport("08asdfa");
+		dotestReport("081mmm993");
+		dotestReport("");
+		dotestReport(null);
 	}
 	
 	
