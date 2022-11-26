@@ -68,9 +68,9 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 						ChannelFuture chfuture = null;
 						BaseMessage msg = createTestReq(UUID.randomUUID().toString());
 //						chfuture = ChannelUtil.asyncWriteToEntity(getEndpointEntity().getId(), msg);
-						futures = ChannelUtil.syncWriteLongMsgToEntity(getEndpointEntity().getId(), msg);
+//						futures = ChannelUtil.syncWriteLongMsgToEntity(getEndpointEntity().getId(), msg);
 						
-//						chfuture = ctx.writeAndFlush(msg);
+						chfuture = ctx.writeAndFlush(msg);
 						
 						if (chfuture != null) {
 							chfuture.addListener(new GenericFutureListener<ChannelFuture>() {
@@ -83,6 +83,8 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 									}
 								}
 							});
+							chfuture.sync();
+							
 						}
 
 						cnt--;
@@ -109,7 +111,7 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 								tmptotal.decrementAndGet();
 								break;
 							}
-						}else {
+						}else if(chfuture==null) {
 							//连接不可写了，等待上一个response回来
 							//再把消息发出去
 							ctx.writeAndFlush(msg);

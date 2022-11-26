@@ -30,7 +30,6 @@ public class TestSMGPEndPoint {
 	@Test
 	public void testSMGPEndpoint() throws Exception {
 
-		final EndpointManager manager = EndpointManager.INS;
 		int port = 18890;
 		SMGPServerEndpointEntity server = new SMGPServerEndpointEntity();
 		server.setId("smgpserver");
@@ -59,7 +58,6 @@ public class TestSMGPEndPoint {
 		serverhandlers.add(receiver);
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
-		manager.addEndpointEntity(server);
 
 		SMGPClientEndpointEntity client = new SMGPClientEndpointEntity();
 		client.setId("smgpclient");
@@ -81,21 +79,20 @@ public class TestSMGPEndPoint {
 		clienthandlers.add(new SMGPSessionConnectedHandler(count));
 		client.setBusinessHandlerSet(clienthandlers);
 
-		manager.addEndpointEntity(client);
-
-		manager.openAll();
+		server.getSingletonConnector().open();
+		client.getSingletonConnector().open();
 
 		Thread.sleep(1000);
 
 		System.out.println("start.....");
-		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
-		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
+		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
+		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
-			 connection = true;
+			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		EndpointManager.INS.close();
-		EndpointManager.INS.removeAll();
+		server.getSingletonConnector().close();
+		client.getSingletonConnector().close();
 
 		Assert.assertEquals(count, receiver.getCnt().get());
 

@@ -31,7 +31,6 @@ public class TestSMPPEndPoint {
 	@Test
 	public void testSMPPEndpoint() throws Exception {
 	
-		final EndpointManager manager = EndpointManager.INS;
 		int port = 19890;
 		SMPPServerEndpointEntity server = new SMPPServerEndpointEntity();
 		server.setId("smppserver");
@@ -81,19 +80,19 @@ public class TestSMPPEndPoint {
 		clienthandlers.add( new SMPPSessionConnectedHandler(count)); 
 		client.setBusinessHandlerSet(clienthandlers);
 		
-		manager.addEndpointEntity(server);
-		manager.addEndpointEntity(client);
-		manager.openAll();
+		server.getSingletonConnector().open();
+		client.getSingletonConnector().open();
 		Thread.sleep(1000);
 		System.out.println("start.....");
-		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
-		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0 &&   receiver.getCnt().get() < count) {
-			connection = true;
+		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
+		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
+			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		EndpointManager.INS.close();
-		EndpointManager.INS.removeAll();
+		server.getSingletonConnector().close();
+		client.getSingletonConnector().close();
+
 		Assert.assertEquals(count, receiver.getCnt().get());
 			
 

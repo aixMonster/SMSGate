@@ -33,7 +33,6 @@ public class TestSgipEndPoint {
 	@Test
 	public void testsgipEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
-		final EndpointManager manager = EndpointManager.INS;
 		int port = 17890;
 		SgipServerEndpointEntity server = new SgipServerEndpointEntity();
 		server.setId("sgipserver");
@@ -64,7 +63,6 @@ public class TestSgipEndPoint {
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
 
-		manager.addEndpointEntity(server);
 		SgipClientEndpointEntity client = new SgipClientEndpointEntity();
 		client.setId("sgipclient");
 		client.setHost("127.0.0.1");
@@ -85,19 +83,19 @@ public class TestSgipEndPoint {
 		int count = 10000;
 		clienthandlers.add(new SGIPSessionConnectedHandler(count));
 		client.setBusinessHandlerSet(clienthandlers);
-		manager.addEndpointEntity(client);
-		manager.openAll();
+		server.getSingletonConnector().open();
+		client.getSingletonConnector().open();
 		Thread.sleep(1000);
 
 		System.out.println("sgip start.....");
-		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
-		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
+		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
+		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		EndpointManager.INS.close();
-		EndpointManager.INS.removeAll();
+		server.getSingletonConnector().close();
+		client.getSingletonConnector().close();
 		Assert.assertEquals(count, receiver.getCnt().get());
 
 	}

@@ -34,7 +34,6 @@ public class TestCMPPEndPoint {
 	@Test
 	public void testCMPPEndpoint() throws Exception {
 		ResourceLeakDetector.setLevel(Level.ADVANCED);
-		final EndpointManager manager = EndpointManager.INS;
 		int port = 16890;
 		CMPPServerEndpointEntity server = new CMPPServerEndpointEntity();
 		server.setId("server");
@@ -118,21 +117,19 @@ public class TestCMPPEndPoint {
 		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 
-		manager.addEndpointEntity(client);
-
-		manager.openEndpoint(server);
-		manager.openEndpoint(client);
+		server.getSingletonConnector().open();
+		client.getSingletonConnector().open();
 		Thread.sleep(1000);
 //		manager.startConnectionCheckTask();
 		System.out.println("start.....");
-		boolean connection = EndpointManager.INS.getEndpointConnector(client).getConnectionNum() > 0;
-		while (EndpointManager.INS.getEndpointConnector(client).getConnectionNum()>0 && receiver.getCnt().get() < count) {
+		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
+		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		EndpointManager.INS.close();
-		EndpointManager.INS.removeAll();
+		server.getSingletonConnector().close();
+		client.getSingletonConnector().close();
 		Assert.assertEquals(count, receiver.getCnt().get());
 		System.out.println("end.....");
 	}

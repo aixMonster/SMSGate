@@ -77,7 +77,7 @@ public class TestWithOpenSMPP {
 		server.setUseSSL(false);
 
 		SMPPServerChildEndpointEntity child = new SMPPServerChildEndpointEntity();
-		child.setId("smppchild");
+		child.setId("opensmppchild");
 		child.setSystemId(systemId);
 		child.setPassword(password);
 
