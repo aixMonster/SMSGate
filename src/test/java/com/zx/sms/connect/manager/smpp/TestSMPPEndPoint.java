@@ -32,7 +32,7 @@ public class TestSMPPEndPoint {
 	public void testSMPPEndpoint() throws Exception {
 	
 		final EndpointManager manager = EndpointManager.INS;
-		int port = RandomUtils.nextInt(55000, 56000);
+		int port = 19890;
 		SMPPServerEndpointEntity server = new SMPPServerEndpointEntity();
 		server.setId("smppserver");
 		server.setHost("127.0.0.1");

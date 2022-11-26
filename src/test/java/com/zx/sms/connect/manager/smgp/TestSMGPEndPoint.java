@@ -31,7 +31,7 @@ public class TestSMGPEndPoint {
 	public void testSMGPEndpoint() throws Exception {
 
 		final EndpointManager manager = EndpointManager.INS;
-		int port = RandomUtils.nextInt(56000, 57000);
+		int port = 18890;
 		SMGPServerEndpointEntity server = new SMGPServerEndpointEntity();
 		server.setId("smgpserver");
 		server.setHost("127.0.0.1");
