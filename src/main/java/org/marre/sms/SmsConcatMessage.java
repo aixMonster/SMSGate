@@ -173,7 +173,6 @@ public abstract class SmsConcatMessage implements SmsMessage {
 						} else {
 							// 如果是英文字符算1个byte
 							oneByteCharCnt++;
-							;
 						}
 					}
 					if ((nMaxUdLength + oneByteCharCnt) % 2 > 0) {
