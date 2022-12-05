@@ -242,7 +242,7 @@ public abstract class EndpointEntity implements Serializable {
 	}
 
 	public void setRetryWaitTimeSec(short retryWaitTimeSec) {
-		this.retryWaitTimeSec = retryWaitTimeSec;
+		this.retryWaitTimeSec = (retryWaitTimeSec <= 0 ? 60 : retryWaitTimeSec);
 	}
 	
 	public SupportLongMessage getSupportLongmsg() {

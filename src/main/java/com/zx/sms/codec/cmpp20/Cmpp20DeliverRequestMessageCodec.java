@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;
 import com.zx.sms.codec.cmpp.msg.Message;
+import com.zx.sms.codec.cmpp.packet.CmppReportRequest;
 import com.zx.sms.codec.cmpp.packet.PacketType;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp20.packet.Cmpp20DeliverRequest;
@@ -80,7 +81,9 @@ public class Cmpp20DeliverRequestMessageCodec extends MessageToMessageCodec<Mess
 			requestMessage.setMsgContentBytes(contentbytes);
 			requestMessage.setMsgLength((short)frameLength);
 		} else {
+			boolean errorProto = false;
 			if(frameLength != Cmpp20ReportRequest.DESTTERMINALID.getBodyLength()){
+				errorProto = true;
 				logger.warn("CmppDeliverRequestMessage20 - MsgContent length is {}. should be {}.",frameLength ,Cmpp20ReportRequest.DESTTERMINALID.getBodyLength());
 			};
 			requestMessage.setReportRequestMessage(new CmppReportRequestMessage());
@@ -93,7 +96,7 @@ public class Cmpp20DeliverRequestMessageCodec extends MessageToMessageCodec<Mess
 			requestMessage.getReportRequestMessage().setDoneTime(
 					bodyBuffer.readCharSequence(Cmpp20ReportRequest.DONETIME.getLength(),GlobalConstance.defaultTransportCharset).toString().trim());
 			requestMessage.getReportRequestMessage().setDestterminalId(
-					bodyBuffer.readCharSequence(Cmpp20ReportRequest.DESTTERMINALID.getLength(),GlobalConstance.defaultTransportCharset).toString().trim());
+					bodyBuffer.readCharSequence(errorProto?CmppReportRequest.DESTTERMINALID.getLength():Cmpp20ReportRequest.DESTTERMINALID.getLength(),GlobalConstance.defaultTransportCharset).toString().trim());
 			requestMessage.getReportRequestMessage().setSmscSequence(bodyBuffer.readUnsignedInt());
 		}
 

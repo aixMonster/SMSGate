@@ -24,6 +24,7 @@ import com.zx.sms.codec.cmpp.packet.CmppPacketType;
 import com.zx.sms.codec.cmpp.packet.CmppReportRequest;
 import com.zx.sms.codec.cmpp.packet.PacketType;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.codec.cmpp20.packet.Cmpp20ReportRequest;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.DefaultMsgIdUtil;
@@ -81,7 +82,9 @@ public class CmppDeliverRequestMessageCodec extends MessageToMessageCodec<Messag
 			requestMessage.setMsgContentBytes(contentbytes);
 			requestMessage.setMsgLength((short)frameLength);
 		} else {
+			boolean errorProto = false;
 			if(frameLength != CmppReportRequest.DESTTERMINALID.getBodyLength()){
+				errorProto = true;
 				logger.warn("CmppDeliverRequestMessage - MsgContent length is {}. should be {}.",frameLength,CmppReportRequest.DESTTERMINALID.getBodyLength());
 			};
 			requestMessage.setReportRequestMessage(new CmppReportRequestMessage());
@@ -93,7 +96,7 @@ public class CmppDeliverRequestMessageCodec extends MessageToMessageCodec<Messag
 			requestMessage.getReportRequestMessage().setDoneTime(
 					bodyBuffer.readCharSequence(CmppReportRequest.DONETIME.getLength(),GlobalConstance.defaultTransportCharset).toString().trim());
 			requestMessage.getReportRequestMessage().setDestterminalId(
-					bodyBuffer.readCharSequence(CmppReportRequest.DESTTERMINALID.getLength(),GlobalConstance.defaultTransportCharset).toString().trim());
+					bodyBuffer.readCharSequence(errorProto?Cmpp20ReportRequest.DESTTERMINALID.getLength():CmppReportRequest.DESTTERMINALID.getLength(),GlobalConstance.defaultTransportCharset).toString().trim());
 			requestMessage.getReportRequestMessage().setSmscSequence(bodyBuffer.readUnsignedInt());
 		}
 		//卓望发送的状态报告 少了11个字节， 剩下的字节全部读取
