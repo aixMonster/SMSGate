@@ -276,7 +276,7 @@ public class CmppDeliverRequestMessage extends DefaultMessage implements LongSMS
 		if (isReport()) {
 			StringBuilder sb = new StringBuilder();
 			sb.append("CmppDeliverRequestMessage [msgId=").append(msgId).append(", destId=").append(destId).append(", srcterminalId=").append(srcterminalId)
-					.append(", getHeader()=").append(getHeader()).append(", ReportRequest=").append(getReportRequestMessage()).append("]");
+					.append(", sequenceId=").append(getHeader().getSequenceId()).append(", ReportRequest=").append(getReportRequestMessage()).append("]");
 			return sb.toString();
 		}
 		StringBuilder sb = new StringBuilder();

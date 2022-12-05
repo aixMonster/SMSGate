@@ -83,7 +83,7 @@ public class Cmpp20DeliverRequestMessageCodec extends MessageToMessageCodec<Mess
 		} else {
 			boolean errorProto = false;
 			if(frameLength != Cmpp20ReportRequest.DESTTERMINALID.getBodyLength()){
-				errorProto = true;
+				if(frameLength == 71) errorProto = true;
 				logger.warn("CmppDeliverRequestMessage20 - MsgContent length is {}. should be {}.",frameLength ,Cmpp20ReportRequest.DESTTERMINALID.getBodyLength());
 			};
 			requestMessage.setReportRequestMessage(new CmppReportRequestMessage());

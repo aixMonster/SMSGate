@@ -120,8 +120,14 @@ public class CmppReportRequestMessage extends DefaultMessage {
 	 */
 	@Override
 	public String toString() {
-		return String.format("CmppReportRequestMessage [msgId=%s, stat=%s, submitTime=%s, doneTime=%s, destterminalId=%s, smscSequence=%s]", msgId, stat,
-				submitTime, doneTime, destterminalId, smscSequence);
+		StringBuilder sb = new StringBuilder("CmppReportRequestMessage [msgId=");
+		sb.append(msgId).append(", stat=").append(stat)
+		.append(", submitTime=").append(submitTime)
+		.append(", doneTime=").append(doneTime)
+		.append(", destterminalId=").append(destterminalId)
+		.append(", smscSequence=").append(smscSequence)
+		.append("]");
+		return sb.toString();
 	}
 
 }
