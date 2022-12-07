@@ -159,15 +159,13 @@ public enum LongMessageFrameHolder {
 	 * 
 	 **/
 	public String getPartTextMsg(LongMessageFrame frame) {
-		if (frame.getTpudhi() == 0) {
+		if (!frame.isConcatMsg()) {
 			return buildTextMessage(frame.getPayloadbytes(0), frame.getMsgfmt()).getText();
-		} else if ((frame.getTpudhi() & 0x01) == 1 || (frame.getTpudhi() & 0x40) == 0x40) {
+		} else {
 			UserDataHeader header = parseUserDataHeader(frame.getMsgContentBytes());
 			byte[] payload = frame.getPayloadbytes(header.headerlength);
 			return buildTextMessage(payload, frame.getMsgfmt()).getText();
 		}
-		return null;
-
 	}
 	
 	/**

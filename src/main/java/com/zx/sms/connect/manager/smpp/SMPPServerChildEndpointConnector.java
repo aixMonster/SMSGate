@@ -1,7 +1,6 @@
 package com.zx.sms.connect.manager.smpp;
 
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +19,8 @@ import com.zx.sms.session.smpp.SMPPSessionStateManager;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelPipeline;
 import io.netty.handler.ssl.SslContext;
-import io.netty.handler.timeout.IdleStateHandler;
 
 public class SMPPServerChildEndpointConnector extends AbstractEndpointConnector{
 	private static final Logger logger = LoggerFactory.getLogger(SMPPServerChildEndpointConnector.class);
@@ -44,13 +41,6 @@ public class SMPPServerChildEndpointConnector extends AbstractEndpointConnector{
 	@Override
 	protected void doBindHandler(ChannelPipeline pipe, EndpointEntity entity) {
 		
-		// 修改连接空闲时间,使用server.xml里配置的连接空闲时间生效
-		if (entity instanceof SMPPServerChildEndpointEntity) {
-			ChannelHandler handler = pipe.get(GlobalConstance.IdleCheckerHandlerName);
-			if (handler != null) {
-				pipe.replace(handler, GlobalConstance.IdleCheckerHandlerName, new IdleStateHandler(0, 0, entity.getIdleTimeSec(), TimeUnit.SECONDS));
-			}
-		}
 		
 		pipe.addAfter(GlobalConstance.codecName,"AddZeroByteHandler",new AddZeroByteHandler(entity));
 		pipe.addLast("SMPPLongMessageHandler", new SMPPLongMessageHandler(entity));
