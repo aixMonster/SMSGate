@@ -1,11 +1,11 @@
 package com.zx.sms.handler.sgip;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelHandler.Sharable;
-
 import com.zx.sms.codec.sgip12.msg.SgipReportRequestMessage;
 import com.zx.sms.codec.sgip12.msg.SgipReportResponseMessage;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
+
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
 @Sharable
 public class SgipReportRequestMessageHandler extends AbstractBusinessHandler{
 	

@@ -1,14 +1,13 @@
 package com.zx.sms.handler.sgip;
 
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelHandler.Sharable;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
-
-import com.zx.sms.codec.smpp.msg.EnquireLink;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.session.cmpp.SessionState;
+
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler.Sharable;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.IdleState;
+import io.netty.handler.timeout.IdleStateEvent;
 @Sharable
 public class SgipServerIdleStateHandler extends ChannelDuplexHandler {
 	@Override

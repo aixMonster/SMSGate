@@ -6,8 +6,6 @@ import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.wap.AbstractLongMessageHandler;
 import com.zx.sms.connect.manager.EndpointEntity;
 
-import io.netty.channel.ChannelHandler.Sharable;
-
 public class CMPPSubmitLongMessageHandler extends AbstractLongMessageHandler<CmppSubmitRequestMessage> {
 
 	public CMPPSubmitLongMessageHandler(EndpointEntity entity) {

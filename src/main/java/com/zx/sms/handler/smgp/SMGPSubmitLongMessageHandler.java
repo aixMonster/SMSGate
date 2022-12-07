@@ -6,8 +6,6 @@ import com.zx.sms.codec.cmpp.wap.AbstractLongMessageHandler;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.connect.manager.EndpointEntity;
 
-import io.netty.channel.ChannelHandler.Sharable;
-
 public class SMGPSubmitLongMessageHandler extends AbstractLongMessageHandler<SMGPSubmitMessage> {
 
 	public SMGPSubmitLongMessageHandler(EndpointEntity entity) {

@@ -10,7 +10,6 @@ import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.smpp.SMPPEndpointEntity;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
 
-import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
