@@ -2,13 +2,13 @@ package com.zx.sms.codec.cmpp.wap;
 
 import java.util.List;
 
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
-import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 
@@ -55,9 +55,15 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, T requestMessage, List<Object> out) throws Exception {
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.SEND) && requestMessage instanceof LongSMSMessage  &&  ((LongSMSMessage)requestMessage).needHandleLongMessage()) {
-			SmsMessage msgcontent = ((LongSMSMessage)requestMessage).getSmsMessage();
-			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
 			LongSMSMessage lmsg = (LongSMSMessage)requestMessage;
+			SmsMessage msgcontent = lmsg.getSmsMessage();
+			
+			if(msgcontent instanceof SmsConcatMessage) {
+				((SmsConcatMessage)msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+			}
+			
+			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
+			
 			for (LongMessageFrame frame : frameList) {
 				T t = (T)lmsg.generateMessage(frame);
 				out.add(t);

@@ -3,6 +3,7 @@ package com.zx.sms.common.util;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +93,13 @@ public class ChannelUtil {
 			if (!lmsg.isReport()) {
 				// 长短信拆分
 				SmsMessage msgcontent = lmsg.getSmsMessage();
-				List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
 				
+				if(msgcontent instanceof SmsConcatMessage) {
+					((SmsConcatMessage)msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+				}
+
+				List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
+
 				//保证同一条长短信，通过同一个tcp连接发送
 				List<BaseMessage> msgs = new ArrayList<BaseMessage>();
 				for (LongMessageFrame frame : frameList) {

@@ -473,9 +473,6 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 	}
 
 	public SmsMessage getSmsMessage() {
-		if(msg instanceof SmsConcatMessage){
-			((SmsConcatMessage)msg).setSeqNoKey( StringUtils.join(this.getDestTermIdArray(), "|")+this.getSrcTermId());
-		}
 		return msg;
 	}
 

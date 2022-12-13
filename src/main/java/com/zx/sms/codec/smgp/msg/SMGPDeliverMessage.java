@@ -291,9 +291,6 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 	}
 
 	public SmsMessage getSmsMessage() {
-		if(msg instanceof SmsConcatMessage){
-			((SmsConcatMessage)msg).setSeqNoKey( this.getSrcTermId()+this.getDestTermId());
-		}
 		return msg;
 	}
 	

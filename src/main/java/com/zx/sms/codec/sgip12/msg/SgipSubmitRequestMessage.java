@@ -370,9 +370,6 @@ public class SgipSubmitRequestMessage extends SgipDefaultMessage implements Long
 	}
 
 	public SmsMessage getSmsMessage() {
-		if(msg instanceof SmsConcatMessage){
-			((SmsConcatMessage)msg).setSeqNoKey( StringUtils.join(this.getUsernumber(), "|")+this.getSpnumber());
-		}
 		return msg;
 	}
 	

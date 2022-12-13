@@ -185,13 +185,6 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	}
 
 	public SmsMessage getSmsMessage() {
-		if(smsMsg instanceof SmsConcatMessage){
-			if(this instanceof SubmitSm){
-				((SmsConcatMessage)smsMsg).setSeqNoKey( this.getDestAddress().getAddress()+this.getSourceAddress().getAddress());
-			}else if(this instanceof DeliverSm){
-				((SmsConcatMessage)smsMsg).setSeqNoKey( this.getSourceAddress().getAddress()+this.getDestAddress().getAddress());
-			}
-		}
 		return smsMsg;
 	}
 

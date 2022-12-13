@@ -261,9 +261,6 @@ public class CmppDeliverRequestMessage extends DefaultMessage implements LongSMS
 	}
 
 	public SmsMessage getSmsMessage() {
-		if(msg instanceof SmsConcatMessage){
-			((SmsConcatMessage)msg).setSeqNoKey(srcterminalId+destId);
-		}
 		return msg;
 	}
 

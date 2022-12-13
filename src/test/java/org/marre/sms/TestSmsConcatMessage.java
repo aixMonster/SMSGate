@@ -35,6 +35,11 @@ public class TestSmsConcatMessage {
 			//如果是长短信类型，记录序列号key
 			String phone = submitMsg.getDestterminalId()[0];
 			SmsMessage smsMessage = submitMsg.getSmsMessage();
+			
+			if(smsMessage instanceof SmsConcatMessage) {
+				((SmsConcatMessage)smsMessage).setSeqNoKey(submitMsg.getSrcIdAndDestId());
+			}
+			
 			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(smsMessage);
 			Integer pkseq = Integer.valueOf(frameList.get(0).getPkseq());
 			Integer oldpkseq = checkMap.putIfAbsent(phone+pkseq,pkseq);

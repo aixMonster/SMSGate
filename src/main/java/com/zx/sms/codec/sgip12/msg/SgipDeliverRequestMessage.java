@@ -163,9 +163,6 @@ public class SgipDeliverRequestMessage extends SgipDefaultMessage implements Lon
 	}
 
 	public SmsMessage getSmsMessage() {
-		if(msg instanceof SmsConcatMessage){
-			((SmsConcatMessage)msg).setSeqNoKey( this.getUsernumber()+this.getSpnumber());
-		}
 		return msg;
 	}
 	
