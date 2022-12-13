@@ -169,7 +169,7 @@ public enum LongMessageFrameHolder {
 	}
 	
 	/**
-	 *获取长短信的UDHI字段里的frameKey ,以方便长短信关联状态报告时使用
+	 *获取长短信的UDHI字段里的frameKey + pkTol ,以方便长短信关联状态报告时使用
 	 */
 	public String parseFrameKey(String longSmsKey,LongSMSMessage msg) {
 		LongMessageFrame frame = msg.generateFrame();
@@ -178,7 +178,7 @@ public enum LongMessageFrameHolder {
 		if (frame.isConcatMsg()) {
 			try {
 				FrameHolder fh = createFrameHolder(longSmsKey, frame);
-				mapKeyBuilder.append(".").append(fh.frameKey);
+				mapKeyBuilder.append(".").append(fh.frameKey).append(".").append(fh.getTotalLength());
 				return mapKeyBuilder.toString();
 			}catch(NotSupportedException es) {
 			}
@@ -224,7 +224,7 @@ public enum LongMessageFrameHolder {
 				}
 
 				// 超过一帧的，进行长短信合并
-				String mapKey = longSmsKey+fh.frameKey;
+				String mapKey = longSmsKey+fh.frameKey+fh.getTotalLength();
 
 				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
 				boolean complete = setAndget(msg,mapKey, frame,isRecvLongMsgOnMultiLink);
