@@ -127,7 +127,7 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		String username = null;
 		String pass = null;
 
-		if (userinfo != null && (!"".equals(userinfo))) {
+		if (StringUtils.isNotBlank(userinfo)) {
 			int idx = userinfo.indexOf(":");
 			if (idx > 0) {
 				username = userinfo.substring(0, idx);
@@ -310,7 +310,7 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 	 * 循环列表，用于实现轮循算法
 	 */
 	private class CircularList {
-		private List<Channel> collection = Collections.synchronizedList(new ArrayList<Channel>(20));
+		private List<Channel> collection = Collections.synchronizedList(new ArrayList<Channel>());
 
 		public Channel[] getall() {
 			return collection.toArray(new Channel[collection.size()]);
@@ -324,12 +324,21 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 			int size = collection.size();
 			if (size == 0)
 				return null;
+			
+			if (size == 1)
+				return collection.get(0);
 
-			int idx = indexSeq.incrementAndGet();
+			int idx = indexSeq.getAndIncrement();
 
 			try {
-				Channel ret = collection.get((idx & 0xffff) % size);
-				return ret;
+				if(idx < collection.size()) {
+					Channel ret = collection.get(idx);
+					return ret;
+				}else {
+					Channel ret = collection.get(0);
+					indexSeq.set(0);
+					return ret;
+				}
 			} catch (IndexOutOfBoundsException ex) {
 				// 多线程情况可能抛异常
 				// 1：当线连接数为0了

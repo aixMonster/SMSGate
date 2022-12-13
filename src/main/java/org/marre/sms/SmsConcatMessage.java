@@ -122,7 +122,7 @@ public abstract class SmsConcatMessage implements SmsMessage {
 
 			int maxSlicLength = slice.size();
 			if (maxSlicLength > 255) {
-				logger.error("error SmsConcatMessage pkTotal Number {} .should be less than 255", maxSlicLength);
+				logger.error("error SmsConcatMessage pkTotal Number {} .should be less than 256", maxSlicLength);
 				maxSlicLength = 255;
 			}
 			smsPdus = new SmsPdu[maxSlicLength];
@@ -159,7 +159,7 @@ public abstract class SmsConcatMessage implements SmsMessage {
 				oneCopyLength = udLength - udOffset; // 这里是最后一个分片了，长度可能小于nMaxUdLength最大长度
 			} else {
 				// 检查本次分片的最后一个字节是否为双字节字符，避免一个汉字被拆在两半
-				if (oneCopyLength % 2 > 0 && SmsAlphabet.UCS2 == ud.getDcs().getAlphabet()) {
+				if ((oneCopyLength & 0x01) == 1 && SmsAlphabet.UCS2 == ud.getDcs().getAlphabet()) {
 					// 如果是UCS2 ，并且maxBytes是奇数
 					oneCopyLength--;
 				} else if (SmsAlphabet.RESERVED == ud.getDcs().getAlphabet()) {
@@ -175,7 +175,7 @@ public abstract class SmsConcatMessage implements SmsMessage {
 							oneByteCharCnt++;
 						}
 					}
-					if ((nMaxUdLength + oneByteCharCnt) % 2 > 0) {
+					if (((nMaxUdLength + oneByteCharCnt) & 0x01) == 1) {
 						oneCopyLength--;
 					}
 				}else if(SmsAlphabet.GSM == ud.getDcs().getAlphabet()) {
