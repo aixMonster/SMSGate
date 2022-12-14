@@ -27,7 +27,7 @@ public  abstract class AbstractSGIPTestMessageCodec<T> {
 	});
 	
 	protected void doinitChannel(Channel ch){
-		ResourceLeakDetector.setLevel(Level.SIMPLE);
+		ResourceLeakDetector.setLevel(Level.DISABLED);
 		ChannelPipeline pipeline = ch.pipeline();
 		SgipCodecChannelInitializer codec = new SgipCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(this.getClass(),LogLevel.DEBUG));

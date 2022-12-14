@@ -250,7 +250,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 	// 多线程长短信合并
 	@Test
 	public void testConcurrentLongMessageMerge() throws Exception {
-		int total = RandomUtils.nextInt(1000,3000);
+		int total = RandomUtils.nextInt(10000,11000);
 		testConcurrentLongMessageMerge1(total,false);
 		testConcurrentLongMessageMerge1(total,true);
 		
