@@ -30,8 +30,11 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && ((LongSMSMessage)msg).needHandleLongMessage()) {
 			LongSMSMessage lmsg = (LongSMSMessage)msg;
 			String key = lmsg.getUniqueLongMsgId();
-			if(key == null)
-				key = lmsg.getSrcIdAndDestId();
+			String channelId = (entity!=null && !entity.isRecvLongMsgOnMultiLink())? ctx.channel().id().asShortText(): "C";
+			if(key == null) {
+				key = channelId +"."+lmsg.getSrcIdAndDestId();
+			}
+			
 			try {
 				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,key,lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
 

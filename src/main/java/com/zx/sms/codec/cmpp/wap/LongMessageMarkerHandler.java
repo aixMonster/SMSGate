@@ -17,7 +17,9 @@ public class LongMessageMarkerHandler extends AbstractBusinessHandler {
 		if (msg instanceof LongSMSMessage && ((LongSMSMessage) msg).needHandleLongMessage()) {
 			LongSMSMessage lmsg = (LongSMSMessage) msg;
 			String srcIdAndDestId = lmsg.getSrcIdAndDestId();
-			StringBuilder sb = entity == null ? new StringBuilder(srcIdAndDestId)  : new StringBuilder(entity.getId()).append(".").append(srcIdAndDestId);
+			String channelId = (entity!=null && !entity.isRecvLongMsgOnMultiLink())? ctx.channel().id().asShortText(): "C";
+			
+			StringBuilder sb = entity == null ? new StringBuilder(channelId+"."+ srcIdAndDestId)  : new StringBuilder(entity.getId()).append(".").append(channelId).append(".").append(srcIdAndDestId);
 			String key =  LongMessageFrameHolder.INS.parseFrameKey(sb.toString(), lmsg);
 			lmsg.setUniqueLongMsgId(new UniqueLongMsgId(key));
 		}
