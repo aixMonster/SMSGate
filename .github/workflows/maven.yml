@@ -38,7 +38,7 @@ jobs:
     - name: Config-RedisLongMessageFrameProvider
       run: echo 'com.zx.sms.common.RedisLongMessageFrameProvider' > src/test/resources/META-INF/services/com.zx.sms.codec.LongMessageFrameProvider
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B test --file pom.xml
       env:
         # The hostname used to communicate with the Redis service container
         REDIS_HOST: localhost

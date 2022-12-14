@@ -31,7 +31,7 @@ import com.zx.sms.handler.smpp.SMPPLongMessageHandler;
 
 public class TestSMPP2CMPPSubmitCodec extends AbstractSMPPTestMessageCodec<CmppSubmitRequestMessage> {
 	protected void doinitChannel(Channel ch){
-		ResourceLeakDetector.setLevel(Level.ADVANCED);
+		ResourceLeakDetector.setLevel(Level.DISABLED);
 		ChannelPipeline pipeline = ch.pipeline();
 		SMPPCodecChannelInitializer codec = new SMPPCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));
