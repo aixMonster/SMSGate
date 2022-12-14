@@ -26,7 +26,7 @@ public class Test10085MsgDataSubmitRequestDecoder extends AbstractTestMessageCod
 			
 			Assert.assertNotNull(result);
 			System.out.println(result.getUniqueLongMsgId());
-			Assert.assertEquals("C.1816483568710085.46.3",result.getUniqueLongMsgId());
+			Assert.assertEquals(super.EndPointID+"."+super.ch.id().asShortText()+".1816483568710085.46.3",result.getUniqueLongMsgId());
 			ch.writeOutbound(result);
 			success = true;
 		}

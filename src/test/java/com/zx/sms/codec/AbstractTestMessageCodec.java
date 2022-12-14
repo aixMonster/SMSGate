@@ -2,6 +2,8 @@ package com.zx.sms.codec;
 
 import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
 import com.zx.sms.common.GlobalConstance;
+import com.zx.sms.connect.manager.EndpointEntity;
+import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
 import com.zx.sms.connect.manager.cmpp.CMPPCodecChannelInitializer;
 import com.zx.sms.handler.cmpp.CMPPDeliverLongMessageHandler;
 import com.zx.sms.handler.cmpp.CMPPSubmitLongMessageHandler;
@@ -18,6 +20,7 @@ import io.netty.util.ResourceLeakDetector.Level;
 
 public abstract class AbstractTestMessageCodec<T> {
 	
+	protected static final String EndPointID = "Test";
 	private static int version = 0x20;
 	protected EmbeddedChannel ch = new EmbeddedChannel(new ChannelInitializer<Channel>() {
 
@@ -25,13 +28,17 @@ public abstract class AbstractTestMessageCodec<T> {
 		protected void initChannel(Channel ch) throws Exception {
 			ResourceLeakDetector.setLevel(Level.DISABLED);
 			ChannelPipeline pipeline = ch.pipeline();
+			EndpointEntity e = new CMPPClientEndpointEntity();
+			e.setId(EndPointID);
+			
 			CMPPCodecChannelInitializer codec = new CMPPCodecChannelInitializer(getVersion());
 			pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));
 			pipeline.addLast(codec.pipeName(), codec);
-			LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
+			LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(e);
 			pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
-			pipeline.addLast( "CMPPDeliverLongMessageHandler", new CMPPDeliverLongMessageHandler(null));
-			pipeline.addLast("CMPPSubmitLongMessageHandler",  new CMPPSubmitLongMessageHandler(null));
+			
+			pipeline.addLast( "CMPPDeliverLongMessageHandler", new CMPPDeliverLongMessageHandler(e));
+			pipeline.addLast("CMPPSubmitLongMessageHandler",  new CMPPSubmitLongMessageHandler(e));
 		}
 	});
 	
