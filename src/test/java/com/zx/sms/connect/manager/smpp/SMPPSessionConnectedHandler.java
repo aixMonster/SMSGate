@@ -55,6 +55,7 @@ public class SMPPSessionConnectedHandler extends SessionConnectedHandler {
 
 		} else {
 			if(((LongSMSMessage)((BaseMessage)msg).getRequest()) != null)
+				logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)((BaseMessage)msg).getRequest()).getUniqueLongMsgId());
 			ctx.fireChannelRead(msg);
 		}
 	}
