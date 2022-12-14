@@ -31,7 +31,7 @@ public  abstract class AbstractSMGPTestMessageCodec<T> {
 	}
 	
 	protected void doinitChannel(Channel ch){
-		ResourceLeakDetector.setLevel(Level.ADVANCED);
+		ResourceLeakDetector.setLevel(Level.SIMPLE);
 		ChannelPipeline pipeline = ch.pipeline();
 		SMGPCodecChannelInitializer codec = new SMGPCodecChannelInitializer(getversion());
 		pipeline.addLast("serverLog", new LoggingHandler(this.getClass(),LogLevel.DEBUG));

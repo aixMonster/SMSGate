@@ -23,7 +23,7 @@ public abstract class AbstractTestMessageCodec<T> {
 
 		@Override
 		protected void initChannel(Channel ch) throws Exception {
-			ResourceLeakDetector.setLevel(Level.ADVANCED);
+			ResourceLeakDetector.setLevel(Level.SIMPLE);
 			ChannelPipeline pipeline = ch.pipeline();
 			CMPPCodecChannelInitializer codec = new CMPPCodecChannelInitializer(getVersion());
 			pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));

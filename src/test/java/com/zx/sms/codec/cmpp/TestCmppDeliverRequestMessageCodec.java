@@ -11,7 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.commons.io.HexDump;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -35,9 +34,7 @@ import com.zx.sms.codec.cmpp.msg.Header;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp.wap.SmsMessageHolder;
-import com.zx.sms.common.util.HexUtil;
 import com.zx.sms.common.util.MsgId;
-import com.zx.sms.common.util.StandardCharsets;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -253,7 +250,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 	// 多线程长短信合并
 	@Test
 	public void testConcurrentLongMessageMerge() throws Exception {
-		int total = 100;
+		int total = RandomUtils.nextInt(1000,3000);
 		testConcurrentLongMessageMerge1(total,false);
 		testConcurrentLongMessageMerge1(total,true);
 		

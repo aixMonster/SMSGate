@@ -30,7 +30,7 @@ public  abstract class AbstractSMPPTestMessageCodec<T> {
 	}
 	
 	protected void doinitChannel(Channel ch){
-		ResourceLeakDetector.setLevel(Level.ADVANCED);
+		ResourceLeakDetector.setLevel(Level.SIMPLE);
 		ChannelPipeline pipeline = ch.pipeline();
 		SMPPCodecChannelInitializer codec = new SMPPCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(this.getClass(),LogLevel.DEBUG));
