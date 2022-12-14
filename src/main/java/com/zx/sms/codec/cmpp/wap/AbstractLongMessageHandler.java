@@ -27,14 +27,13 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	
 	@Override
 	protected void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
+		
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && ((LongSMSMessage)msg).needHandleLongMessage()) {
 			LongSMSMessage lmsg = (LongSMSMessage)msg;
-			String key = lmsg.getUniqueLongMsgId();
-			String channelId = (entity!=null && !entity.isRecvLongMsgOnMultiLink())? ctx.channel().id().asShortText(): "";
-			if(key == null) {
-				key = channelId +"."+lmsg.getSrcIdAndDestId();
-			}
+			//长短信类型生成唯一ID
+			setUniqueLongMsgId(lmsg,ctx);
 			
+			String key = lmsg.getUniqueLongMsgId().getId();
 			try {
 				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,key,lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
 
@@ -57,6 +56,7 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, T requestMessage, List<Object> out) throws Exception {
+		
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.SEND) && requestMessage instanceof LongSMSMessage  &&  ((LongSMSMessage)requestMessage).needHandleLongMessage()) {
 			LongSMSMessage lmsg = (LongSMSMessage)requestMessage;
 			SmsMessage msgcontent = lmsg.getSmsMessage();
@@ -67,13 +67,23 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 			
 			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
 			
+			
 			for (LongMessageFrame frame : frameList) {
 				T t = (T)lmsg.generateMessage(frame);
+				
+				//长短信类型生成唯一ID
+				setUniqueLongMsgId((LongSMSMessage)t,ctx);
+						
 				out.add(t);
 			}
 		} else {
 			out.add(requestMessage);
 		}
+	}
+	
+	//长短信类型生成唯一ID
+	private void setUniqueLongMsgId( LongSMSMessage lmsg,ChannelHandlerContext ctx) {
+		lmsg.setUniqueLongMsgId(new UniqueLongMsgId(entity,ctx.channel(),lmsg));
 	}
 
 	protected abstract void resetMessageContent(T t, SmsMessage content);

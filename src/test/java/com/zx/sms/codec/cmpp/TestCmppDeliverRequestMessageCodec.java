@@ -103,6 +103,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 			Assert.assertEquals(msg.getReportRequestMessage().getSmscSequence(),
 					result.getReportRequestMessage().getSmscSequence());
 		} else {
+			Assert.assertNotNull(result.getUniqueLongMsgId().getId());
 			Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 		}
 		Assert.assertEquals(msg.getSrcterminalId(), result.getSrcterminalId());
@@ -243,6 +244,7 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		CmppDeliverRequestMessage result = decode(copybuf);
 
 		System.out.println(result.getMsgContent());
+		Assert.assertNotNull(result.getUniqueLongMsgId().getId());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 		return frameCnt;
 	}

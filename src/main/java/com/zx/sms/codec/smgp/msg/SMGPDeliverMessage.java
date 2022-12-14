@@ -7,7 +7,6 @@ import java.util.List;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.marre.sms.SMGPSmsDcs;
 import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsMessage;
 import org.marre.sms.SmsMsgClass;
 import org.slf4j.Logger;
@@ -402,13 +401,13 @@ public class SMGPDeliverMessage extends SMGPBaseMessage implements LongSMSMessag
 	}
 	
 	@Override
-	public String getUniqueLongMsgId() {
+	public UniqueLongMsgId getUniqueLongMsgId() {
 		return super.getUniqueLongMsgId();
 	}
 
 	@Override
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
-		super.setUniqueLongMsgId(id.getId());
+		super.setUniqueLongMsgId(id);
 	}
 
 

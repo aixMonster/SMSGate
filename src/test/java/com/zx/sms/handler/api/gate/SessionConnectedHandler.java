@@ -30,7 +30,7 @@ import io.netty.util.concurrent.Promise;
  *
  */
 public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
-	private static final Logger logger = LoggerFactory.getLogger(SessionConnectedHandler.class);
+	protected static final Logger logger = LoggerFactory.getLogger(SessionConnectedHandler.class);
 
 	protected AtomicInteger totleCnt = new AtomicInteger(10);
 

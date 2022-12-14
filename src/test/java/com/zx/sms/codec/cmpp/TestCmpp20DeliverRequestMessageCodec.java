@@ -64,6 +64,7 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 		if (msg.isReport()) {
 			Assert.assertEquals(msg.getReportRequestMessage().getSmscSequence(), result.getReportRequestMessage().getSmscSequence());
 		} else {
+			Assert.assertNotNull(result.getUniqueLongMsgId().getId());
 			Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 		}
 		Assert.assertEquals(msg.getSrcterminalId(), result.getSrcterminalId());
@@ -129,6 +130,6 @@ public class TestCmpp20DeliverRequestMessageCodec extends AbstractTestMessageCod
 		
 		System.out.println(result.getMsgContent());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
-		Assert.assertNotNull(result.getUniqueLongMsgId());
+		Assert.assertNotNull(result.getUniqueLongMsgId().getId());
 	}
 }

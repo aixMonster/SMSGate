@@ -29,11 +29,13 @@ public class SMPPMessageReceiveHandler extends MessageReceiveHandler {
 			return ctx.writeAndFlush(res);
 			
 		}else if (msg instanceof DeliverSm ) {
+			logger.debug("UniqueLongMsgId : {}",((DeliverSm) msg).getUniqueLongMsgId());
 			DeliverSmResp res = ((DeliverSm) msg).createResponse();
 			String msgcontent = ((DeliverSm) msg).getMsgContent();
 			res.setMessageId(DigestUtils.md5Hex(msgcontent.getBytes(StandardCharsets.UTF_8)));
 			return ctx.writeAndFlush(res);
 		} else if (msg instanceof SubmitSm) {
+			logger.debug("UniqueLongMsgId : {}",((SubmitSm) msg).getUniqueLongMsgId());
 			SubmitSmResp res = ((SubmitSm) msg).createResponse();
 			String msgcontent = ((SubmitSm) msg).getMsgContent();
 			byte[] receive = msgcontent.getBytes(StandardCharsets.UTF_8);

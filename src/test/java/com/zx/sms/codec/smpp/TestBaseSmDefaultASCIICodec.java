@@ -25,6 +25,7 @@ public class TestBaseSmDefaultASCIICodec extends AbstractSMPPTestMessageCodec<Ba
 	protected EndpointEntity buildEndpointEntity() {
 		SMPPClientEndpointEntity en = new SMPPClientEndpointEntity();
 		en.setDefauteSmsAlphabet(SmsAlphabet.ASCII);
+		en.setId("Test");
 		return en;
 	}
 	
@@ -62,7 +63,7 @@ public class TestBaseSmDefaultASCIICodec extends AbstractSMPPTestMessageCodec<Ba
 	    BaseSm result = decode(copybuf);
 		
 		System.out.println(result);
-		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId());
+		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId().toString());
 		Assert.assertEquals(((SmsTextMessage)msg.getSmsMessage()).getText(), ((SmsTextMessage)result.getSmsMessage()).getText());
 	}
 }

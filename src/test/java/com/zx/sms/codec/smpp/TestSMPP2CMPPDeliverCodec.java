@@ -29,7 +29,7 @@ import io.netty.util.ResourceLeakDetector.Level;
 
 public class TestSMPP2CMPPDeliverCodec extends AbstractSMPPTestMessageCodec<CmppDeliverRequestMessage> {
 	protected void doinitChannel(Channel ch){
-		ResourceLeakDetector.setLevel(Level.ADVANCED);
+		ResourceLeakDetector.setLevel(Level.DISABLED);
 		ChannelPipeline pipeline = ch.pipeline();
 		SMPPCodecChannelInitializer codec = new SMPPCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));

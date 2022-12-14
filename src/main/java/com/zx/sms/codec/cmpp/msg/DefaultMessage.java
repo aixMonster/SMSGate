@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.packet.PacketType;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 
@@ -24,7 +25,7 @@ public class DefaultMessage implements Message ,Cloneable {
 	private Header header;
 	private byte[] buffer;
 	
-	private String uniqueLongMsgId;
+	private UniqueLongMsgId uniqueLongMsgId;
 
 	/**
 	 * CMPP的消息字段太少,增加一个附加字段,方便业务处理,
@@ -167,11 +168,11 @@ public class DefaultMessage implements Message ,Cloneable {
 		getHeader().setSequenceId(seq);
 	}
 
-	protected String getUniqueLongMsgId() {
+	protected UniqueLongMsgId getUniqueLongMsgId() {
 		return uniqueLongMsgId;
 	}
 
-	protected void setUniqueLongMsgId(String uniqueLongMsgId) {
+	protected void setUniqueLongMsgId(UniqueLongMsgId uniqueLongMsgId) {
 		this.uniqueLongMsgId = uniqueLongMsgId;
 	}
 }

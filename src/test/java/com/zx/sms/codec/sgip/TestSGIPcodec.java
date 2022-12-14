@@ -111,7 +111,7 @@ public class TestSGIPcodec extends AbstractSGIPTestMessageCodec<SgipDefaultMessa
 	    SgipDefaultMessage result = decode(copybuf);
 		Assert.assertNotNull(result);
 		System.out.println(result);
-		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId());
+		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId().getId());
 		if(msg instanceof SgipSubmitRequestMessage) {
 			SgipSubmitRequestMessage mt = (SgipSubmitRequestMessage)msg;
 			Assert.assertEquals(mt.getMsgContent(), ((SgipSubmitRequestMessage)result).getMsgContent());

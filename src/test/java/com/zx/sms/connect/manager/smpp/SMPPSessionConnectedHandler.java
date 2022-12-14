@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.marre.sms.SmsAlphabet;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.msg.DeliverSm;
 import com.zx.sms.codec.smpp.msg.DeliverSmReceipt;
@@ -38,7 +39,7 @@ public class SMPPSessionConnectedHandler extends SessionConnectedHandler {
 	        pdu.setSourceAddress(new Address((byte)0,(byte)0,"10086"));
 	        pdu.setDestAddress(new Address((byte)0,(byte)0,"13800138000"));
 //	        pdu.setSmsMsg(new SmsTextMessage(content,SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM,SmsMsgClass.CLASS_UNKNOWN)));
-	        pdu.setSmsMsg(str,SmsAlphabet.ASCII); //设置默认字符为ACSII
+	        pdu.setSmsMsg(str+"这个链接的访问记录，跟普通链ssage(content,SmsDcs.getGeneralDataCodingDcs(SmsAlphabet.GSM,SmsMsgClass.CLASS_U接的访问记录都一样，都发到大数据平台了吧？",SmsAlphabet.ASCII); //设置默认字符为ACSII
 	        return pdu;
 		}
 	}
@@ -53,6 +54,7 @@ public class SMPPSessionConnectedHandler extends SessionConnectedHandler {
 			 ctx.writeAndFlush(res);
 
 		} else {
+			if(((LongSMSMessage)((BaseMessage)msg).getRequest()) != null)
 			ctx.fireChannelRead(msg);
 		}
 	}

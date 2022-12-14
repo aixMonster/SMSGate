@@ -1,5 +1,9 @@
 package com.zx.sms.codec;
 
+import com.zx.sms.connect.manager.smgp.SMGPCodecChannelInitializer;
+import com.zx.sms.handler.smgp.SMGPDeliverLongMessageHandler;
+import com.zx.sms.handler.smgp.SMGPSubmitLongMessageHandler;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
@@ -9,13 +13,6 @@ import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
 import io.netty.util.ResourceLeakDetector;
 import io.netty.util.ResourceLeakDetector.Level;
-
-import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
-import com.zx.sms.common.GlobalConstance;
-import com.zx.sms.connect.manager.smgp.SMGPCodecChannelInitializer;
-import com.zx.sms.connect.manager.smpp.SMPPCodecChannelInitializer;
-import com.zx.sms.handler.smgp.SMGPDeliverLongMessageHandler;
-import com.zx.sms.handler.smgp.SMGPSubmitLongMessageHandler;
 
 public  abstract class AbstractSMGPTestMessageCodec<T> {
 	
@@ -36,8 +33,6 @@ public  abstract class AbstractSMGPTestMessageCodec<T> {
 		SMGPCodecChannelInitializer codec = new SMGPCodecChannelInitializer(getversion());
 		pipeline.addLast("serverLog", new LoggingHandler(this.getClass(),LogLevel.DEBUG));
 		pipeline.addLast(codec.pipeName(), codec);
-		LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
-		pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
 		//处理长短信
 		pipeline.addLast("SMGPDeliverLongMessageHandler", new SMGPDeliverLongMessageHandler(null));
 		pipeline.addLast("SMGPSubmitLongMessageHandler",  new SMGPSubmitLongMessageHandler(null));

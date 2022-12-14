@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
-import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.NotSupportedException;
 import com.zx.sms.common.storedMap.BDBStoredMapFactoryImpl;
@@ -213,11 +212,6 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 			// 增加流量整形 ，每个连接每秒发送，接收消息数不超过配置的值
 			ch.pipeline().addAfter(GlobalConstance.codecName, "ChannelTrafficAfter",
 					new WindowSizeChannelTrafficShapingHandler(endpoint, 100));
-			
-			//添加长短信标识Handler : LongMessageMarkerHandler
-			//用于给长短信类型的msg打上标识
-			LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(endpoint);
-			ch.pipeline().addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
 			
 			//添加各个协议的业务Handler
 			bindHandler(ch.pipeline(), endpoint);

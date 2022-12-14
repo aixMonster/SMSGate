@@ -530,7 +530,7 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 	}
 	
 	public SMGPSubmitMessage clone() throws CloneNotSupportedException {
-		SMGPSubmitMessage cloned = new SMGPSubmitMessage();
+		SMGPSubmitMessage cloned = (SMGPSubmitMessage)super.clone();
 		cloned.setSequenceNo(this.getSequenceNo());
 		cloned.setTimestamp(this.getTimestamp());
 		cloned.setLifeTime(this.getLifeTime());
@@ -616,13 +616,13 @@ public class SMGPSubmitMessage extends SMGPBaseMessage implements LongSMSMessage
 	}
 	
 	@Override
-	public String getUniqueLongMsgId() {
+	public UniqueLongMsgId getUniqueLongMsgId() {
 		return super.getUniqueLongMsgId();
 	}
 
 	@Override
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
-		super.setUniqueLongMsgId(id.getId());
+		super.setUniqueLongMsgId(id);
 	}
 	@Override
 	public boolean needHandleLongMessage() {

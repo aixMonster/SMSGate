@@ -10,6 +10,7 @@ import org.marre.sms.SmsMsgClass;
 import org.marre.sms.SmsTextMessage;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smgp.tlv.TLV;
 import com.zx.sms.codec.smgp.tlv.TLVOctets;
 import com.zx.sms.codec.smgp.util.ByteUtil;
@@ -39,7 +40,7 @@ public abstract class SMGPBaseMessage implements BaseMessage ,Cloneable{
 	//消息的生命周期，单位秒, 0表示永不过期
 	private long lifeTime=0;
 	
-	private String uniqueLongMsgId;
+	private UniqueLongMsgId uniqueLongMsgId;
 	
 	public boolean fromBytes(byte[] bytes,int version) throws Exception {
 		if (bytes == null) {
@@ -268,11 +269,11 @@ public abstract class SMGPBaseMessage implements BaseMessage ,Cloneable{
 		 sequenceNumber=seq;
 	}
 
-	protected String getUniqueLongMsgId() {
+	protected UniqueLongMsgId getUniqueLongMsgId() {
 		return uniqueLongMsgId;
 	}
 
-	protected void setUniqueLongMsgId(String uniqueLongMsgId) {
+	protected void setUniqueLongMsgId(UniqueLongMsgId uniqueLongMsgId) {
 		this.uniqueLongMsgId = uniqueLongMsgId;
 	}
 	

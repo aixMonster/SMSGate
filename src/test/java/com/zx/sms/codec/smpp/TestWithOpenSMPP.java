@@ -109,8 +109,8 @@ public class TestWithOpenSMPP {
 	public void sendsubmit(String msg,String  charencoding) throws Exception {
 		SubmitSM request = new SubmitSM();
 		request.setServiceType("");
-		request.setSourceAddr(new Address((byte) 5, (byte) 0, "198332"));
-		request.setDestAddr(new Address((byte) 1, (byte) 1, "10086"));
+		request.setSourceAddr(new Address((byte) 5, (byte) 0, "10088"));
+		request.setDestAddr(new Address((byte) 1, (byte) 1, "13800138001"));
 		request.setReplaceIfPresentFlag((byte) 0);
 
 		request.setShortMessage(msg, charencoding);

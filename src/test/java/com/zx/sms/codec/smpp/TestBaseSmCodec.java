@@ -259,7 +259,7 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
 	    BaseSm result = decode(copybuf);
 		
 		System.out.println(result);
-		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId());
+		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId().getId());
 		Assert.assertEquals(((SmsTextMessage)msg.getSmsMessage()).getText(), ((SmsTextMessage)result.getSmsMessage()).getText());
 	}
 	

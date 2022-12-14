@@ -119,13 +119,13 @@ public class DataSm extends BaseSm<DataSmResp>  implements LongSMSMessage<DataSm
 	}
 	
 	@Override
-	public String getUniqueLongMsgId() {
+	public UniqueLongMsgId getUniqueLongMsgId() {
 		return super.getUniqueLongMsgId();
 	}
 
 	@Override
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
-		super.setUniqueLongMsgId(id.getId());
+		super.setUniqueLongMsgId(id);
 	}
 
 	@Override

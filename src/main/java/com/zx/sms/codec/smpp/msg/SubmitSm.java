@@ -83,13 +83,13 @@ public class SubmitSm extends BaseSm<SubmitSmResp>  implements LongSMSMessage<Su
 	}
 	
 	@Override
-	public String getUniqueLongMsgId() {
+	public UniqueLongMsgId getUniqueLongMsgId() {
 		return super.getUniqueLongMsgId();
 	}
 
 	@Override
 	public void setUniqueLongMsgId(UniqueLongMsgId id) {
-		super.setUniqueLongMsgId(id.getId());
+		super.setUniqueLongMsgId(id);
 	}
 
 	@Override

@@ -21,7 +21,7 @@ import io.netty.util.concurrent.GenericFutureListener;
 
 
 public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
-	private static final Logger logger = LoggerFactory.getLogger(MessageReceiveHandler.class);
+	protected static final Logger logger = LoggerFactory.getLogger(MessageReceiveHandler.class);
 	private int rate = 1;
 
 	private AtomicLong cnt = new AtomicLong();

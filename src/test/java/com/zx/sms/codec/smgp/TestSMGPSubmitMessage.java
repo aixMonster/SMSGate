@@ -60,7 +60,7 @@ public class TestSMGPSubmitMessage extends AbstractSMGPTestMessageCodec<SMGPSubm
 	    SMGPSubmitMessage result = decode(copybuf);
 		Assert.assertNotNull(result);
 		System.out.println(result);
-		System.out.println(result.getUniqueLongMsgId());
+		Assert.assertNotNull(result.getUniqueLongMsgId().getId());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 		Assert.assertEquals(msg.getSrcTermId(), result.getSrcTermId());
 		Assert.assertArrayEquals(msg.getDestTermIdArray(), result.getDestTermIdArray());

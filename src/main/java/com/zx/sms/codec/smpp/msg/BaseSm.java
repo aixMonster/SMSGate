@@ -2,7 +2,6 @@ package com.zx.sms.codec.smpp.msg;
 
 import org.marre.sms.SmppSmsDcs;
 import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsMessage;
 import org.marre.sms.SmsMsgClass;
 import org.marre.sms.SmsPduUtil;
@@ -10,6 +9,7 @@ import org.marre.sms.SmsTextMessage;
 
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.RecoverablePduException;
 import com.zx.sms.codec.smpp.SmppInvalidArgumentException;
@@ -50,7 +50,7 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 	private short msglength;
 	private SmsMessage smsMsg;
 	
-	private String uniqueLongMsgId;
+	private UniqueLongMsgId uniqueLongMsgId;
 
 	public BaseSm(int commandId, String name) {
 		super(commandId, name);
@@ -176,11 +176,11 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		this.destAddress = value;
 	}
 	
-	protected String getUniqueLongMsgId() {
+	protected UniqueLongMsgId getUniqueLongMsgId() {
 		return uniqueLongMsgId;
 	}
 
-	protected void setUniqueLongMsgId(String uniqueLongMsgId) {
+	protected void setUniqueLongMsgId(UniqueLongMsgId uniqueLongMsgId) {
 		this.uniqueLongMsgId = uniqueLongMsgId;
 	}
 
