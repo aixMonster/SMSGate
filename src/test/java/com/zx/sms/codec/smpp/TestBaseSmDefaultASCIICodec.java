@@ -63,7 +63,7 @@ public class TestBaseSmDefaultASCIICodec extends AbstractSMPPTestMessageCodec<Ba
 	    BaseSm result = decode(copybuf);
 		
 		System.out.println(result);
-		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId().toString());
+		Assert.assertNotNull(((LongSMSMessage)result).getUniqueLongMsgId().toString());
 		Assert.assertEquals(((SmsTextMessage)msg.getSmsMessage()).getText(), ((SmsTextMessage)result.getSmsMessage()).getText());
 	}
 }
