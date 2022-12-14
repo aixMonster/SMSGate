@@ -20,7 +20,7 @@ jobs:
 
         # Docker Hub image
 
-        image: redis:alpine
+        image: redis
 
         # Set health checks to wait until redis has started
 
