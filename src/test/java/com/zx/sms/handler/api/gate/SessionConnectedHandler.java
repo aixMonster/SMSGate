@@ -10,8 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.LongSMSMessage;
+import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.common.util.ChannelUtil;
-import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
@@ -67,10 +68,15 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 						List<Promise<BaseMessage>> futures = null;
 						ChannelFuture chfuture = null;
 						BaseMessage msg = createTestReq(UUID.randomUUID().toString());
-//						chfuture = ChannelUtil.asyncWriteToEntity(getEndpointEntity().getId(), msg);
-//						futures = ChannelUtil.syncWriteLongMsgToEntity(getEndpointEntity().getId(), msg);
-						
-						chfuture = ctx.writeAndFlush(msg);
+						//测试专用，每个发送方法调一次
+						int mod = tmptotal.get()  % 3;
+						if(mod == 0) {
+							chfuture = ChannelUtil.asyncWriteToEntity(getEndpointEntity().getId(), msg);
+						}else if(mod ==1) {
+							futures = ChannelUtil.syncWriteLongMsgToEntity(getEndpointEntity().getId(), msg);
+						}else {
+							chfuture = ctx.writeAndFlush(msg);
+						}
 						
 						if (chfuture != null) {
 							chfuture.addListener(new GenericFutureListener<ChannelFuture>() {
@@ -84,7 +90,6 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 								}
 							});
 							chfuture.sync();
-							
 						}
 
 						cnt--;
@@ -157,5 +162,19 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 		SessionConnectedHandler ret = (SessionConnectedHandler) super.clone();
 		return ret;
 	}
+	
+	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+		if(msg instanceof BaseMessage) {
+			BaseMessage base = (BaseMessage)msg;
+			if(base.isResponse()) {
+				BaseMessage req = base.getRequest();
+				if(req instanceof LongSMSMessage) {
+					logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)req).getUniqueLongMsgId());
+				}
+			}
+		}
+	}
+
+		
 
 }

@@ -34,6 +34,7 @@ import com.zx.sms.codec.cmpp.msg.Header;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp.wap.SmsMessageHolder;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.common.util.MsgId;
 
 import io.netty.buffer.ByteBuf;

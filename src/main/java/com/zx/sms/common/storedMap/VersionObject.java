@@ -2,6 +2,8 @@ package com.zx.sms.common.storedMap;
 
 import java.io.Serializable;
 
+import com.zx.sms.common.util.CachedMillisecondClock;
+
 public class VersionObject<T extends Serializable> implements Serializable {
 	/**
 	 * 
@@ -11,7 +13,7 @@ public class VersionObject<T extends Serializable> implements Serializable {
 	private long version;
 	public VersionObject(T obj){
 		this.obj = obj;
-		this.version = System.currentTimeMillis();
+		this.version = CachedMillisecondClock.INS.now();
 	}
 	
 	public T getObj() {

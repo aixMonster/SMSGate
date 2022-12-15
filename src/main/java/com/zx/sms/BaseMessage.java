@@ -10,4 +10,5 @@ public interface BaseMessage extends Serializable{
     public BaseMessage getRequest();
     public int getSequenceNo();
     public void setSequenceNo(int seq);
+    public long getTimestamp();
 }

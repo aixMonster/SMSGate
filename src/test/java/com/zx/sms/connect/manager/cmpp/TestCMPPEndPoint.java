@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
+import com.zx.sms.connect.manager.TestConstants;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 
@@ -87,8 +88,7 @@ public class TestCMPPEndPoint {
 		serverhandlers.add(receiver);
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
-
-//		manager.addEndpointEntity(server);
+		EndpointManager.INS.openEndpoint(server);
 
 		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
 		client.setId("client");
@@ -112,13 +112,13 @@ public class TestCMPPEndPoint {
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
-		int count = 5000;
+		int count = TestConstants.Count;
 		CMPPSessionConnectedHandler sender = new CMPPSessionConnectedHandler(count);
 		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 
-		server.getSingletonConnector().open();
-		client.getSingletonConnector().open();
+		EndpointManager.INS.openEndpoint(client);
+		
 		Thread.sleep(1000);
 //		manager.startConnectionCheckTask();
 		System.out.println("start.....");
@@ -128,8 +128,7 @@ public class TestCMPPEndPoint {
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		server.getSingletonConnector().close();
-		client.getSingletonConnector().close();
+		EndpointManager.INS.close();
 		Assert.assertEquals(count, receiver.getCnt().get());
 		System.out.println("end.....");
 	}

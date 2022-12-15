@@ -208,6 +208,13 @@ public class TestCmppSubmitRequestMessageCodec  extends AbstractTestMessageCodec
 		
 		System.out.println(result.getMsgContent());
 		Assert.assertNotNull(result.getUniqueLongMsgId().getId());
+		System.out.println(result.getUniqueLongMsgId());
+		
+		if(result.getFragments()!=null) {
+			for(CmppSubmitRequestMessage m : result.getFragments())
+				System.out.println(m.getUniqueLongMsgId());
+		}
+		
 		Assert.assertEquals(msg.getServiceId(), result.getServiceId());
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 	}

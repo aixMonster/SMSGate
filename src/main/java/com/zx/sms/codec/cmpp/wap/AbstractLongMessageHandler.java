@@ -27,11 +27,8 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	
 	@Override
 	protected void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
-		
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && ((LongSMSMessage)msg).needHandleLongMessage()) {
 			LongSMSMessage lmsg = (LongSMSMessage)msg;
-			//长短信类型生成唯一ID
-			setUniqueLongMsgId(lmsg,ctx);
 			
 			String key = lmsg.getUniqueLongMsgId().getId();
 			try {
@@ -70,10 +67,6 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 			
 			for (LongMessageFrame frame : frameList) {
 				T t = (T)lmsg.generateMessage(frame);
-				
-				//长短信类型生成唯一ID
-				setUniqueLongMsgId((LongSMSMessage)t,ctx);
-						
 				out.add(t);
 			}
 		} else {
@@ -81,10 +74,6 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 		}
 	}
 	
-	//长短信类型生成唯一ID
-	private void setUniqueLongMsgId( LongSMSMessage lmsg,ChannelHandlerContext ctx) {
-		lmsg.setUniqueLongMsgId(new UniqueLongMsgId(entity,ctx.channel(),lmsg));
-	}
 
 	protected abstract void resetMessageContent(T t, SmsMessage content);
 }

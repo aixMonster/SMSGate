@@ -1,5 +1,7 @@
 package com.zx.sms.codec;
 
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
+import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.connect.manager.smgp.SMGPCodecChannelInitializer;
 import com.zx.sms.handler.smgp.SMGPDeliverLongMessageHandler;
 import com.zx.sms.handler.smgp.SMGPSubmitLongMessageHandler;
@@ -33,6 +35,8 @@ public  abstract class AbstractSMGPTestMessageCodec<T> {
 		SMGPCodecChannelInitializer codec = new SMGPCodecChannelInitializer(getversion());
 		pipeline.addLast("serverLog", new LoggingHandler(this.getClass(),LogLevel.DEBUG));
 		pipeline.addLast(codec.pipeName(), codec);
+		LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
+		pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
 		//处理长短信
 		pipeline.addLast("SMGPDeliverLongMessageHandler", new SMGPDeliverLongMessageHandler(null));
 		pipeline.addLast("SMGPSubmitLongMessageHandler",  new SMGPSubmitLongMessageHandler(null));

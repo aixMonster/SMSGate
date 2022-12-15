@@ -2,6 +2,8 @@ package PduParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.common.util.CachedMillisecondClock;
+
 
 /*
  * Copyright (C) 2007-2008 Esmertec AG.
@@ -44,7 +46,7 @@ public class SendReq extends MultimediaMessagePdu {
     }
 
     private byte[] generateTransactionId() {
-        String transactionId = "T" + Long.toHexString(System.currentTimeMillis());
+        String transactionId = "T" + Long.toHexString(CachedMillisecondClock.INS.now());
         return transactionId.getBytes();
     }
 

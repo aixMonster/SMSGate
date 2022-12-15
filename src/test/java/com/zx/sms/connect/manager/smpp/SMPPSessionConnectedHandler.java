@@ -45,7 +45,7 @@ public class SMPPSessionConnectedHandler extends SessionConnectedHandler {
 	}
 	
 	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-
+		super.channelRead(ctx, msg);
 		if (msg instanceof DeliverSmReceipt) {
 			DeliverSmReceipt e = (DeliverSmReceipt) msg;
 			
@@ -54,8 +54,6 @@ public class SMPPSessionConnectedHandler extends SessionConnectedHandler {
 			 ctx.writeAndFlush(res);
 
 		} else {
-			if(((LongSMSMessage)((BaseMessage)msg).getRequest()) != null)
-				logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)((BaseMessage)msg).getRequest()).getUniqueLongMsgId());
 			ctx.fireChannelRead(msg);
 		}
 	}

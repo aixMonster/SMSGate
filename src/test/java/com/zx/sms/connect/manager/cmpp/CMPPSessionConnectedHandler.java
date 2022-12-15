@@ -56,7 +56,7 @@ public class CMPPSessionConnectedHandler extends SessionConnectedHandler {
 	}
 	
 	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-
+		super.channelRead(ctx, msg);
 		if (msg instanceof CmppDeliverRequestMessage) {
 			CmppDeliverRequestMessage e = (CmppDeliverRequestMessage) msg;
 			

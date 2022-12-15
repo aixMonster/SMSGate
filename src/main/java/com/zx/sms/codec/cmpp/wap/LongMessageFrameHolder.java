@@ -49,6 +49,7 @@ import com.zx.sms.codec.LongMessageFrameProvider;
 import com.zx.sms.codec.smpp.msg.BaseSm;
 import com.zx.sms.common.NotSupportedException;
 import com.zx.sms.common.util.CMPPCommonUtil;
+import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.common.util.StandardCharsets;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.smpp.SMPPEndpointEntity;
@@ -171,19 +172,16 @@ public enum LongMessageFrameHolder {
 	/**
 	 *获取长短信的UDHI字段里的frameKey + pkTol ,以方便长短信关联状态报告时使用
 	 */
-	public String parseFrameKey(String longSmsKey,LongSMSMessage msg) {
-		LongMessageFrame frame = msg.generateFrame();
-		StringBuilder mapKeyBuilder = new StringBuilder(longSmsKey);
-		// udhi只取第1个bit和第7个bit同时为0时，表示不包含UDH
+	public FrameHolder parseFrameKey(LongMessageFrame frame) {
+		
 		if (frame.isConcatMsg()) {
 			try {
-				FrameHolder fh = createFrameHolder(longSmsKey, frame);
-				mapKeyBuilder.append(".").append(fh.frameKey).append(".").append(fh.getTotalLength());
-				return mapKeyBuilder.toString();
+				FrameHolder fh = createFrameHolder("", frame);
+				return fh ;
 			}catch(NotSupportedException es) {
 			}
 		}
-		return mapKeyBuilder.toString();
+		return null;
 	}
 	
 	/**
@@ -225,6 +223,9 @@ public enum LongMessageFrameHolder {
 
 				// 超过一帧的，进行长短信合并
 				String mapKey = longSmsKey+fh.frameKey+fh.getTotalLength();
+				
+				//设置短信处分的接收时间
+				frame.setTimestamp(((BaseMessage)msg).getTimestamp());
 
 				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
 				boolean complete = setAndget(msg,mapKey, frame,isRecvLongMsgOnMultiLink);
@@ -248,17 +249,28 @@ public enum LongMessageFrameHolder {
 						
 						//根据分片信息，恢复消息对象，并保存在Fragments 列表中，不包含第一个分片
 						//用第一个到达的分片做为 合并后消息的母本
+
+						//恢复UniqueLongMsgId
 						LongSMSMessage fullMsg = (LongSMSMessage) msg.generateMessage(allFrame.get(0));
+						//恢复消息序列号
 						if(fullMsg instanceof BaseMessage) {
-							((BaseMessage)fullMsg).setSequenceNo((int)allFrame.get(0).getSequence());
+							((BaseMessage)fullMsg).setSequenceNo(allFrame.get(0).getSequence());
 						}
+						if(fullMsg.getUniqueLongMsgId()!=null)
+							fullMsg.setUniqueLongMsgId(new UniqueLongMsgId(fullMsg.getUniqueLongMsgId(),allFrame.get(0)));
 						
 						//其它的分片，作为fragment放入 Fragment List 
 						for(int i = 1; i< allFrame.size() ;i++) {
 							LongMessageFrame tmp = allFrame.get(i);
 							LongSMSMessage  frag = (LongSMSMessage) fullMsg.generateMessage(tmp);
+							
+							//恢复UniqueLongMsgId
+							if(frag.getUniqueLongMsgId()!=null)
+								frag.setUniqueLongMsgId(new UniqueLongMsgId(frag.getUniqueLongMsgId(),tmp));
+							
+							//恢复消息序列号
 							if(frag instanceof BaseMessage) {
-								((BaseMessage)frag).setSequenceNo((int)tmp.getSequence());
+								((BaseMessage)frag).setSequenceNo(tmp.getSequence());
 							}
 							fullMsg.addFragment(frag);
 						}
@@ -706,7 +718,7 @@ public enum LongMessageFrameHolder {
 			NotificationInd nind = (NotificationInd) notify;
 			SmsMmsNotificationMessage mms = new SmsMmsNotificationMessage(new String(nind.getContentLocation(), StandardCharsets.US_ASCII),
 					nind.getMessageSize());
-			mms.setExpiry((int) (nind.getExpiry() - System.currentTimeMillis() / 1000));
+			mms.setExpiry((int) (nind.getExpiry() - CachedMillisecondClock.INS.now() / 1000));
 			if (nind.getFrom() != null)
 				mms.setFrom(nind.getFrom().getString());
 			String msgclass = new String(nind.getMessageClass(), StandardCharsets.UTF_8);

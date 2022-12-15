@@ -22,6 +22,7 @@ import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.SendFailException;
 import com.zx.sms.common.SmsLifeTerminateException;
 import com.zx.sms.common.storedMap.VersionObject;
+import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.config.PropertiesUtils;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
@@ -68,7 +69,7 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 	private long msgWriteCount = 0;
 	private EndpointEntity entity;
 
-	private final long version = System.currentTimeMillis();
+	private final long version = CachedMillisecondClock.INS.now();
 
 	private final static ScheduledThreadPoolExecutor msgResend = new ScheduledThreadPoolExecutor(Integer.parseInt(PropertiesUtils.getProperties(
 			"GlobalMsgResendThreadCount", "4")), new ThreadFactory() {

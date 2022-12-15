@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
+import com.zx.sms.connect.manager.TestConstants;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 /**
@@ -59,7 +60,7 @@ public class TestSMPPEndPoint {
 		serverhandlers.add(receiver);   
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
-		
+		EndpointManager.INS.openEndpoint(server);
 		SMPPClientEndpointEntity client = new SMPPClientEndpointEntity();
 		client.setId("smppclient");
 		client.setHost("127.0.0.1");
@@ -76,12 +77,11 @@ public class TestSMPPEndPoint {
 //		client.setReadLimit(200);
 		client.setSupportLongmsg(SupportLongMessage.SEND);  //接收长短信时不自动合并
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
-		int count = 10000;
+		int count = TestConstants.Count;
 		clienthandlers.add( new SMPPSessionConnectedHandler(count)); 
 		client.setBusinessHandlerSet(clienthandlers);
 		
-		server.getSingletonConnector().open();
-		client.getSingletonConnector().open();
+		EndpointManager.INS.openEndpoint(client);
 		Thread.sleep(1000);
 		System.out.println("start.....");
 		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
@@ -90,8 +90,8 @@ public class TestSMPPEndPoint {
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		server.getSingletonConnector().close();
-		client.getSingletonConnector().close();
+		EndpointManager.INS.close(client);
+		EndpointManager.INS.close(server);
 
 		Assert.assertEquals(count, receiver.getCnt().get());
 			

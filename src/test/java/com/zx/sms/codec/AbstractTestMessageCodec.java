@@ -1,5 +1,7 @@
 package com.zx.sms.codec;
 
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
+import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
 import com.zx.sms.connect.manager.cmpp.CMPPCodecChannelInitializer;
@@ -32,7 +34,8 @@ public abstract class AbstractTestMessageCodec<T> {
 			CMPPCodecChannelInitializer codec = new CMPPCodecChannelInitializer(getVersion());
 			pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));
 			pipeline.addLast(codec.pipeName(), codec);
-			
+			LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(e);
+			pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
 			pipeline.addLast( "CMPPDeliverLongMessageHandler", new CMPPDeliverLongMessageHandler(e));
 			pipeline.addLast("CMPPSubmitLongMessageHandler",  new CMPPSubmitLongMessageHandler(e));
 		}

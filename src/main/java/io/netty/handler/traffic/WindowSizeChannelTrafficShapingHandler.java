@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.common.GlobalConstance;
+import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.connect.manager.EndpointEntity;
 
 import io.netty.buffer.ByteBuf;
@@ -220,7 +221,7 @@ public class WindowSizeChannelTrafficShapingHandler extends AbstractTrafficShapi
         //积压消息过大，打印告警日志
         if(queueSize > getMaxWriteSize()*2) {
         	final long t_size = queueSize;
-        	final long time = System.currentTimeMillis();
+        	final long time = CachedMillisecondClock.INS.now();
             if(logFuture == null || logFuture.isDone()) {
             	//1秒打印一次
             	logFuture = ctx.executor().schedule(new Runnable() {

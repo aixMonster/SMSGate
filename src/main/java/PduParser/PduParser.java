@@ -10,6 +10,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.common.util.CachedMillisecondClock;
+
 public class PduParser {
 	private static final Logger logger = LoggerFactory.getLogger(PduParser.class);
 	/**
@@ -138,7 +140,7 @@ public class PduParser {
                     PduPart theOnlyPart = new PduPart();
                     theOnlyPart.setContentType(contentType);
                     theOnlyPart.setContentLocation(Long.toOctalString(
-                            System.currentTimeMillis()).getBytes());
+                    		CachedMillisecondClock.INS.now()).getBytes());
                     theOnlyPart.setContentId("<part1>".getBytes());
 
                     mPduDataStream.mark(1);
@@ -508,7 +510,7 @@ public class PduParser {
 					/*
 					 * need to convert the Delta-seconds-value into Date-value
 					 */
-					timeValue = System.currentTimeMillis() / 1000 + timeValue;
+					timeValue = CachedMillisecondClock.INS.now() / 1000 + timeValue;
 				}
 
 				try {
@@ -845,7 +847,7 @@ public class PduParser {
 			 * not set anyone of them, generate a default content-location
 			 */
 			if ((null == part.getContentLocation()) && (null == part.getName()) && (null == part.getFilename()) && (null == part.getContentId())) {
-				part.setContentLocation(Long.toOctalString(System.currentTimeMillis()).getBytes());
+				part.setContentLocation(Long.toOctalString(CachedMillisecondClock.INS.now()).getBytes());
 			}
 
 			/* get part's data */

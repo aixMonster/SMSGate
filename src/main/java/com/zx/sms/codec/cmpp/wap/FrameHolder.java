@@ -40,7 +40,7 @@ class FrameHolder {
 	private static final Logger logger = LoggerFactory.getLogger(FrameHolder.class);
 	// 这个字段目前只在当分片丢失时方便跟踪
 	private String serviceNum;
-	private long sequence;
+	private int sequence;
 	private long timestamp = CachedMillisecondClock.INS.now();
 	/**
 	 * 长短信的总分片数量
@@ -71,11 +71,11 @@ class FrameHolder {
 		this.serviceNum = serviceNum;
 	}
 
-	public long getSequence() {
+	public int getSequence() {
 		return sequence;
 	}
 
-	public void setSequence(long sequence) {
+	public void setSequence(int sequence) {
 		this.sequence = sequence;
 	}
 

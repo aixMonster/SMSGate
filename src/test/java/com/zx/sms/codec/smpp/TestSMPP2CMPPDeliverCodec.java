@@ -13,6 +13,8 @@ import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;
 import com.zx.sms.codec.cmpp.msg.DefaultHeader;
 import com.zx.sms.codec.cmpp.msg.Header;
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
+import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.smpp.SMPPCodecChannelInitializer;
 import com.zx.sms.handler.smpp.SMPP2CMPPBusinessHandler;
@@ -34,6 +36,10 @@ public class TestSMPP2CMPPDeliverCodec extends AbstractSMPPTestMessageCodec<Cmpp
 		SMPPCodecChannelInitializer codec = new SMPPCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));
 		pipeline.addLast(codec.pipeName(), codec);
+		
+		LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
+		pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
+		
 		pipeline.addLast( "SMPPLongMessageHandler", new SMPPLongMessageHandler(null));
 		pipeline.addLast("SMPP2CMPPCodec", new SMPP2CMPPBusinessHandler());
 	}

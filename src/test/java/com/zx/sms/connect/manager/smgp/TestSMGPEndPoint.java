@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
+import com.zx.sms.connect.manager.TestConstants;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 
@@ -58,7 +59,7 @@ public class TestSMGPEndPoint {
 		serverhandlers.add(receiver);
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
-
+		EndpointManager.INS.openEndpoint(server);
 		SMGPClientEndpointEntity client = new SMGPClientEndpointEntity();
 		client.setId("smgpclient");
 		client.setHost("127.0.0.1");
@@ -75,12 +76,11 @@ public class TestSMGPEndPoint {
 //		client.setWriteLimit(200);
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
-		int count = 10000;
+		int count = TestConstants.Count;
 		clienthandlers.add(new SMGPSessionConnectedHandler(count));
 		client.setBusinessHandlerSet(clienthandlers);
 
-		server.getSingletonConnector().open();
-		client.getSingletonConnector().open();
+		EndpointManager.INS.openEndpoint(client);
 
 		Thread.sleep(1000);
 
@@ -91,9 +91,8 @@ public class TestSMGPEndPoint {
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		server.getSingletonConnector().close();
-		client.getSingletonConnector().close();
-
+		EndpointManager.INS.close(client);
+		EndpointManager.INS.close(server);
 		Assert.assertEquals(count, receiver.getCnt().get());
 
 	}

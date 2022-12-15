@@ -134,6 +134,7 @@ public class DefaultMessage implements Message ,Cloneable {
 		newHeader.setSequenceId(header.getSequenceId());
 		newHeader.setCommandId(packetType.getCommandId());
 		msg.setHeader(newHeader);
+		msg.setTimestamp(CachedMillisecondClock.INS.now());
 		return msg;
 	}
 

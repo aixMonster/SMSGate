@@ -14,6 +14,7 @@ import io.netty.buffer.ByteBufUtil;
 public class LongMessageFrame implements Serializable{
 	private static final long serialVersionUID = -8554060199834235624L;
 	
+	private long timestamp;
 	private short pkseq = 0;
 	private byte pktotal = 1;
 	private byte pknumber = 1;
@@ -23,7 +24,7 @@ public class LongMessageFrame implements Serializable{
 	// encode septet
 	private byte[] msgContentBytes = GlobalConstance.emptyBytes;
 
-	private long sequence;
+	private int sequence;
 	
 	public short getPkseq() {
 		return pkseq;
@@ -130,12 +131,20 @@ public class LongMessageFrame implements Serializable{
 		this.msgContentBytes = msgContentBytes;
 	}
 
-	public long getSequence() {
+	public int getSequence() {
 		return sequence;
 	}
 
-	public void setSequence(long sequence) {
+	public void setSequence(int sequence) {
 		this.sequence = sequence;
+	}
+	
+	public long getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(long timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	// get unencode septet bytes
@@ -158,7 +167,7 @@ public class LongMessageFrame implements Serializable{
 	public String toString() {
 		return "LongMessageFrame [pkseq=" + pkseq + ", pktotal=" + pktotal + ", pknumber=" + pknumber + ", tppid="
 				+ tppid + ", tpudhi=" + tpudhi + ", msgfmt=" + msgfmt + ", msgContentBytes="
-				+ ByteBufUtil.hexDump(msgContentBytes) + ", sequence=" + sequence + "]";
+				+ ByteBufUtil.hexDump(msgContentBytes) +", timestamp=" + timestamp+ ", sequence=" + sequence + "]";
 	}
 	
 	

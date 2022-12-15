@@ -1,5 +1,6 @@
 package com.zx.sms.handler.api.smsbiz;
 
+import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -8,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
+import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
@@ -71,7 +73,16 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 
 	@Override
 	public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
-
+		if(msg instanceof LongSMSMessage) {
+			logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)msg).getUniqueLongMsgId());
+			if(((LongSMSMessage) msg).getFragments()!=null) {
+				for(LongSMSMessage f :(List<LongSMSMessage>) ((LongSMSMessage) msg).getFragments()) {
+					logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)f).getUniqueLongMsgId());
+				}
+			}
+		}
+			
+		
 		ChannelFuture future = reponse(ctx, msg);
 		if (future != null && msg instanceof BaseMessage)
 			future.addListener(new GenericFutureListener() {

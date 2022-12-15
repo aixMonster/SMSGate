@@ -96,7 +96,6 @@ public class SmsMmsNotificationMessage extends SmsWapPushMessage implements Seri
         }
         MmsHeaderEncoder.writeHeaderXMmsMessageClass(os, messageClassId_);
         MmsHeaderEncoder.writeHeaderXMmsMessageSize(os, size_);
-       // MmsHeaderEncoder.writeHeaderXMmsExpiryAbsolute(os, expiry_ + System.currentTimeMillis()/1000);
     }
 
     public void setMessageClass(int messageClassId)

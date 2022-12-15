@@ -23,6 +23,8 @@ public class SMGPMessageReceiveHandler extends MessageReceiveHandler {
 			return ctx.writeAndFlush(resp);
 		}else if(msg instanceof SMGPSubmitMessage) {
 			SMGPSubmitRespMessage resp = new SMGPSubmitRespMessage();
+			
+			
 			resp.setSequenceNo(((SMGPSubmitMessage)msg).getSequenceNo());
 		    resp.setStatus(0);
 			return ctx.writeAndFlush(resp);

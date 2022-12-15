@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
+import com.zx.sms.connect.manager.TestConstants;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 import com.zx.sms.handler.sgip.SgipReportRequestMessageHandler;
@@ -62,7 +63,7 @@ public class TestSgipEndPoint {
 		serverhandlers.add(receiver);
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
-
+		EndpointManager.INS.openEndpoint(server);
 		SgipClientEndpointEntity client = new SgipClientEndpointEntity();
 		client.setId("sgipclient");
 		client.setHost("127.0.0.1");
@@ -80,11 +81,10 @@ public class TestSgipEndPoint {
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		clienthandlers.add(new SgipReportRequestMessageHandler());
-		int count = 10000;
+		int count = TestConstants.Count;
 		clienthandlers.add(new SGIPSessionConnectedHandler(count));
 		client.setBusinessHandlerSet(clienthandlers);
-		server.getSingletonConnector().open();
-		client.getSingletonConnector().open();
+		EndpointManager.INS.openEndpoint(client);
 		Thread.sleep(1000);
 
 		System.out.println("sgip start.....");
@@ -94,8 +94,8 @@ public class TestSgipEndPoint {
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		server.getSingletonConnector().close();
-		client.getSingletonConnector().close();
+		EndpointManager.INS.close(server);
+		EndpointManager.INS.close(client);
 		Assert.assertEquals(count, receiver.getCnt().get());
 
 	}
