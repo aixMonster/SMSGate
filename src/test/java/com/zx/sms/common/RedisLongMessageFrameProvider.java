@@ -16,7 +16,7 @@ public class RedisLongMessageFrameProvider implements LongMessageFrameProvider {
 	@Override
 	public LongMessageFrameCache create() {
 		JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
-		jedisPoolConfig.setMaxTotal(20);
+		jedisPoolConfig.setMaxTotal(10);
 		jedisPoolConfig.setMaxIdle(10);
 		String host = StringUtils.isBlank(System.getenv("REDIS_HOST")) ? System.getProperty("RedisHost"):System.getenv("REDIS_HOST");
 		String port = StringUtils.isBlank(System.getenv("REDIS_PORT")) ? System.getProperty("RedisPort"):System.getenv("REDIS_PORT");

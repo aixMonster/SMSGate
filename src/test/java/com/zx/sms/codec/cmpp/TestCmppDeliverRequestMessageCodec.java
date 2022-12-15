@@ -9,11 +9,13 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
+import org.marre.sms.SmsConcatMessage;
 import org.marre.sms.SmsDcs;
 import org.marre.sms.SmsMessage;
 import org.marre.sms.SmsTextMessage;
@@ -117,13 +119,13 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		// 取时间，用来查看编码解码时间
 
 		CmppDeliverRequestMessage msg = new CmppDeliverRequestMessage(header);
-		msg.setDestId("13800138000");
+		msg.setDestId("10"+RandomUtils.nextInt(138000, 188000));
 		msg.setLinkid("0000");
 		// 70个汉字
 		msg.setMsgContent(content);
 		msg.setMsgId(new MsgId());
 		msg.setServiceid("10086");
-		msg.setSrcterminalId("13800138000");
+		msg.setSrcterminalId("13800"+RandomUtils.nextInt(238000, 288000));
 		msg.setSrcterminalType((short) 1);
 		header.setSequenceId((int) System.nanoTime());
 		return msg;
@@ -249,16 +251,18 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		Assert.assertEquals(msg.getMsgContent(), result.getMsgContent());
 		return frameCnt;
 	}
-	ExecutorService executor = Executors.newFixedThreadPool(20);
+	ExecutorService executor = Executors.newFixedThreadPool(200);
 	// 多线程长短信合并
 	@Test
 	public void testConcurrentLongMessageMerge() throws Exception {
-		int total = RandomUtils.nextInt(1000,3000);
-		testConcurrentLongMessageMerge1(total,false);
-		testConcurrentLongMessageMerge1(total,true);
-		
-		testConcurrentLongMessageMerge2(total,false);
-		testConcurrentLongMessageMerge2(total,true);
+//		for(int i=0 ;i<100;i++) {
+			int total = RandomUtils.nextInt(1000,3000);
+			testConcurrentLongMessageMerge1(total,false);
+			testConcurrentLongMessageMerge1(total,true);
+			
+			testConcurrentLongMessageMerge2(total,false);
+			testConcurrentLongMessageMerge2(total,true);
+//		}
 	}
 	
 
@@ -278,9 +282,14 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 			randomSize = RandomUtils.nextInt(130, 67 * 5);
 			CmppDeliverRequestMessage lmsg = createTestReq(longlongMsg.substring(0, randomSize));
 			
-			lmsg.setDestId("102" + i);
+			lmsg.setDestId("1871" + i);
 			// 长短信拆分
 			SmsMessage msgcontent = lmsg.getSmsMessage();
+			
+			if(msgcontent instanceof SmsConcatMessage) {
+				((SmsConcatMessage)msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+			}
+			
 			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
 
 			// 保证同一条长短信，通过同一个tcp连接发送
@@ -331,14 +340,14 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 
 			startSignal.countDown(); // 合并线程同时启动
 			long start = System.nanoTime();
-			stop.await(); // 等待结束
+			stop.await(60,TimeUnit.SECONDS); // 等待结束
 
 			Assert.assertEquals("合并成功的消息数：", 1, count.get());
 			long end = System.nanoTime();
 			totalTime += (end - start);
 		}
 
-		logger.info("testConcurrentLongMessageMerge1 "+ (useredis?"Redis":"")+"合并耗时 : " + totalTime / 1000000 + "ms，" + "长短信总条数: " + TOTLE + " 总分片数："+sumsplit + " 合并速度：" + (sumsplit*1000*1000000)/totalTime+"/s");
+		logger.info("testConcurrentLongMessageMerge1 "+ (useredis?"Redis":"     ")+"合并耗时 : " + totalTime / 1000000 + "ms，" + "长短信总条数: " + TOTLE + " 总分片数："+sumsplit + " 合并速度：" + (sumsplit*1000*1000000)/totalTime+"/s");
 	}
 
 	// 多线程长短信合并
@@ -374,10 +383,13 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 			
 			CmppDeliverRequestMessage lmsg = createTestReq(txt);
 			// 设置每个短信的端口号不同
-			lmsg.setDestId("102" + i);
+			lmsg.setDestId("1872" + i);
 			// 长短信拆分
 			SmsMessage msgcontent = lmsg.getSmsMessage();
 			
+			if(msgcontent instanceof SmsConcatMessage) {
+				((SmsConcatMessage)msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+			}
 			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
 
 			// 保证同一条长短信，通过同一个tcp连接发送
@@ -434,12 +446,12 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 		startSignal.countDown(); // 合并线程同时启动
 		
 		long start = System.nanoTime();
-		stop.await(); // 等待结束
+		stop.await(60,TimeUnit.SECONDS); // 等待结束
 
 		Assert.assertEquals("合并成功的条数：", TOTLE, count.get());
 		long end = System.nanoTime();
 		totalTime += (end - start);
 
-		logger.info("testConcurrentLongMessageMerge2 长短信总条数"+ TOTLE+" 总分片数："+totalSplitMsg + " " + (useredis?"Redis":"")+ " 合并耗时 : " + totalTime / 1000000 + "ms"+ " 合并速度：" + ((long)totalSplitMsg*1000*1000000)/totalTime+"/s");
+		logger.info("testConcurrentLongMessageMerge2 长短信总条数"+ TOTLE+" 总分片数："+totalSplitMsg + " " + (useredis?"Redis":"     ")+ " 合并耗时 : " + totalTime / 1000000 + "ms"+ " 合并速度：" + ((long)totalSplitMsg*1000*1000000)/totalTime+"/s");
 	}
 }

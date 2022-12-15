@@ -101,7 +101,10 @@ public class TestMsgDataSubmitRequestDecoder2 extends AbstractTestMessageCodec<C
 		while (null != (result = (CmppSubmitRequestMessage) ch.readInbound())) {
 			System.out.println(result);
 			Assert.assertNotNull(result.getUniqueLongMsgId().getId());
-			Assert.assertTrue(result.getUniqueLongMsgId().getId().startsWith(super.EndPointID+"."+super.ch.id().asShortText()+"."+result.getSrcIdAndDestId()));
+			
+			Assert.assertEquals(result.getUniqueLongMsgId().getEntityId(),super.EndPointID);
+			Assert.assertEquals(result.getUniqueLongMsgId().getChannelId(),super.ch.id().asShortText());
+			Assert.assertTrue(result.getUniqueLongMsgId().getId().startsWith(result.getSrcIdAndDestId()));
 		
 			resultStr += result.getMsgContent();
 			ByteBuf bytebuf = Unpooled.copiedBuffer(encode(result));

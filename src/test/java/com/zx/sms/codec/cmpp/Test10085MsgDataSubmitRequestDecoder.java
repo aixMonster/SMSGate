@@ -1,13 +1,14 @@
 package com.zx.sms.codec.cmpp;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-
 import org.junit.Assert;
 import org.junit.Test;
 
 import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class Test10085MsgDataSubmitRequestDecoder extends AbstractTestMessageCodec<CmppSubmitRequestMessage>{
 	@Override
@@ -25,8 +26,9 @@ public class Test10085MsgDataSubmitRequestDecoder extends AbstractTestMessageCod
 		while(null!= ( result =  (CmppSubmitRequestMessage)ch.readInbound())){
 			
 			Assert.assertNotNull(result);
-			Assert.assertNotNull(result.getUniqueLongMsgId().getId());
-			Assert.assertEquals(super.EndPointID+"."+super.ch.id().asShortText()+".1816483568710085.46.3",result.getUniqueLongMsgId().getId());
+			UniqueLongMsgId uid = result.getUniqueLongMsgId();
+			Assert.assertNotNull(uid);
+			Assert.assertEquals(super.EndPointID+super.ch.id().asShortText()+"1816483568710085.46.3",uid.getEntityId()+uid.getChannelId()+uid.getId());
 			ch.writeOutbound(result);
 			success = true;
 		}

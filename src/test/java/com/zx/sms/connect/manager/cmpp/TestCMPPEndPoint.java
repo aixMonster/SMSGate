@@ -128,7 +128,8 @@ public class TestCMPPEndPoint {
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
-		EndpointManager.INS.close();
+		EndpointManager.INS.close(server);
+		EndpointManager.INS.close(client);
 		Assert.assertEquals(count, receiver.getCnt().get());
 		System.out.println("end.....");
 	}

@@ -222,7 +222,7 @@ public enum LongMessageFrameHolder {
 				}
 
 				// 超过一帧的，进行长短信合并
-				String mapKey = longSmsKey+fh.frameKey+fh.getTotalLength();
+				String mapKey = longSmsKey+"."+fh.frameKey+"."+fh.getTotalLength();
 				
 				//设置短信处分的接收时间
 				frame.setTimestamp(((BaseMessage)msg).getTimestamp());
@@ -237,7 +237,7 @@ public enum LongMessageFrameHolder {
 					List<LongMessageFrame> allFrame = getAndDel(mapKey,isRecvLongMsgOnMultiLink);
 					//总帧数个数虽然够了，还要再判断是不是所有帧都齐了 ，有可能收到相同帧序号的帧
 					//从第一个帧开始偿试合并
-					FrameHolder firstF = createFrameHolder(longSmsKey, allFrame.get(0));
+					FrameHolder firstF = createFrameHolder(mapKey, allFrame.get(0));
 					for(int i = 1; i< allFrame.size() ;i++) {
 						try {
 							firstF = mergeFrameHolder(firstF, allFrame.get(i));
@@ -281,7 +281,7 @@ public enum LongMessageFrameHolder {
 					}
 				}
 			} catch (Exception ex) {
-				logger.warn("Merge Long SMS Error. dump:{}",ByteBufUtil.hexDump(frame.getMsgContentBytes()) ,ex);
+				logger.warn("Merge Long SMS Error. entity : {} , dump:{}.\n {} ",  entity.getId(),ByteBufUtil.hexDump(frame.getMsgContentBytes()) ,msg,ex);
 				throw new NotSupportedException(ex.getMessage());
 			}
 		} 
@@ -354,7 +354,7 @@ public enum LongMessageFrameHolder {
 			frame.setMsgContentBytes(btos.toByteArray());
 			result.add(frame);
 		}
-
+//		Collections.shuffle(result);
 		return result;
 	}
 

@@ -24,9 +24,7 @@ public class LongMessageMarkerHandler extends AbstractBusinessHandler {
 
 	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 		if (msg instanceof LongSMSMessage && ((LongSMSMessage) msg).needHandleLongMessage()) {
-			//new 出来的消息没有UniqueLongMsgId,这里生成一个
-			if(((LongSMSMessage)msg).getUniqueLongMsgId() == null)
-				setUniqueLongMsgId((LongSMSMessage)msg,ctx);
+			setUniqueLongMsgId((LongSMSMessage)msg,ctx);
 		}
 		ctx.write(msg, promise);
 	}

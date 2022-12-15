@@ -29,10 +29,17 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	protected void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
 		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && ((LongSMSMessage)msg).needHandleLongMessage()) {
 			LongSMSMessage lmsg = (LongSMSMessage)msg;
+			UniqueLongMsgId uniqueId = lmsg.getUniqueLongMsgId();
 			
-			String key = lmsg.getUniqueLongMsgId().getId();
+			StringBuffer keysb = new StringBuffer(uniqueId.getEntityId());
+			if(entity==null || !entity.isRecvLongMsgOnMultiLink()) {
+				keysb.append(".").append(uniqueId.getChannelId());
+			}
+			
+			keysb.append(".").append(uniqueId.getId()).toString();
+			
 			try {
-				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,key,lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
+				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,keysb.toString(),lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
 
 				if (hoder != null) {
 					
@@ -43,8 +50,7 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 				} 
 			} catch (Exception ex) {
 				// 长短信解析失败，直接给网关回复 resp . 并丢弃这个短信
-				logger.error("Decode Message Error ,key : {} , msg dump :{}",key, ByteBufUtil.hexDump(lmsg.generateFrame().getMsgContentBytes()));
-
+				logger.error("Decode Message Error ,entity : {} ,key : {} , msg dump :{}",entity.getId(),keysb.toString(), ByteBufUtil.hexDump(lmsg.generateFrame().getMsgContentBytes()));
 			}
 		} else {
 			out.add(msg);

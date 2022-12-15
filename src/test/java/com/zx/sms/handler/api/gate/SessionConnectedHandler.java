@@ -169,12 +169,10 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 			if(base.isResponse()) {
 				BaseMessage req = base.getRequest();
 				if(req instanceof LongSMSMessage) {
-					logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)req).getUniqueLongMsgId());
+					logger.debug("msgId : {} ,UniqueLongMsgId : {}",base,((LongSMSMessage)req).getUniqueLongMsgId());
 				}
 			}
 		}
 	}
-
-		
 
 }
