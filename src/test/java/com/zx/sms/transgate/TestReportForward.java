@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,8 +58,7 @@ public class TestReportForward {
 
 	@Test
 	public void testReportForward() throws InterruptedException {
-		int count =TestConstants.Count; //发送消息总数
-		
+		int count =  TestConstants.Count; //发送消息总数
 		
 		int port = 26890;
 		String s1Id = createS1(port); // 创建运营商
@@ -87,12 +87,11 @@ public class TestReportForward {
 		client.setMaxRetryCnt((short) 1);
 		client.setCloseWhenRetryFailed(false);
 		client.setUseSSL(false);
-//		 client.setWriteLimit(150);
-		client.setWindow(16);
+//		 client.setWriteLimit(3000);
+		client.setWindow(64);
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
-		
 		
 		
 		//用于检查收到的状态和response的msgId是否一样
@@ -106,8 +105,12 @@ public class TestReportForward {
 				msg.setDestterminalId("13800138005");
 				msg.setSrcId("100869");
 				msg.setLinkID("0000");
-				msg.setMsgContent(content
-						+ " 16:28:40.453 [busiWo中国rk-6] IN0.453 [busiWork-6] INFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,ToFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,Totle Receive Msg Num:5001,   speed : 0/s");
+				if(RandomUtils.nextBoolean()) {
+					msg.setMsgContent(content);
+				}else {
+					msg.setMsgContent(content
+							+ " 16:28:40.453 [busiWo中国rk-6] IN0.453 [busiWork-6] INFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,ToFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,Totle Receive Msg Num:5001,   speed : 0/s");
+				}
 				msg.setRegisteredDelivery((short) 1);
 				msg.setServiceId("10086");
 				return msg;

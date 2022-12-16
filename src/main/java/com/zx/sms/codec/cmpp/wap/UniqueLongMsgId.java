@@ -62,17 +62,22 @@ public class UniqueLongMsgId implements Serializable{
 			if(fh != null && fh.getTotalLength() > 1) {
 				//分片ID,及分片总数
 				keysb.append(".").append(fh.frameKey).append(".").append(fh.getTotalLength());
-				//多于一个分片的，生成唯一序号
-				
 				//只有是从channel上接收时，因为有合并的问题，才拼接唯一序号
 				if(createdByRead) {
-				
 					this.cacheKey = keysb.toString();
 					Long longId = LongMessageFrameHolder.INS.getUniqueLongMsgId(cacheKey, recvLongMsgOnMultiLink);
 					//唯一ID
 					keysb.append(".").append(longId);
 				}
+			}else {
+				if(createdByRead) {
+					Long longId = System.nanoTime();
+					//唯一ID
+					keysb.append(".").append(longId);
+				}
 			}
+			
+
 			this.id = keysb.toString();
 		}else {
 			this.id = lmsg.getUniqueLongMsgId().getId();
