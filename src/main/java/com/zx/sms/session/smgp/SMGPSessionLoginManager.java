@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
+import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppConnectRequestMessage;
 import com.zx.sms.codec.smgp.codec.SMGPMessageCodec;
 import com.zx.sms.codec.smgp.msg.SMGPLoginMessage;
@@ -38,7 +39,7 @@ public class SMGPSessionLoginManager extends AbstractSessionLoginManager {
 	}
 
 	@Override
-	protected void doLogin(Channel ch) {
+	protected BaseMessage  createLoginRequest(){
 		//发送bind请求
 		SMGPEndpointEntity cliententity = (SMGPEndpointEntity) entity;
 		
@@ -54,8 +55,8 @@ public class SMGPSessionLoginManager extends AbstractSessionLoginManager {
 		req.setVersion(cliententity.getClientVersion());
 		byte loginMode = (byte)(cliententity.getChannelType() == ChannelType.DUPLEX ? 2 : (cliententity.getChannelType() == ChannelType.UP ? 1:0));
 		req.setLoginMode(loginMode);
-		ch.writeAndFlush(req);
-		logger.info("session Start :Send SMGPLoginMessage seq :{}", req.getSequenceNo());
+
+		return req;
 	}
 
 	@Override

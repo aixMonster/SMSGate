@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.BaseMessage;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.ByteArrayUtil;
 import com.zx.sms.common.util.IPRange;
@@ -94,7 +95,7 @@ public abstract class AbstractSessionLoginManager extends ChannelDuplexHandler {
 		ctx.fireChannelInactive();
 	}
 
-	protected abstract void doLogin(Channel ch);
+	protected abstract BaseMessage  createLoginRequest();
 
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
@@ -102,8 +103,9 @@ public abstract class AbstractSessionLoginManager extends ChannelDuplexHandler {
 			// 客户端必须先发起Connect消息
 			if (entity instanceof ClientEndpoint) {
 
-				doLogin(ctx.channel());
-
+				BaseMessage loginRequest = createLoginRequest();
+				ctx.channel().writeAndFlush(loginRequest);
+				logger.info("session Start : Send to {} Login Message : {}",entity,loginRequest);
 			}
 		}
 		ctx.fireChannelActive();

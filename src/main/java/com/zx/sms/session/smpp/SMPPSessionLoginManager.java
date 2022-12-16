@@ -3,6 +3,7 @@ package com.zx.sms.session.smpp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.smpp.SmppConstants;
 import com.zx.sms.codec.smpp.Tlv;
 import com.zx.sms.codec.smpp.TlvConvertException;
@@ -31,11 +32,11 @@ public class SMPPSessionLoginManager extends AbstractSessionLoginManager {
 	}
 
 	@Override
-	protected void doLogin(Channel ch) {
+	protected BaseMessage  createLoginRequest() {
 		//发送bind请求
 		SMPPEndpointEntity smppentity = (SMPPEndpointEntity) entity;
 		BaseBind bind = createBindRequest(smppentity);
-		ch.writeAndFlush(bind);
+		return bind;
 	}
 
 	@Override

@@ -343,6 +343,7 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 				// 多线程情况可能抛异常
 				// 1：当线连接数为0了
 				// 2：当前连接数小于index
+				ex.printStackTrace();
 				return collection.isEmpty() ? null : collection.get(0);
 			} finally {
 			}

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.primitives.Bytes;
 import com.google.common.primitives.Ints;
+import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppConnectRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppConnectResponseMessage;
 import com.zx.sms.common.GlobalConstance;
@@ -58,7 +59,7 @@ public class SessionLoginManager extends AbstractSessionLoginManager {
 
 
 	@Override
-	protected void doLogin(Channel ch) {
+	protected BaseMessage  createLoginRequest() {
 		CMPPEndpointEntity cliententity = (CMPPEndpointEntity) entity;
 		CmppConnectRequestMessage req = new CmppConnectRequestMessage();
 		req.setSourceAddr(cliententity.getUserName());
@@ -69,8 +70,7 @@ public class SessionLoginManager extends AbstractSessionLoginManager {
 		byte[] timestampBytes = timestamp.getBytes(cliententity.getChartset());
 		req.setAuthenticatorSource(DigestUtils.md5(Bytes.concat(userBytes, new byte[9], passwdBytes, timestampBytes)));
 		req.setVersion(cliententity.getVersion());
-		ch.writeAndFlush(req);
-		logger.info("session Start :Send CmppConnectRequestMessage seq :{}", req.getHeader().getSequenceId());
+		return req;
 	}
 
 	@Override

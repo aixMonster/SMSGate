@@ -191,7 +191,7 @@ public class TestReportForward {
 		child.setValid(true);
 		child.setVersion((short) 0x20);
 
-		child.setMaxChannels((short) 1);
+		child.setMaxChannels((short) 10);
 		child.setRetryWaitTimeSec((short) 30);
 		child.setMaxRetryCnt((short) 3);
 
@@ -220,7 +220,7 @@ public class TestReportForward {
 		return server.getId();
 	}
 
-	private String createTc(int serverPort) {
+	private String createTc(int serverPort) throws InterruptedException {
 		String cid = "TC";
 		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
 		client.setId(cid + "client");
@@ -233,7 +233,7 @@ public class TestReportForward {
 		client.setUserName("test01");
 		client.setPassword("1qaz2wsx");
 
-		client.setMaxChannels((short) 1);
+		client.setMaxChannels((short) 10);
 		client.setVersion((short) 0x20);
 		client.setRetryWaitTimeSec((short) 30);
 		client.setMaxRetryCnt((short) 1);
@@ -253,16 +253,19 @@ public class TestReportForward {
 				ctx.pipeline().addAfter("sessionStateManager", handler.name(), handler);
 				ctx.pipeline().remove(this);
 			}
-
 			@Override
 			public String name() {
 				return "AddForwardResponseSenderHandler";
 			}
-
 		});
 		client.setBusinessHandlerSet(clienthandlers);
-
 		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
+		//等待连接建立 完成
+		Thread.sleep(2000);
 		return client.getId();
 	}
 

@@ -3,6 +3,7 @@ package com.zx.sms.session.sgip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.Message;
 import com.zx.sms.codec.sgip12.msg.SgipBindRequestMessage;
 import com.zx.sms.codec.sgip12.msg.SgipBindResponseMessage;
@@ -25,11 +26,12 @@ public class SgipSessionLoginManager extends AbstractSessionLoginManager {
 	}
 
 	@Override
-	protected void doLogin(Channel ch) {
+	protected BaseMessage  createLoginRequest(){
 		//发送bind请求
 		SgipEndpointEntity sgipentity = (SgipEndpointEntity) entity;
 		SgipBindRequestMessage bind = createBindRequest(sgipentity);
-		ch.writeAndFlush(bind);
+
+		return bind;
 	}
 
 	@Override

@@ -1,8 +1,5 @@
 package com.zx.sms.transgate;
 
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

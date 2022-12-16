@@ -128,6 +128,8 @@
 
 将消息转发给通道后，当接收到`submitResponse后`，通过`response.getRequest()`获取对应的`request` 。注意此时有两个`msgID`，一个是通道给你的`msgID`，一个是你给来源客户的。在数据库里记录相关信息（至少包括消息来源客户，消息出去的通道，两个`msgId`,消息详情）。之后在接收到状态报告后，通过通道给你的`msgId`更新消息回执状态，并根据来源客户将回执回传给客户，注意回传`reportMessage`里的`msgId`要使用你给客户回复`response`时用的`msgId`.  [详见流程图](https://www.processon.com/view/link/598c16ace4b02e9a26eeed11)
 
+在Test包里有一个模拟匹配状态报告的测试用例，逻辑供参考： `com.zx.sms.transgate.TestReportForward`
+
 - `集群环境如何平均分配上游连接数?`
 
 网关平台通常会有多个服务节点，而对接的通道给的连接数通常不是服务节点数的整倍数，极端情况连接数小于服务节点数，这样如何平均分配连接数就成了一个问题。
