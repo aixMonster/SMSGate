@@ -147,26 +147,27 @@ public class TestReportForward {
 		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 		EndpointManager.INS.openEndpoint(client);
-
-		//等待发送完
+		Thread.sleep(1500);
+		//等待Sp所有短信发送完
 		try {
+			logger.info("等待Sp所有短信发送完...." );
 			sendover.get();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-		
 		while (uidMap.size() > 0) {
-			
-			System.out.println("size...." + uidMap.size() + "..");
+			logger.info("等待所有状态报告回来...." +"size...." + uidMap.size() + ".." );
 			Thread.sleep(1000);
 		}
+		
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(client.getId()));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tsId));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tcId));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(s1Id));
 		Thread.sleep(1000);
+		logger.info("检查状态报告是否完全匹配上...." );
 		Assert.assertEquals(0,checkMsgIdMap.size());
 	}
 
@@ -296,6 +297,8 @@ public class TestReportForward {
 
 		child.setReSendFailMsg(false);
 
+		child.setWindow(64); //加大窗口，加大状态报告发送速度
+		
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
 
 		ForwardHander sender = new ForwardHander(forwardEid);
@@ -321,6 +324,53 @@ public class TestReportForward {
 
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
+		
+		
+		//再加一个账号
+		child = new CMPPServerChildEndpointEntity();
+		child.setId(Sid + "child1");
+		child.setChartset(Charset.forName("utf-8"));
+		child.setGroupName("test");
+		child.setUserName("test02");
+		child.setPassword("1qaz2wsx");
+
+		child.setValid(true);
+		child.setVersion((short) 0x20);
+
+		child.setMaxChannels((short) 10);
+		child.setRetryWaitTimeSec((short) 30);
+		child.setMaxRetryCnt((short) 3);
+
+		child.setReSendFailMsg(false);
+
+		child.setWindow(64); //加大窗口，加大状态报告发送速度
+		
+		serverhandlers = new ArrayList<BusinessHandlerInterface>();
+
+		sender = new ForwardHander(forwardEid);
+
+		serverhandlers.add(sender);
+
+		serverhandlers.add(new AbstractBusinessHandler() {
+
+			@Override
+			public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
+				ForwardResponseHander handler = new ForwardResponseHander(uidMap, msgIdMap);
+				handler.setEndpointEntity(getEndpointEntity());
+				ctx.pipeline().addAfter("sessionStateManager", handler.name(), handler);
+				ctx.pipeline().remove(this);
+			}
+
+			@Override
+			public String name() {
+				return "AddForwardResponseSenderHandler";
+			}
+
+		});
+
+		child.setBusinessHandlerSet(serverhandlers);
+		server.addchild(child);
+		
 		EndpointManager.INS.openEndpoint(server);
 
 		return server.getId();
