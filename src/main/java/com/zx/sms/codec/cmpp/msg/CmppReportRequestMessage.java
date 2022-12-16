@@ -3,6 +3,8 @@
  */
 package com.zx.sms.codec.cmpp.msg;
 
+import java.io.Serializable;
+
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
@@ -13,7 +15,7 @@ import com.zx.sms.common.util.MsgId;
  * @author Lihuanghe(18852780@qq.com)
  *
  */
-public class CmppReportRequestMessage extends DefaultMessage {
+public class CmppReportRequestMessage implements Serializable{
 	private static final long serialVersionUID = -4631945859346437882L;
 	
 	private MsgId msgId = new MsgId();

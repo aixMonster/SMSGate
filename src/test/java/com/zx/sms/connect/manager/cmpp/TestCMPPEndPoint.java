@@ -112,6 +112,8 @@ public class TestCMPPEndPoint {
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
+		
+//		int count = 1;
 		int count = TestConstants.Count;
 		CMPPSessionConnectedHandler sender = new CMPPSessionConnectedHandler(count);
 		clienthandlers.add(sender);
@@ -128,6 +130,7 @@ public class TestCMPPEndPoint {
 			connection = true;
 		}
 		Assert.assertEquals(true, receiver.getCnt().get() == count || connection);
+		Thread.sleep(1000);
 		EndpointManager.INS.close(server);
 		EndpointManager.INS.close(client);
 		Assert.assertEquals(count, receiver.getCnt().get());

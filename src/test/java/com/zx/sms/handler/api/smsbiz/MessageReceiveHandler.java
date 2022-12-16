@@ -84,6 +84,7 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 		
 		ChannelFuture future = reponse(ctx, msg);
 		if (future != null && msg instanceof BaseMessage)
+
 			future.addListener(new GenericFutureListener() {
 				@Override
 				public void operationComplete(Future future) throws Exception {
@@ -91,6 +92,7 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 						cnt.incrementAndGet();
 				}
 			});
+
 	}
 
 	public MessageReceiveHandler clone() throws CloneNotSupportedException {

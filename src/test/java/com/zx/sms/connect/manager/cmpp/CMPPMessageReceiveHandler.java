@@ -14,10 +14,7 @@ public class CMPPMessageReceiveHandler extends MessageReceiveHandler {
 
 		if (msg instanceof BaseMessage) {
 			BaseMessage basemsg = (BaseMessage) msg;
-			if (basemsg.isRequest() && basemsg instanceof LongSMSMessage) {
-
-				ctx.channel().write(basemsg);
-
+			if (basemsg.isRequest()) {
 				return ctx.newSucceededFuture();
 			} else if (basemsg.isResponse()) {
 				BaseMessage req = basemsg.getRequest();

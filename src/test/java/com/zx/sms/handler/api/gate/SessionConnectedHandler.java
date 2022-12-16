@@ -21,8 +21,10 @@ import com.zx.sms.session.cmpp.SessionState;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.Promise;
 
 /**
@@ -34,6 +36,7 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 	protected static final Logger logger = LoggerFactory.getLogger(SessionConnectedHandler.class);
 
 	protected AtomicInteger totleCnt = new AtomicInteger(10);
+	protected DefaultPromise sendover = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 
 	public AtomicInteger getTotleCnt() {
 		return totleCnt;
@@ -46,8 +49,9 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 	public SessionConnectedHandler() {
 	}
 
-	public SessionConnectedHandler(AtomicInteger t) {
+	public SessionConnectedHandler(AtomicInteger t ,DefaultPromise sendover ) {
 		totleCnt = t;
+		this.sendover  = sendover;
 	}
 
 	protected abstract BaseMessage createTestReq(String content);
@@ -141,7 +145,7 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 					boolean over = ch.isActive() && tmptotal.get() > 0;
 					if (!over) {
 						logger.info("========send over.============");
-
+						sendover.trySuccess(0);
 						// ch.writeAndFlush(new CmppTerminateRequestMessage());
 					}
 					return over;
