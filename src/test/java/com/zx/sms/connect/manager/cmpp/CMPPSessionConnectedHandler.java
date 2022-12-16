@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppQueryRequestMessage;
@@ -45,8 +46,8 @@ public class CMPPSessionConnectedHandler extends SessionConnectedHandler {
 			return msg;
 		} else {
 			CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
-			msg.setDestterminalId(String.valueOf(System.nanoTime()));
-			msg.setSrcId(String.valueOf(System.nanoTime()));
+			msg.setDestterminalId("13800138005");
+			msg.setSrcId("100869");
 			msg.setLinkID("0000");
 			msg.setMsgContent(content+" 16:28:40.453 [busiWo中国rk-6] IN0.453 [busiWork-6] INFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,ToFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,Totle Receive Msg Num:5001,   speed : 0/s");
 			msg.setRegisteredDelivery((short)0);
@@ -56,7 +57,9 @@ public class CMPPSessionConnectedHandler extends SessionConnectedHandler {
 	}
 	
 	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+		
 		super.channelRead(ctx, msg);
+		
 		if (msg instanceof CmppDeliverRequestMessage) {
 			CmppDeliverRequestMessage e = (CmppDeliverRequestMessage) msg;
 			
@@ -139,6 +142,8 @@ public class CMPPSessionConnectedHandler extends SessionConnectedHandler {
 			
 		} else if (msg instanceof CmppSubmitResponseMessage) {
 			CmppSubmitResponseMessage e = (CmppSubmitResponseMessage) msg;
+			
+
 		} else if (msg instanceof CmppQueryRequestMessage) {
 			CmppQueryRequestMessage e = (CmppQueryRequestMessage) msg;
 			CmppQueryResponseMessage res = new CmppQueryResponseMessage(e.getHeader().getSequenceId());

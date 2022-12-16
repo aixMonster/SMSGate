@@ -51,7 +51,7 @@ public abstract class AbstractSessionLoginManager extends ChannelDuplexHandler {
 				if(matcher.find()) {
 					String length = matcher.group(1);
 					byte[] chars = ByteArrayUtil.toByteArray(Long.parseLong(length));
-					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP "+ (new String(chars)).trim()+" request.", cause);
+					logger.error("login error entity : " + entity.toString() + ".\nthis request maybe HTTP. receive first 4 byte is :\""+ (new String(chars)).trim()+"\" .", cause);
 				}else {
 					logger.error("login error entity : " + entity.toString(), cause);
 				}

@@ -16,7 +16,7 @@ public class LongMessageMarkerHandler extends AbstractBusinessHandler {
 
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		if (msg instanceof LongSMSMessage && ((LongSMSMessage) msg).needHandleLongMessage()) {
-			setUniqueLongMsgId((LongSMSMessage)msg,ctx);
+			setUniqueLongMsgId((LongSMSMessage)msg,ctx,true);
 		}
 
 		ctx.fireChannelRead(msg);
@@ -24,14 +24,14 @@ public class LongMessageMarkerHandler extends AbstractBusinessHandler {
 
 	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
 		if (msg instanceof LongSMSMessage && ((LongSMSMessage) msg).needHandleLongMessage()) {
-			setUniqueLongMsgId((LongSMSMessage)msg,ctx);
+			setUniqueLongMsgId((LongSMSMessage)msg,ctx,false);
 		}
 		ctx.write(msg, promise);
 	}
 	
 	//长短信类型生成唯一ID
-	private void setUniqueLongMsgId( LongSMSMessage lmsg,ChannelHandlerContext ctx) {
-		lmsg.setUniqueLongMsgId(new UniqueLongMsgId(entity,ctx.channel(),lmsg));
+	private void setUniqueLongMsgId( LongSMSMessage lmsg,ChannelHandlerContext ctx,boolean read) {
+		lmsg.setUniqueLongMsgId(new UniqueLongMsgId(entity,ctx.channel(),lmsg,read));
 	}
 
 

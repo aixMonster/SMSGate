@@ -74,14 +74,13 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 	@Override
 	public void channelRead(final ChannelHandlerContext ctx, final Object msg) throws Exception {
 		if(msg instanceof LongSMSMessage) {
-			logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)msg).getUniqueLongMsgId());
+			logger.debug("receive : {}",((LongSMSMessage)msg).getUniqueLongMsgId());
 			if(((LongSMSMessage) msg).getFragments()!=null) {
 				for(LongSMSMessage f :(List<LongSMSMessage>) ((LongSMSMessage) msg).getFragments()) {
-					logger.debug("UniqueLongMsgId : {}",((LongSMSMessage)f).getUniqueLongMsgId());
+					logger.debug("receive : {}",((LongSMSMessage)f).getUniqueLongMsgId());
 				}
 			}
 		}
-			
 		
 		ChannelFuture future = reponse(ctx, msg);
 		if (future != null && msg instanceof BaseMessage)

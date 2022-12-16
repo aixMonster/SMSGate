@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.cache.RemovalCause;
 import com.google.common.cache.RemovalListener;
 import com.google.common.cache.RemovalNotification;
@@ -44,12 +46,22 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 	 * 注意：这里使用的jvm缓存保证长短信的分片。如果是集群部署，从网关过来的长短信会随机发送到不同的主机，需要使用集群缓存
 	 * ，如redis,memcached来保存长短信分片。 由于可能有短信分片丢失，造成一直不能组装完成，为防止内存泄漏，这里要使用支持过期失效的缓存。
 	 */
-	private static Cache<String, ImmutablePair<BitSet,List<LongMessageFrame>>> cache = CacheBuilder.newBuilder().expireAfterAccess(2, TimeUnit.HOURS).removalListener(removealListener).build();
+	private static Cache<String, ImmutablePair<BitSet,List<LongMessageFrame>>> cache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.HOURS).removalListener(removealListener).build();
 	private static ConcurrentMap<String, ImmutablePair<BitSet,List<LongMessageFrame>>> map = cache.asMap();
 	@Override
 	public LongMessageFrameCache create() {
 		return new LongMessageFrameCacheInner();
 	}
+	
+	//在这个Map保存未合并完成的消息分片对应的id
+	//合并完成的短信从这里删除，否则内存会爆
+	private static final LoadingCache<String, Long> UniqCache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.HOURS).build(new CacheLoader<String, Long>() {
+		@Override
+		public Long load(String key) throws Exception {
+			return new Long(System.currentTimeMillis());
+		}
+	});
+	
 
 	@Override
 	public int order() {
@@ -118,5 +130,17 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 			ImmutablePair<BitSet,List<LongMessageFrame>> pair = map.remove(key);
 			return pair.right;
 		}
+
+		@Override
+		public Long getUniqueLongMsgId(String cacheKey) {
+			return  UniqCache.getUnchecked(cacheKey);
+		}
+
+		@Override
+		public void clearUniqueLongMsgIdCacheKey(String cacheKey) {
+			if(cacheKey!=null)
+				UniqCache.invalidate(cacheKey);
+		}
+		
 	}
 }

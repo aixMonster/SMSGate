@@ -31,17 +31,13 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 			LongSMSMessage lmsg = (LongSMSMessage)msg;
 			UniqueLongMsgId uniqueId = lmsg.getUniqueLongMsgId();
 			
-			StringBuffer keysb = new StringBuffer(uniqueId.getEntityId());
-			if(entity==null || !entity.isRecvLongMsgOnMultiLink()) {
-				keysb.append(".").append(uniqueId.getChannelId());
-			}
-			
-			keysb.append(".").append(uniqueId.getId()).toString();
-			
 			try {
-				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,keysb.toString(),lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
+				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,uniqueId.getId(),lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
 
 				if (hoder != null) {
+					
+					//合并完成，及时删除UniqueLongMsgId中的uniqeId缓存
+					uniqueId.clearCacheKey();
 					
 					resetMessageContent((T)hoder.msg, hoder.smsMessage);
 					
@@ -50,7 +46,7 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 				} 
 			} catch (Exception ex) {
 				// 长短信解析失败，直接给网关回复 resp . 并丢弃这个短信
-				logger.error("Decode Message Error ,entity : {} ,key : {} , msg dump :{}",entity.getId(),keysb.toString(), ByteBufUtil.hexDump(lmsg.generateFrame().getMsgContentBytes()));
+				logger.error("Decode Message Error ,entity : {} ,uniqueId : {} , msg dump :{}",entity.getId(),uniqueId, ByteBufUtil.hexDump(lmsg.generateFrame().getMsgContentBytes()));
 			}
 		} else {
 			out.add(msg);

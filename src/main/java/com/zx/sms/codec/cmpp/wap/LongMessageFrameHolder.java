@@ -291,7 +291,7 @@ public enum LongMessageFrameHolder {
 	private void warning (boolean isMulti) {
 		//如果没有提供集群版的长短信合并缓存，要给告警
 		if(isMulti && !hasClusterLongMessageFrameProvider)
-			logger.warn("you use JVM cache for LongMessageFrameCache .When Long message fragments sent by multiple connections , messages will be lost");
+			logger.warn("you use JVM cache for LongMessageFrameCache .When Long message fragments sent by multiple connections , messages will be lost , Cause memory leak");
 	}
 	
 	//这个方法必须是线程安全的
@@ -305,6 +305,24 @@ public enum LongMessageFrameHolder {
 	}
 	
 
+
+	Long getUniqueLongMsgId(String cacheKey,boolean isMulti) {
+		if(isMulti) {
+			return clusterMap.getUniqueLongMsgId(cacheKey);
+		}else {
+			return jvmMap.getUniqueLongMsgId(cacheKey);
+		}
+	}
+
+
+	void clearUniqueLongMsgIdCacheKey(String cacheKey,boolean isMulti) {
+		if(isMulti) {
+			 clusterMap.clearUniqueLongMsgIdCacheKey(cacheKey);
+		}else {
+			 jvmMap.clearUniqueLongMsgIdCacheKey(cacheKey);
+		}
+	}
+	
 	private List<LongMessageFrame> getAndDel(String key,boolean isMulti) {
 		if(isMulti) {
 			return clusterMap.getAndDel(key);
@@ -354,7 +372,7 @@ public enum LongMessageFrameHolder {
 			frame.setMsgContentBytes(btos.toByteArray());
 			result.add(frame);
 		}
-//		Collections.shuffle(result);
+
 		return result;
 	}
 

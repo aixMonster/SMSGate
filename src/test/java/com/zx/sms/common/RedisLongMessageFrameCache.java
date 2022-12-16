@@ -104,5 +104,34 @@ public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 	}
 
 	private static String Lua_ge_64 = "redis.call('setbit',KEYS[1],ARGV[1],1);return redis.call('bitcount',KEYS[1])";
+	@Override
+	public Long getUniqueLongMsgId(String cacheKey) {
+		Jedis jedis = jedispool.getResource();
+		String key = userPrefix + cacheKey;
+		
+		try {
+			Long value = System.currentTimeMillis();
+			long ret = jedis.setnx(key, value.toString());
+			if(1 ==  ret ) {
+				return value;
+			}else {
+				return Long.valueOf(jedis.get(key));
+			}
+		} finally {
+			jedis.expire(key, ttl);
+			jedis.close();
+		}
+	}
+
+	@Override
+	public void clearUniqueLongMsgIdCacheKey(String cacheKey) {
+		Jedis jedis = jedispool.getResource();
+		try {
+			String key = userPrefix + cacheKey;
+			jedis.del(key);
+		} finally {
+			jedis.close();
+		}
+	}
 
 }
