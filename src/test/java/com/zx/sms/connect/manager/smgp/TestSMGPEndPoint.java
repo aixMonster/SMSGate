@@ -77,14 +77,17 @@ public class TestSMGPEndPoint {
 //		client.setReadLimit(200);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		int count = TestConstants.Count;
-		clienthandlers.add(new SMGPSessionConnectedHandler(count));
+		
+		SMGPSessionConnectedHandler sender = new SMGPSessionConnectedHandler(count);
+		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 
 		EndpointManager.INS.openEndpoint(client);
 
-		Thread.sleep(1000);
+		
 
 		System.out.println("start.....");
+		sender.getSendover().get();
 		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
 		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);

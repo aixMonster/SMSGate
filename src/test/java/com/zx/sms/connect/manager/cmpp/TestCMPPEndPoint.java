@@ -115,15 +115,16 @@ public class TestCMPPEndPoint {
 		
 //		int count = 1;
 		int count = TestConstants.Count;
+		
 		CMPPSessionConnectedHandler sender = new CMPPSessionConnectedHandler(count);
 		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 
 		EndpointManager.INS.openEndpoint(client);
 		
-		Thread.sleep(1000);
 //		manager.startConnectionCheckTask();
 		System.out.println("start.....");
+		sender.getSendover().get();
 		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
 		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);

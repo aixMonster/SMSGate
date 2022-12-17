@@ -54,6 +54,10 @@ public abstract class SessionConnectedHandler extends AbstractBusinessHandler {
 		this.sendover  = sendover;
 	}
 
+	public DefaultPromise getSendover() {
+		return sendover;
+	}
+
 	protected abstract BaseMessage createTestReq(String content);
 
 	@Override

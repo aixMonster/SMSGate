@@ -78,12 +78,13 @@ public class TestSMPPEndPoint {
 		client.setSupportLongmsg(SupportLongMessage.SEND);  //接收长短信时不自动合并
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		int count = TestConstants.Count;
-		clienthandlers.add( new SMPPSessionConnectedHandler(count)); 
+		SMPPSessionConnectedHandler sender =  new SMPPSessionConnectedHandler(count);
+		clienthandlers.add(sender); 
 		client.setBusinessHandlerSet(clienthandlers);
 		
 		EndpointManager.INS.openEndpoint(client);
-		Thread.sleep(1000);
 		System.out.println("start.....");
+		sender.getSendover().get();
 		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
 		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);

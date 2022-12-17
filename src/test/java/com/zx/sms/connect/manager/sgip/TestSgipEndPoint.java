@@ -82,12 +82,13 @@ public class TestSgipEndPoint {
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		clienthandlers.add(new SgipReportRequestMessageHandler());
 		int count = TestConstants.Count;
-		clienthandlers.add(new SGIPSessionConnectedHandler(count));
+		SGIPSessionConnectedHandler sender = new SGIPSessionConnectedHandler(count);
+		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 		EndpointManager.INS.openEndpoint(client);
-		Thread.sleep(1000);
 
 		System.out.println("sgip start.....");
+		sender.getSendover().get();
 		boolean connection = client.getSingletonConnector().getConnectionNum() > 0;
 		while (client.getSingletonConnector().getConnectionNum()>0 && receiver.getCnt().get() < count) {
 			Thread.sleep(1000);
