@@ -21,6 +21,7 @@ import com.google.common.cache.RemovalNotification;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.LongMessageFrameCache;
 import com.zx.sms.codec.LongMessageFrameProvider;
+import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 
 public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 	private static final Logger logger = LoggerFactory.getLogger(LongMessageFrameProviderInner.class);
@@ -58,7 +59,7 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 	private static final LoadingCache<String, Long> UniqCache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.HOURS).build(new CacheLoader<String, Long>() {
 		@Override
 		public Long load(String key) throws Exception {
-			return new Long(System.currentTimeMillis());
+			return new Long(DefaultSequenceNumberUtil.getSequenceNo());
 		}
 	});
 	

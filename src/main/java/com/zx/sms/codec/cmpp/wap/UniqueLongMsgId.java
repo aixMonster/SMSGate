@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
+import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.connect.manager.EndpointEntity;
 
 import io.netty.channel.Channel;
@@ -71,9 +72,8 @@ public class UniqueLongMsgId implements Serializable{
 				}
 			}else {
 				if(createdByRead) {
-					Long longId = System.nanoTime();
 					//唯一ID
-					keysb.append(".").append(longId);
+					keysb.append(".").append(DefaultSequenceNumberUtil.getSequenceNo());
 				}
 			}
 			

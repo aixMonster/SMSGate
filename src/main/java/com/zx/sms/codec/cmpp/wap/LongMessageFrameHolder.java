@@ -100,7 +100,7 @@ public enum LongMessageFrameHolder {
 		}
 	}
 	
-	private static boolean hasClusterLongMessageFrameProvider  = provider != null && !LongMessageFrameProviderInner.class.equals(provider.getClass());
+	public final static boolean hasClusterLongMessageFrameProvider  = provider != null && !LongMessageFrameProviderInner.class.equals(provider.getClass());
 
 	private SmsMessage generatorSmsMessage(FrameHolder fh, LongMessageFrame frame) throws NotSupportedException {
 		byte[] contents = fh.mergeAllcontent();
