@@ -103,7 +103,7 @@ public class TestReportForward {
 			protected BaseMessage createTestReq(String content) {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 				msg.setDestterminalId("13800138005");
-				msg.setSrcId("100869");
+				msg.setSrcId("100869"+RandomUtils.nextInt());
 				msg.setLinkID("0000");
 				if(RandomUtils.nextBoolean()) {
 					msg.setMsgContent(content);

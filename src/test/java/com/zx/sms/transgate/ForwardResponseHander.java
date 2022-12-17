@@ -57,7 +57,8 @@ public class ForwardResponseHander extends AbstractBusinessHandler{
 				CmppReportRequestMessage report = e.getReportRequestMessage();
 				MsgId reportMsgId = report.getMsgId();
 				//根据报告里的id获取uid
-				UniqueLongMsgId uid = msgIdMap.remove(reportMsgId.toString());
+				String destsrc = e.getSrcIdAndDestId();
+				UniqueLongMsgId uid = msgIdMap.remove(destsrc+reportMsgId.toString());
 				if(uid != null) {
 					ImmutablePair<AtomicInteger,ImmutablePair<UniqueLongMsgId,Map<Integer,MsgId>>> t = uidMap.get(uid.getId());
 					int cnt = t.left.decrementAndGet();
@@ -108,6 +109,9 @@ public class ForwardResponseHander extends AbstractBusinessHandler{
 							writeToEntity(originUid.getEntityId(), msg);
 						}
 					}
+					
+				}else {
+					logger.warn("report before reponse:msgid: {} ",reportMsgId);
 				}
 			}
 			
@@ -139,9 +143,10 @@ public class ForwardResponseHander extends AbstractBusinessHandler{
     		//作为客户端收response 消息
     		CmppSubmitRequestMessage req =(CmppSubmitRequestMessage) ((CmppSubmitResponseMessage) msg).getRequest();
     		if(req.getRegisteredDelivery() == 1) {
+    			String destsrc = req.getSrcIdAndDestId();
         		MsgId resMsgid = ((CmppSubmitResponseMessage) msg).getMsgId();
         		UniqueLongMsgId uid = req.getUniqueLongMsgId();
-        		msgIdMap.putIfAbsent(resMsgid.toString(), uid);
+        		msgIdMap.put(destsrc+resMsgid.toString(), uid);
         		ImmutablePair<AtomicInteger,ImmutablePair<UniqueLongMsgId,Map<Integer,MsgId>>> p = uidMap.get(uid.getId());
         		p.left.compareAndSet(0, uid.getPktotal());//收了几个response，就要有几个report
     		}
