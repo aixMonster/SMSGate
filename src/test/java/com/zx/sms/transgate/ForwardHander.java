@@ -1,8 +1,11 @@
 package com.zx.sms.transgate;
 
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,58 +29,67 @@ import io.netty.util.concurrent.GenericFutureListener;
 public class ForwardHander extends AbstractBusinessHandler {
 	private static final Logger logger = LoggerFactory.getLogger(ForwardHander.class);
 	private String forwardEid;
-	ForwardHander(String forwardEid){
+
+	ForwardHander(String forwardEid) {
 		this.forwardEid = forwardEid;
 	}
+
+	private static Map<String,AtomicLong> initedMap = new ConcurrentHashMap<String,AtomicLong>();
 	
 	private int rate = 2;
 
-	private AtomicLong cnt = new AtomicLong();
 	private long lastNum = 0;
-	private volatile static boolean inited = false;
-	
+
 	private static final Object lock = new Object();
-	
+
 	public synchronized void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 		synchronized (lock) {
-			if (evt == SessionState.Connect && !inited) {
+			AtomicLong count = initedMap.get(getEndpointEntity().getId());
+			
+			if (evt == SessionState.Connect && count == null) {
+				initedMap.put(getEndpointEntity().getId(), new AtomicLong());
+				
 				EventLoopGroupFactory.INS.submitUnlimitCircleTask(new Callable<Boolean>() {
 
 					@Override
 					public Boolean call() throws Exception {
-							long nowcnt = cnt.get();
-							EndpointConnector conn = getEndpointEntity().getSingletonConnector();
-							
-							logger.info("{} channels : {},Totle Receive Msg Num:{},   speed : {}/s",getEndpointEntity().getId(),
-									conn == null ? 0 : conn.getConnectionNum(), nowcnt, (nowcnt - lastNum) / rate);
-							lastNum = nowcnt;
-							return true;
+						
+						AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
+						
+						long nowcnt = cnt.get();
+						EndpointConnector conn = getEndpointEntity().getSingletonConnector();
+
+						logger.info("{} channels : {},Totle Receive Msg Num:{},   speed : {}/s",
+								getEndpointEntity().getId(), conn == null ? 0 : conn.getConnectionNum(), nowcnt,
+								(nowcnt - lastNum) / rate);
+						lastNum = nowcnt;
+						return true;
 					}
 				}, new ExitUnlimitCirclePolicy() {
 					@Override
 					public boolean notOver(Future future) {
-						inited = getEndpointEntity().getSingletonConnector().getConnectionNum()>0;
+						boolean inited = getEndpointEntity().getSingletonConnector().getConnectionNum() > 0;
 						return inited;
 					}
 				}, rate * 1000);
-				inited = true;
+				
 			}
 		}
 		ctx.fireUserEventTriggered(evt);
 	}
-	
-    @Override
-    public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
-       	
-    	if (msg instanceof CmppDeliverRequestMessage) {
-    		//作为客户端收report消息
-    		//收到上行不处理
-			
-    	}else if (msg instanceof CmppSubmitRequestMessage) {
-    		//作为服务端收submit消息
-    		//短信合并完成了
-    		CmppSubmitRequestMessage submit = (CmppSubmitRequestMessage)msg;
-    		
+
+	@Override
+	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
+
+		if (msg instanceof CmppDeliverRequestMessage) {
+			// 作为客户端收report消息
+			// 收到上行不处理
+
+		} else if (msg instanceof CmppSubmitRequestMessage) {
+			// 作为服务端收submit消息
+			// 短信合并完成了
+			CmppSubmitRequestMessage submit = (CmppSubmitRequestMessage) msg;
+
 //    		//重新设置最大拆分长度
 //    		SmsTextMessage sms = (SmsTextMessage)submit.getSmsMessage();
 //    		SmsDcs mydcs = new SmsDcs(sms.getDcs().getValue()) {
@@ -86,25 +98,35 @@ public class ForwardHander extends AbstractBusinessHandler {
 //    			}
 //    		};
 //    		submit.setMsg(new SmsTextMessage(sms.getText(),mydcs));
-    		//转发给上游服务
-    		EndpointConnector conn = EndpointManager.INS.getEndpointConnector(forwardEid);
-    		Channel ch = conn.fetch(); //获取连接，保证必写成功
-    		ChannelFuture future = ch.writeAndFlush(submit);
-    		future.addListener(new GenericFutureListener() {
-				@Override
-				public void operationComplete(Future future) throws Exception {
-						cnt.incrementAndGet();
-				}
-			});
-			
-    	}else if(msg instanceof CmppSubmitResponseMessage) {
-    		//作为客户端收response 消息
-    	
-    	}
-    	
-    	ctx.fireChannelRead(msg);
-    }
+			// 转发给上游服务
+			if (StringUtils.isNotBlank(forwardEid)) {
 
+				EndpointConnector conn = EndpointManager.INS.getEndpointConnector(forwardEid);
+				Channel ch = conn.fetch(); // 获取连接，保证必写成功
+				ChannelFuture future = ch.writeAndFlush(submit);
+				future.addListener(new GenericFutureListener() {
+					@Override
+					public void operationComplete(Future future) throws Exception {
+						AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
+						cnt.incrementAndGet();
+					}
+				});
+			}else {
+				AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
+				cnt.incrementAndGet();
+			}
+		} else if (msg instanceof CmppSubmitResponseMessage) {
+			// 作为客户端收response 消息
+
+		}
+		ctx.fireChannelRead(msg);
+	}
+
+	public  long  getTotalReceiveCnt() {
+		AtomicLong count = initedMap.get(getEndpointEntity().getId());
+		return count.get();
+	}
+	
 	@Override
 	public String name() {
 		return "ForwardHander";

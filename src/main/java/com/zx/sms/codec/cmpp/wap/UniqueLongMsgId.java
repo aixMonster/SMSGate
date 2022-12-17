@@ -97,7 +97,7 @@ public class UniqueLongMsgId implements Serializable{
 		this.createdByRead = createdByRead;
 	}
 	
-	UniqueLongMsgId(UniqueLongMsgId id ,LongMessageFrame frame ){
+	public UniqueLongMsgId(UniqueLongMsgId id ,LongMessageFrame frame ){
 		this.id = id.getId();
 		this.entityId = id.getEntityId();
 		this.channelId = id.getChannelId();

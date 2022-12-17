@@ -21,6 +21,7 @@ import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
+import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
@@ -54,14 +55,15 @@ public class TestReportForward {
 	 */
 
 	private Map<String, ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>>> uidMap = new ConcurrentHashMap<String, ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>>>();
-	private Map<String, UniqueLongMsgId> msgIdMap = new ConcurrentHashMap<String, UniqueLongMsgId>();
+	private Map<String, Map<String, UniqueLongMsgId>> msgIdMap = new ConcurrentHashMap<String, Map<String, UniqueLongMsgId>>();
 
 	@Test
 	public void testReportForward() throws InterruptedException {
 		int count =  TestConstants.Count; //发送消息总数
 		
 		int port = 26890;
-		String s1Id = createS1(port); // 创建运营商
+		ForwardHander forward = new ForwardHander(null);
+		String s1Id = createS1(port,forward); // 创建运营商
 		Thread.sleep(1000);
 		String tcId = createTc(port); // 转发器连到运营商
 		Thread.sleep(1000);
@@ -103,7 +105,7 @@ public class TestReportForward {
 			protected BaseMessage createTestReq(String content) {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 				msg.setDestterminalId("13800138005");
-				msg.setSrcId("100869"+RandomUtils.nextInt());
+				msg.setSrcId("100869"+DefaultSequenceNumberUtil.getSequenceNo());
 				msg.setLinkID("0000");
 				if(RandomUtils.nextBoolean()) {
 					msg.setMsgContent(content);
@@ -164,7 +166,7 @@ public class TestReportForward {
 			logger.info("等待所有状态报告回来...." +"size...." + uidMap.size() + ".." );
 			Thread.sleep(1000);
 		}
-		
+		Thread.sleep(1000);
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(client.getId()));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tsId));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tcId));
@@ -172,9 +174,10 @@ public class TestReportForward {
 		Thread.sleep(1000);
 		logger.info("检查状态报告是否完全匹配上...." );
 		Assert.assertEquals(0,checkMsgIdMap.size());
+		Assert.assertEquals(count,forward.getTotalReceiveCnt());
 	}
 
-	private String createS1(int port) {
+	private String createS1(int port,ForwardHander forward) {
 
 		String Sid = "S1";
 		CMPPServerEndpointEntity server = new CMPPServerEndpointEntity();
@@ -201,7 +204,8 @@ public class TestReportForward {
 
 		child.setReSendFailMsg(false);
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
-
+		forward.setEndpointEntity(child);
+		serverhandlers.add(forward);
 		serverhandlers.add(new AbstractBusinessHandler() {
 
 			@Override
@@ -263,10 +267,10 @@ public class TestReportForward {
 			}
 		});
 		client.setBusinessHandlerSet(clienthandlers);
+//		EndpointManager.INS.openEndpoint(client);
 		EndpointManager.INS.openEndpoint(client);
-		EndpointManager.INS.openEndpoint(client);
-		EndpointManager.INS.openEndpoint(client);
-		EndpointManager.INS.openEndpoint(client);
+//		EndpointManager.INS.openEndpoint(client);
+//		EndpointManager.INS.openEndpoint(client);
 		EndpointManager.INS.openEndpoint(client);
 		//等待连接建立 完成
 		Thread.sleep(2000);

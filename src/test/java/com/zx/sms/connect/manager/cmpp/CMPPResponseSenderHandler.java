@@ -1,5 +1,6 @@
 package com.zx.sms.connect.manager.cmpp;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
@@ -29,12 +30,13 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 			ctx.channel().writeAndFlush(responseMessage);
     	}else if (msg instanceof CmppSubmitRequestMessage) {
     		CmppSubmitRequestMessage e = (CmppSubmitRequestMessage) msg;
-    		CmppSubmitResponseMessage resp = new CmppSubmitResponseMessage(e.getHeader().getSequenceId());
+    		
+    		final CmppSubmitResponseMessage resp = new CmppSubmitResponseMessage(e.getHeader().getSequenceId());
 			resp.setResult(0);
-			ctx.channel().writeAndFlush(resp);
 			
+			
+			final CmppDeliverRequestMessage deliver = new CmppDeliverRequestMessage();
 			if(e.getRegisteredDelivery()==1) {
-				final CmppDeliverRequestMessage deliver = new CmppDeliverRequestMessage();
 				deliver.setDestId(e.getSrcId());
 				deliver.setSrcterminalId(e.getDestterminalId()[0]);
 				CmppReportRequestMessage report = new CmppReportRequestMessage();
@@ -46,12 +48,31 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 				report.setStat("DELIVRD");
 				report.setSmscSequence(0);
 				deliver.setReportRequestMessage(report);
+
+				
+			}
+			
+			//模拟状态报告先于response回来
+			if(RandomUtils.nextInt(0, 10000)>9995) {
 				ctx.executor().submit(new Runnable() {
 					public void run() {
-							ctx.channel().writeAndFlush(deliver);
+						ctx.channel().writeAndFlush(deliver);
+						ctx.channel().writeAndFlush(resp);
 					}
 				});
+			
+				
+			}else{
+				ctx.executor().submit(new Runnable() {
+					public void run() {
+						ctx.channel().writeAndFlush(resp);
+						ctx.channel().writeAndFlush(deliver);
+					}
+				});
+			
+				
 			}
+			
 			
 			
     	}else if (msg instanceof CmppQueryRequestMessage) {
