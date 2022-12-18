@@ -201,7 +201,11 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 			Map<String, UniqueLongMsgId> old = msgIdMap.putIfAbsent(srcAndDest, map);
 			if (old != null && uid != null) {
 				// 这个消息的uid没放进去msgIdMap，新put一次
-				old.putAll(map);
+				synchronized (old) {
+					old = msgIdMap.putIfAbsent(srcAndDest, map);
+					if(old != null && uid != null)
+						old.putAll(map);
+				}
 			}
 
 		}
@@ -278,7 +282,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 		MsgId reportMsgId = report.getMsgId();
 
 		if (t == null) {
-			logger.info("t 是空，说明这个report在这之前已经被回传了 {}", uid);
+			logger.info("t 是空，说明有重复的uid,这个report在这之前已经被回传了 {}", uid);
 			return;
 		}
 		int cnt = t.left.decrementAndGet();

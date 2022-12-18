@@ -13,6 +13,7 @@ import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.common.util.CachedMillisecondClock;
+import com.zx.sms.common.util.ChannelUtil;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
@@ -51,6 +52,7 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 			
 			
 			final CmppDeliverRequestMessage deliver = new CmppDeliverRequestMessage();
+			int delay;
 			if(e.getRegisteredDelivery()==1) {
 				deliver.setDestId(e.getSrcId());
 				deliver.setSrcterminalId(e.getDestterminalId()[0]);
@@ -64,11 +66,29 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 				report.setSmscSequence(0);
 				deliver.setReportRequestMessage(report);
 
-				
+				 delay = RandomUtils.nextInt(0,100);
+				ctx.executor().schedule(new Runnable() {
+					public void run() {
+						 EndpointConnector conn = EndpointManager.INS.getEndpointConnector(getEndpointEntity());
+						//report从任意连接回去
+						 ChannelFuture f ;
+						f = ChannelUtil.asyncWriteToEntity(getEndpointEntity(), deliver);
+						int cnt=5;
+						while(f == null && cnt>0) {
+							f = ChannelUtil.asyncWriteToEntity(getEndpointEntity(), deliver);
+							cnt--;
+						}
+						if(f == null) {
+							Channel ch = conn.fetch(); // 获取连接，保证必写成功
+							ChannelFuture future = ch.writeAndFlush(deliver);
+						}
+
+					}
+				},delay,TimeUnit.MILLISECONDS);
 			}
 			//模拟状态报告先于response回来
 			//随机延迟，response和状态不一定谁先回
-				int delay = isDelay ?RandomUtils.nextInt(0,100):0;
+				delay = isDelay ?RandomUtils.nextInt(0,100):0;
 				ctx.executor().schedule(new Runnable() {
 					public void run() {
 						//response从同一连接回去
@@ -76,15 +96,7 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 					}
 				},delay,TimeUnit.MILLISECONDS);
 				
-				 delay = RandomUtils.nextInt(0,100);
-				ctx.executor().schedule(new Runnable() {
-					public void run() {
-						 EndpointConnector conn = EndpointManager.INS.getEndpointConnector(getEndpointEntity());
-						//report从任意连接回去
-						Channel ch = conn.fetch(); // 获取连接，保证必写成功
-						ChannelFuture future = ch.writeAndFlush(deliver);
-					}
-				},delay,TimeUnit.MILLISECONDS);
+
 			
     	}else if (msg instanceof CmppQueryRequestMessage) {
 			CmppQueryRequestMessage e = (CmppQueryRequestMessage) msg;

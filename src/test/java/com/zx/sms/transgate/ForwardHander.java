@@ -36,7 +36,7 @@ public class ForwardHander extends AbstractBusinessHandler {
 
 	private static Map<String,AtomicLong> initedMap = new ConcurrentHashMap<String,AtomicLong>();
 	
-	private int rate = 2;
+	private int rate = 10;
 
 	private long lastNum = 0;
 

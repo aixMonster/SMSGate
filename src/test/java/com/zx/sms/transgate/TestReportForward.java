@@ -2,8 +2,10 @@ package com.zx.sms.transgate;
 
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,6 +14,8 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Test;
+import org.marre.sms.SmsDcs;
+import org.marre.sms.SmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +25,6 @@ import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
-import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
@@ -59,7 +62,7 @@ public class TestReportForward {
 
 	@Test
 	public void testReportForward() throws InterruptedException {
-		int count =  TestConstants.Count; //发送消息总数
+		int count = TestConstants.Count; //发送消息总数
 		
 		int port = 26890;
 		ForwardHander forward = new ForwardHander(null);
@@ -83,13 +86,13 @@ public class TestReportForward {
 		client.setUserName("test01");
 		client.setPassword("1qaz2wsx");
 
-		client.setMaxChannels((short) 1);
+		client.setMaxChannels((short) 10);
 		client.setVersion((short) 0x20);
 		client.setRetryWaitTimeSec((short) 30);
 		client.setMaxRetryCnt((short) 1);
 		client.setCloseWhenRetryFailed(false);
 		client.setUseSSL(false);
-//		 client.setWriteLimit(3000);
+//		 client.setWriteLimit(600);
 		client.setWindow(64);
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
@@ -97,7 +100,7 @@ public class TestReportForward {
 		
 		
 		//用于检查收到的状态和response的msgId是否一样
-		final Map<String,String> checkMsgIdMap = new ConcurrentHashMap<String, String>();
+		final Map<String,AtomicInteger> checkMsgIdCnt = new  ConcurrentHashMap<String, AtomicInteger>();
 		DefaultPromise sendover = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 		SessionConnectedHandler sender = new SessionConnectedHandler(new AtomicInteger(count),sendover) {
 
@@ -106,13 +109,25 @@ public class TestReportForward {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 				msg.setDestterminalId("13800138005");
 				//有机率端口号手机号相同
-				msg.setSrcId("100869"+String.valueOf(RandomUtils.nextInt(0,500)));
+				msg.setSrcId("100869"+String.valueOf(RandomUtils.nextInt(0,3)));
 				msg.setLinkID("0000");
-				if(RandomUtils.nextBoolean()) {
+				
+				if(RandomUtils.nextBoolean() ) {
 					msg.setMsgContent(content);
 				}else {
 					msg.setMsgContent(content
-							+ " 16:28:40.453 [busiWo中国rk-6] IN0.453 [busiWork-6] INFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,ToFO  c.z.s.h.a.s.MessageReceiveHandler - channels : 1,Totle Receive Msg Num:5001,   speed : 0/s");
+							+ " 16:28:40.453 [busiWo中国rk-6] IN0.453 [busiWork-6] INFO  ReceiveHandler - channels : 1,ToFO 总计查找1次");
+				}
+				
+				if(RandomUtils.nextBoolean() && RandomUtils.nextBoolean() ) {
+				
+		    		SmsTextMessage sms = (SmsTextMessage)msg.getSmsMessage();
+		    		SmsDcs mydcs = new SmsDcs(sms.getDcs().getValue()) {
+		    			public int getMaxMsglength() {
+		    				return RandomUtils.nextInt(70,150);
+		    			}
+		    		};
+		    		msg.setMsg(new SmsTextMessage(sms.getText(),mydcs));
 				}
 				msg.setRegisteredDelivery((short) 1);
 				msg.setServiceId("10086");
@@ -135,14 +150,18 @@ public class TestReportForward {
 					ctx.channel().writeAndFlush(responseMessage);
 					
 					if(e.isReport()) {
-						checkMsgIdMap.remove(e.getReportRequestMessage().getMsgId().toString());
+						AtomicInteger atom = checkMsgIdCnt.putIfAbsent(e.getReportRequestMessage().getMsgId().toString(), new AtomicInteger(-1));
+						if(atom!=null)
+							atom.decrementAndGet();
 					}
 
 				} else if (msg instanceof CmppSubmitResponseMessage) {
 					
 					//收Response
 					CmppSubmitResponseMessage e = (CmppSubmitResponseMessage) msg;
-					checkMsgIdMap.put(e.getMsgId().toString(), "");
+					AtomicInteger atom = checkMsgIdCnt.putIfAbsent(e.getMsgId().toString(), new AtomicInteger(1));
+					if(atom!=null)
+						atom.incrementAndGet();
 
 				}  else {
 					ctx.fireChannelRead(msg);
@@ -153,7 +172,15 @@ public class TestReportForward {
 		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
 		EndpointManager.INS.openEndpoint(client);
-		Thread.sleep(1500);
+		Thread.sleep(100);
+		EndpointManager.INS.openEndpoint(client);
+		Thread.sleep(100);
+		EndpointManager.INS.openEndpoint(client);
+		Thread.sleep(100);
+		EndpointManager.INS.openEndpoint(client);
+		Thread.sleep(100);
+		EndpointManager.INS.openEndpoint(client);
+		Thread.sleep(1000);
 		//等待Sp所有短信发送完
 		try {
 			logger.info("等待Sp所有短信发送完...." );
@@ -169,15 +196,21 @@ public class TestReportForward {
 			Thread.sleep(1000);
 			cnt -- ;
 		}
-		Thread.sleep(1000);
+		Thread.sleep(10000);
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(client.getId()));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tsId));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tcId));
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(s1Id));
 		Thread.sleep(1000);
 		logger.info("检查状态报告是否完全匹配上...." );
-		Assert.assertTrue(checkMsgIdMap.size() * 1000 < count); //小于千分之一
-		Assert.assertEquals(count,forward.getTotalReceiveCnt());
+		logger.info("checkMsgIdMap:{}; count : {}", checkMsgIdCnt.size(),forward.getTotalReceiveCnt());
+		Iterator<Entry<String,AtomicInteger>> itor = checkMsgIdCnt.entrySet().iterator();
+		while(itor.hasNext()) {
+			Entry<String,AtomicInteger> entry = itor.next();
+			Assert.assertTrue(entry.getValue().get() == 0); 
+		}
+		
+		Assert.assertTrue(count<=forward.getTotalReceiveCnt());  //多连接下，实际收到的要比发送的多
 	}
 
 	private String createS1(int port,ForwardHander forward) {
