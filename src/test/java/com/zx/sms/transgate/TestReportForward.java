@@ -59,6 +59,7 @@ public class TestReportForward {
 
 	private Map<String, ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>>> uidMap = new ConcurrentHashMap<String, ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>>>();
 	private Map<String, Map<String, UniqueLongMsgId>> msgIdMap = new ConcurrentHashMap<String, Map<String, UniqueLongMsgId>>();
+	private Map<String, BaseMessage> repeatMsgId = new ConcurrentHashMap<String, BaseMessage>();
 
 	@Test
 	public void testReportForward() throws InterruptedException {
@@ -102,6 +103,7 @@ public class TestReportForward {
 		//用于检查收到的状态和response的msgId是否一样
 		final Map<String,AtomicInteger> checkMsgIdCnt = new  ConcurrentHashMap<String, AtomicInteger>();
 		DefaultPromise sendover = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+		final AtomicInteger seq = new AtomicInteger(0);
 		SessionConnectedHandler sender = new SessionConnectedHandler(new AtomicInteger(count),sendover) {
 
 			@Override
@@ -109,7 +111,11 @@ public class TestReportForward {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 				msg.setDestterminalId("13800138005");
 				//有机率端口号手机号相同
-				msg.setSrcId("100869");
+				int t = seq.incrementAndGet();
+				//t太小造成相同手机号，端口号重复太多，会锁冲突，速度下降
+				if(t >= 500)seq.set(0);
+				
+				msg.setSrcId("100869"+t);
 				msg.setLinkID("0000");
 				
 				if(RandomUtils.nextBoolean() ) {

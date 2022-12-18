@@ -1,6 +1,5 @@
 package com.zx.sms.transgate;
 
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -13,6 +12,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;
@@ -40,7 +40,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 	// key: srcIdAndDestId
 	// key : msgId
 	private Map<String, Map<String, UniqueLongMsgId>> msgIdMap;
-
+	
 	private static final String uidPrefix = "_UID_";
 
 	ForwardResponseHander(
@@ -141,10 +141,14 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 			CmppSubmitRequestMessage req = (CmppSubmitRequestMessage) ((CmppSubmitResponseMessage) msg).getRequest();
 			if (req.getRegisteredDelivery() == 1) {
 				String destsrc = req.getSrcIdAndDestId();
-				MsgId resMsgid = ((CmppSubmitResponseMessage) msg).getMsgId();
+				String  resMsgid = ((CmppSubmitResponseMessage) msg).getMsgId().toString();
+				
+				//判断resMsgId是不是重复了
+				Map<String, UniqueLongMsgId> destsrcuidMap = msgIdMap.get(destsrc);
+				
 				UniqueLongMsgId uid = req.getUniqueLongMsgId();
 				// 收到response了,
-				Map<String, UniqueLongMsgId> destsrcuidMap = msgIdMap.get(destsrc);
+				
 				// destsrcuidMap 一定不为空，且是全局的,是有多线程同时处理一个对象的情况
 				if(destsrcuidMap!=null) {
 					// 这里要考虑，reponse回来晚了，状态报告先回来并且已回传
@@ -160,7 +164,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 							UniqueLongMsgId oldtt = destsrcuidMap.remove(uidPrefix + uid.getId() + uid.getPknumber());
 							// 获取锁后，再判断一次report有没有回传
 							if (oldtt != null)
-								destsrcuidMap.put(destsrc + resMsgid.toString(), uid);
+								destsrcuidMap.put(destsrc + resMsgid, uid);
 						}
 					} else {
 						// requestUid不在了，状态报告已回传，
@@ -176,38 +180,39 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 		// 发送CmppSubmitRequestMessage消息时，开始记录状态报告要用的相关信息
 		if (msg instanceof CmppSubmitRequestMessage) {
 			CmppSubmitRequestMessage submit = (CmppSubmitRequestMessage) msg;
-			String srcAndDest = submit.getSrcIdAndDestId();
-			// 发送前放入Map
-			Map<String, UniqueLongMsgId> map = new ConcurrentHashMap<String, UniqueLongMsgId>();
+			if(submit.getRegisteredDelivery() == 1) {
+				String srcAndDest = submit.getSrcIdAndDestId();
+				// 发送前放入Map
+				Map<String, UniqueLongMsgId> map = new ConcurrentHashMap<String, UniqueLongMsgId>();
 
-			// 此时msg还没有设置pkTol,pKnumber信息。这里设置一下
-			UniqueLongMsgId uid = new UniqueLongMsgId(submit.getUniqueLongMsgId(), submit.generateFrame());
+				// 此时msg还没有设置pkTol,pKnumber信息。这里设置一下
+				UniqueLongMsgId uid = new UniqueLongMsgId(submit.getUniqueLongMsgId(), submit.generateFrame());
 
-			if (uid != null) {
-				// 这里放的对象，收到response和report的时候会删除掉。如果没有收到估计会内存泄露，因此要有过期回收机制
-				map.put(uidPrefix + uid.getId() + uid.getPknumber(), uid);
+				if (uid != null) {
+					// 这里放的对象，收到response和report的时候会删除掉。如果没有收到估计会内存泄露，因此要有过期回收机制
+					map.put(uidPrefix + uid.getId() + uid.getPknumber(), uid);
 
-				// 发送的时候就知道要收几个状态报告了
-				ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>> p = uidMap
-						.get(uid.getId());
-				p.left.compareAndSet(0, uid.getPktotal());// 根据分片总烽，知道有几个report
-			} else {
-				// uid没有，说明不是通过channel收上来的消息，是通过new创建出来的消息
-				// 这种也要设置一个标示这个消息从哪里，状态报告要送回哪里的信息(uid就是这个作用)。 这里暂不处理
-				// TODO
-			}
-//			logger.info("srcAndDest {} ,map {}" ,srcAndDest,map);
+					// 发送的时候就知道要收几个状态报告了
+					ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>> p = uidMap
+							.get(uid.getId());
+					p.left.compareAndSet(0, uid.getPktotal());// 根据分片总烽，知道有几个report
+				} else {
+					// uid没有，说明不是通过channel收上来的消息，是通过new创建出来的消息
+					// 这种也要设置一个标示这个消息从哪里，状态报告要送回哪里的信息(uid就是这个作用)。 这里暂不处理
+					// TODO
+				}
+//				logger.info("srcAndDest {} ,map {}" ,srcAndDest,map);
 
-			Map<String, UniqueLongMsgId> old = msgIdMap.putIfAbsent(srcAndDest, map);
-			if (old != null && uid != null) {
-				// 这个消息的uid没放进去msgIdMap，新put一次
-				synchronized (old) {
-					old = msgIdMap.putIfAbsent(srcAndDest, map);
-					if(old != null && uid != null)
-						old.putAll(map);
+				Map<String, UniqueLongMsgId> old = msgIdMap.putIfAbsent(srcAndDest, map);
+				if (old != null && uid != null) {
+					// 这个消息的uid没放进去msgIdMap，新put一次
+					synchronized (old) {
+						old = msgIdMap.putIfAbsent(srcAndDest, map);
+						if(old != null && uid != null)
+							old.putAll(map);
+					}
 				}
 			}
-
 		}
 		ctx.write(msg, promise);
 	}

@@ -14,6 +14,7 @@ import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.common.util.ChannelUtil;
+import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
@@ -48,6 +49,8 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
     		CmppSubmitRequestMessage e = (CmppSubmitRequestMessage) msg;
     		
     		final CmppSubmitResponseMessage resp = new CmppSubmitResponseMessage(e.getHeader().getSequenceId());
+    		 //单元测试时，相同手机号端口号可能出现相同msgId的情况造成状态报告匹配出错，因此设置随机的gateId
+    		resp.setMsgId(new MsgId(RandomUtils.nextInt(0,4194303)));
 			resp.setResult(0);
 			
 			
