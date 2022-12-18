@@ -439,7 +439,7 @@ public class CmppSubmitRequestMessage extends DefaultMessage implements LongSMSM
 		StringBuilder sb = new StringBuilder();
 		sb.append("CmppSubmitRequestMessage [msgid=").append(msgid).append(", serviceId=").append(serviceId).append(", srcId=").append(srcId)
 				.append(", msgsrc=").append(msgsrc).append(", destterminalId=").append(Arrays.toString(destterminalId)).append(", msgContent=")
-				.append(getMsgContent()).append(", sequenceId=").append(getHeader().getSequenceId()).append("]");
+				.append(getMsgContent()).append(", sequenceId=").append(getHeader().getSequenceId()).append(", ").append(getUniqueLongMsgId()).append("]");
 		return sb.toString();
 	}
 

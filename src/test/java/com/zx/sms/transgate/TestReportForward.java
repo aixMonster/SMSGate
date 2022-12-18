@@ -62,7 +62,7 @@ public class TestReportForward {
 
 	@Test
 	public void testReportForward() throws InterruptedException {
-		int count = TestConstants.Count; //发送消息总数
+		int count =  TestConstants.Count; //发送消息总数
 		
 		int port = 26890;
 		ForwardHander forward = new ForwardHander(null);
@@ -109,7 +109,7 @@ public class TestReportForward {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 				msg.setDestterminalId("13800138005");
 				//有机率端口号手机号相同
-				msg.setSrcId("100869"+String.valueOf(RandomUtils.nextInt(0,3)));
+				msg.setSrcId("100869");
 				msg.setLinkID("0000");
 				
 				if(RandomUtils.nextBoolean() ) {
@@ -205,11 +205,17 @@ public class TestReportForward {
 		logger.info("检查状态报告是否完全匹配上...." );
 		logger.info("checkMsgIdMap:{}; count : {}", checkMsgIdCnt.size(),forward.getTotalReceiveCnt());
 		Iterator<Entry<String,AtomicInteger>> itor = checkMsgIdCnt.entrySet().iterator();
+		int check = 0;
+		int checkErr = 0;
 		while(itor.hasNext()) {
 			Entry<String,AtomicInteger> entry = itor.next();
-			Assert.assertTrue(entry.getValue().get() == 0); 
+			check = entry.getValue().get();
+			if(check != 0) {
+				logger.info("状态报告没有完全匹配上....{}" ,entry.getKey());
+				checkErr++ ;
+			}
 		}
-		
+		Assert.assertTrue(checkErr == 0); 
 		Assert.assertTrue(count<=forward.getTotalReceiveCnt());  //多连接下，实际收到的要比发送的多
 	}
 

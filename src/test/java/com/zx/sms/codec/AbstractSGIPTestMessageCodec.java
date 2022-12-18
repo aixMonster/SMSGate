@@ -1,7 +1,8 @@
 package com.zx.sms.codec;
 
 
-import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerReadHandler;
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerWriteHandler;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.connect.manager.sgip.SgipCodecChannelInitializer;
 import com.zx.sms.handler.sgip.SgipDeliverLongMessageHandler;
@@ -32,8 +33,14 @@ public  abstract class AbstractSGIPTestMessageCodec<T> {
 		SgipCodecChannelInitializer codec = new SgipCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(this.getClass(),LogLevel.DEBUG));
 		pipeline.addLast(codec.pipeName(), codec);
-		LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
-		pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
+		LongMessageMarkerReadHandler h_readMarker = new LongMessageMarkerReadHandler(null);
+		pipeline.addAfter(GlobalConstance.codecName, h_readMarker.name(),h_readMarker );
+
+		//添加长短信标识Handler : LongMessageMarkerHandler
+		//用于给长短信类型的msg打上标识
+		LongMessageMarkerWriteHandler h_writeMarker = new LongMessageMarkerWriteHandler(null);
+		ch.pipeline().addAfter(h_readMarker.name(), h_writeMarker.name(),h_writeMarker );
+
 		pipeline.addLast( "SgipDeliverLongMessageHandler", new SgipDeliverLongMessageHandler(null));
 		pipeline.addLast("SgipSubmitLongMessageHandler",  new SgipSubmitLongMessageHandler(null));
 	

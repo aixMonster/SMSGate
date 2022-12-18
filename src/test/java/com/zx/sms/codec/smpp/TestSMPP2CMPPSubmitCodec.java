@@ -15,7 +15,8 @@ import org.marre.wap.push.WapSLPush;
 
 import com.zx.sms.codec.AbstractSMPPTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
-import com.zx.sms.codec.cmpp.wap.LongMessageMarkerHandler;
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerReadHandler;
+import com.zx.sms.codec.cmpp.wap.LongMessageMarkerWriteHandler;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.smpp.SMPPCodecChannelInitializer;
@@ -36,8 +37,14 @@ public class TestSMPP2CMPPSubmitCodec extends AbstractSMPPTestMessageCodec<CmppS
 		pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));
 		pipeline.addLast(codec.pipeName(), codec);
 		
-		LongMessageMarkerHandler h_marker = new LongMessageMarkerHandler(null);
-		pipeline.addAfter(GlobalConstance.codecName, h_marker.name(),h_marker );
+		LongMessageMarkerReadHandler h_readMarker = new LongMessageMarkerReadHandler(buildEndpointEntity());
+		pipeline.addAfter(GlobalConstance.codecName, h_readMarker.name(),h_readMarker );
+
+		//添加长短信标识Handler : LongMessageMarkerHandler
+		//用于给长短信类型的msg打上标识
+		LongMessageMarkerWriteHandler h_writeMarker = new LongMessageMarkerWriteHandler(buildEndpointEntity());
+		ch.pipeline().addAfter(h_readMarker.name(), h_writeMarker.name(),h_writeMarker );
+
 		pipeline.addLast( "SMPPLongMessageHandler", new SMPPLongMessageHandler(null));
 		pipeline.addLast("SMPP2CMPPCodec", new SMPP2CMPPBusinessHandler());
 	}

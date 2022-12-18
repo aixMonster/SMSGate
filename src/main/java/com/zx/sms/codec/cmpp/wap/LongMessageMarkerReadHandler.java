@@ -7,10 +7,10 @@ import com.zx.sms.handler.api.AbstractBusinessHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
 
-public class LongMessageMarkerHandler extends AbstractBusinessHandler {
+public class LongMessageMarkerReadHandler extends AbstractBusinessHandler {
 	private EndpointEntity entity;
 
-	public LongMessageMarkerHandler(EndpointEntity entity) {
+	public LongMessageMarkerReadHandler(EndpointEntity entity) {
 		this.entity = entity;
 	}
 
@@ -22,13 +22,6 @@ public class LongMessageMarkerHandler extends AbstractBusinessHandler {
 		ctx.fireChannelRead(msg);
 	}
 
-	public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-		if (msg instanceof LongSMSMessage && ((LongSMSMessage) msg).needHandleLongMessage()) {
-			setUniqueLongMsgId((LongSMSMessage)msg,ctx,false);
-		}
-		ctx.write(msg, promise);
-	}
-	
 	//长短信类型生成唯一ID
 	private void setUniqueLongMsgId( LongSMSMessage lmsg,ChannelHandlerContext ctx,boolean read) {
 		lmsg.setUniqueLongMsgId(new UniqueLongMsgId(entity,ctx.channel(),lmsg,read));
@@ -37,7 +30,7 @@ public class LongMessageMarkerHandler extends AbstractBusinessHandler {
 
 	@Override
 	public String name() {
-		return "_LongMessageMarkerHandler";
+		return "_LongMessageMarkerReadHandler";
 	}
 
 }
