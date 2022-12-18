@@ -1,17 +1,5 @@
 package com.zx.sms.codec.cmpp;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.embedded.EmbeddedChannel;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.handler.traffic.WindowSizeChannelTrafficShapingHandler;
-import io.netty.util.ResourceLeakDetector;
-import io.netty.util.ResourceLeakDetector.Level;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,11 +13,20 @@ import org.junit.Test;
 
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
-import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.cmpp.CMPPClientEndpointEntity;
 import com.zx.sms.connect.manager.cmpp.CMPPCodecChannelInitializer;
 import com.zx.sms.session.cmpp.SessionStateManager;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.embedded.EmbeddedChannel;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.traffic.WindowSizeChannelTrafficShapingHandler;
 
 public class TestSpeedError {
 
@@ -39,7 +36,6 @@ public class TestSpeedError {
 
 		@Override
 		protected void initChannel(Channel ch) throws Exception {
-			ResourceLeakDetector.setLevel(Level.ADVANCED);
 			ChannelPipeline pipeline = ch.pipeline();
 			CMPPCodecChannelInitializer codec = new CMPPCodecChannelInitializer();
 			pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));

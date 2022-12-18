@@ -1,14 +1,5 @@
 package com.zx.sms.codec.smpp;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelPipeline;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
-import io.netty.util.ResourceLeakDetector;
-import io.netty.util.ResourceLeakDetector.Level;
-
 import java.util.Random;
 
 import org.junit.Assert;
@@ -31,9 +22,15 @@ import com.zx.sms.connect.manager.smpp.SMPPCodecChannelInitializer;
 import com.zx.sms.handler.smpp.SMPP2CMPPBusinessHandler;
 import com.zx.sms.handler.smpp.SMPPLongMessageHandler;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelPipeline;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
+
 public class TestSMPP2CMPPSubmitCodec extends AbstractSMPPTestMessageCodec<CmppSubmitRequestMessage> {
 	protected void doinitChannel(Channel ch){
-		ResourceLeakDetector.setLevel(Level.DISABLED);
 		ChannelPipeline pipeline = ch.pipeline();
 		SMPPCodecChannelInitializer codec = new SMPPCodecChannelInitializer();
 		pipeline.addLast("serverLog", new LoggingHandler(LogLevel.DEBUG));

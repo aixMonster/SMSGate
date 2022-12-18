@@ -258,10 +258,12 @@ public class TestCmppDeliverRequestMessageCodec extends AbstractTestMessageCodec
 //		for(int i=0 ;i<100;i++) {
 			int total = RandomUtils.nextInt(1000,3000);
 			testConcurrentLongMessageMerge1(total,false);
-			testConcurrentLongMessageMerge1(total,true);
+			if(LongMessageFrameHolder.hasClusterLongMessageFrameProvider)
+				testConcurrentLongMessageMerge1(total,true);
 			
 			testConcurrentLongMessageMerge2(total,false);
-			testConcurrentLongMessageMerge2(total,true);
+			if(LongMessageFrameHolder.hasClusterLongMessageFrameProvider)
+				testConcurrentLongMessageMerge2(total,true);
 //		}
 	}
 	

@@ -3,7 +3,6 @@ package com.zx.sms.connect.manager.sgip;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -16,9 +15,6 @@ import com.zx.sms.connect.manager.TestConstants;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 import com.zx.sms.handler.api.smsbiz.MessageReceiveHandler;
 import com.zx.sms.handler.sgip.SgipReportRequestMessageHandler;
-
-import io.netty.util.ResourceLeakDetector;
-import io.netty.util.ResourceLeakDetector.Level;
 
 /**
  * 经测试，35个连接，每个连接每200/s条消息 lenovoX250能承担7000/s消息编码解析无压力。
@@ -33,7 +29,6 @@ public class TestSgipEndPoint {
 
 	@Test
 	public void testsgipEndpoint() throws Exception {
-		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		int port = 17890;
 		SgipServerEndpointEntity server = new SgipServerEndpointEntity();
 		server.setId("sgipserver");

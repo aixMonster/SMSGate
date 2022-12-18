@@ -103,6 +103,7 @@ public class TestWithOpenSMPP {
 		String randomStr = String.valueOf(RandomUtils.nextInt(0,10000));
 		sendsubmit("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|" + randomStr,Data.ENC_GSM7BIT);
 		sendsubmit("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】" + randomStr,Data.ENC_UTF16_BE);
+		
 		unbind();
 	}
 

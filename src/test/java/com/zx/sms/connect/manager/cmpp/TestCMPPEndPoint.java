@@ -4,7 +4,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -17,8 +16,6 @@ import com.zx.sms.handler.api.AbstractBusinessHandler;
 import com.zx.sms.handler.api.BusinessHandlerInterface;
 
 import io.netty.channel.ChannelHandlerContext;
-import io.netty.util.ResourceLeakDetector;
-import io.netty.util.ResourceLeakDetector.Level;
 
 
 /**
@@ -34,7 +31,6 @@ public class TestCMPPEndPoint {
 
 	@Test
 	public void testCMPPEndpoint() throws Exception {
-		ResourceLeakDetector.setLevel(Level.ADVANCED);
 		int port = 16890;
 		CMPPServerEndpointEntity server = new CMPPServerEndpointEntity();
 		server.setId("server");
