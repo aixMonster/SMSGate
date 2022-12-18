@@ -1,5 +1,7 @@
 package com.zx.sms.connect.manager.cmpp;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
@@ -11,12 +13,25 @@ import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.common.util.CachedMillisecondClock;
+import com.zx.sms.connect.manager.EndpointConnector;
+import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
 
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelHandlerContext;
 
 
 public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
+	
+	boolean isDelay = false;
+	
+	public CMPPResponseSenderHandler(boolean isDelay ) {
+		this.isDelay = isDelay;
+	}
+	
+	public CMPPResponseSenderHandler( ) {
+	}
 	
     @Override
     public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
@@ -51,29 +66,25 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 
 				
 			}
-			
 			//模拟状态报告先于response回来
-			if(RandomUtils.nextInt(0, 10000)>9995) {
-				ctx.executor().submit(new Runnable() {
+			//随机延迟，response和状态不一定谁先回
+				int delay = isDelay ?RandomUtils.nextInt(0,100):0;
+				ctx.executor().schedule(new Runnable() {
 					public void run() {
-						ctx.channel().writeAndFlush(deliver);
+						//response从同一连接回去
 						ctx.channel().writeAndFlush(resp);
 					}
-				});
-			
+				},delay,TimeUnit.MILLISECONDS);
 				
-			}else{
-				ctx.executor().submit(new Runnable() {
+				 delay = RandomUtils.nextInt(0,100);
+				ctx.executor().schedule(new Runnable() {
 					public void run() {
-						ctx.channel().writeAndFlush(resp);
-						ctx.channel().writeAndFlush(deliver);
+						 EndpointConnector conn = EndpointManager.INS.getEndpointConnector(getEndpointEntity());
+						//report从任意连接回去
+						Channel ch = conn.fetch(); // 获取连接，保证必写成功
+						ChannelFuture future = ch.writeAndFlush(deliver);
 					}
-				});
-			
-				
-			}
-			
-			
+				},delay,TimeUnit.MILLISECONDS);
 			
     	}else if (msg instanceof CmppQueryRequestMessage) {
 			CmppQueryRequestMessage e = (CmppQueryRequestMessage) msg;

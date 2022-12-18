@@ -105,7 +105,8 @@ public class TestReportForward {
 			protected BaseMessage createTestReq(String content) {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
 				msg.setDestterminalId("13800138005");
-				msg.setSrcId("100869"+DefaultSequenceNumberUtil.getSequenceNo());
+				//有机率端口号手机号相同
+				msg.setSrcId("100869"+String.valueOf(RandomUtils.nextInt(0,500)));
 				msg.setLinkID("0000");
 				if(RandomUtils.nextBoolean()) {
 					msg.setMsgContent(content);
@@ -162,9 +163,11 @@ public class TestReportForward {
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-		while (uidMap.size() > 0) {
+		int cnt = 10;
+		while (uidMap.size() > 0 && cnt > 0 ) {
 			logger.info("等待所有状态报告回来...." +"size...." + uidMap.size() + ".." );
 			Thread.sleep(1000);
+			cnt -- ;
 		}
 		Thread.sleep(1000);
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(client.getId()));
@@ -173,7 +176,7 @@ public class TestReportForward {
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(s1Id));
 		Thread.sleep(1000);
 		logger.info("检查状态报告是否完全匹配上...." );
-		Assert.assertEquals(0,checkMsgIdMap.size());
+		Assert.assertTrue(checkMsgIdMap.size() * 1000 < count); //小于千分之一
 		Assert.assertEquals(count,forward.getTotalReceiveCnt());
 	}
 
@@ -210,7 +213,7 @@ public class TestReportForward {
 
 			@Override
 			public void handlerAdded(ChannelHandlerContext ctx) throws Exception {
-				CMPPResponseSenderHandler handler = new CMPPResponseSenderHandler();
+				CMPPResponseSenderHandler handler = new CMPPResponseSenderHandler(true);
 				handler.setEndpointEntity(getEndpointEntity());
 				ctx.pipeline().addAfter("sessionStateManager", handler.name(), handler);
 				ctx.pipeline().remove(this);
@@ -248,7 +251,7 @@ public class TestReportForward {
 		client.setCloseWhenRetryFailed(false);
 		client.setUseSSL(false);
 //		 client.setWriteLimit(150);
-		client.setWindow(16);
+		client.setWindow(100);
 		client.setReSendFailMsg(false);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
@@ -267,10 +270,10 @@ public class TestReportForward {
 			}
 		});
 		client.setBusinessHandlerSet(clienthandlers);
-//		EndpointManager.INS.openEndpoint(client);
 		EndpointManager.INS.openEndpoint(client);
-//		EndpointManager.INS.openEndpoint(client);
-//		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
+		EndpointManager.INS.openEndpoint(client);
 		EndpointManager.INS.openEndpoint(client);
 		//等待连接建立 完成
 		Thread.sleep(2000);

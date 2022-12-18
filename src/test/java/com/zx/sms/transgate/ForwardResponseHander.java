@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,7 +40,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 	// key: srcIdAndDestId
 	// key : msgId
 	private Map<String, Map<String, UniqueLongMsgId>> msgIdMap;
-	
+
 	private static final String uidPrefix = "_UID_";
 
 	ForwardResponseHander(
@@ -73,72 +74,41 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 
 				if (destsrcuidMap != null) {
 
-					UniqueLongMsgId uid = destsrcuidMap.remove(destsrc+reportMsgId);
+					UniqueLongMsgId uid = destsrcuidMap.remove(destsrc + reportMsgId);
 //					logger.info("destsrc {} reportMsgId {} ,uid {}" ,destsrc,reportMsgId,uid);
 
 					if (uid != null) {
 						// 1: response先回来 ,这种情况是正常的，可能最大
 //						logger.info("response先回来 uid {}" ,uid);
 
-						sendBackReport(uid,e);
-						
+						sendBackReport(uid, e);
+
 					} else {
-						// 2: report先回来
-						//遍历出来以“ uidPrefix” 开头的key, 任选一个回传
-						
-						String MMddHHmmss = reportMsgId.substring(0,10);
-						UniqueLongMsgId early = null;
-						UniqueLongMsgId any = null; //当early为空时，任选一个发回
-						
-						//遍历的时候避免打断
-						Iterator<Entry<String, UniqueLongMsgId>> itor =destsrcuidMap.entrySet().iterator();
-						while (itor.hasNext()) {
-							Entry<String, UniqueLongMsgId> entry = itor.next();
-							
-							if(entry.getKey().startsWith(uidPrefix)) {
-								UniqueLongMsgId requestUid = entry.getValue();
-								any = requestUid;
-								String uidTime = DateFormatUtils.format(requestUid.getTimestamp(),"MMddHHmmss");
-								//状态时间要大于请求发送时间
-								if(MMddHHmmss.compareTo(uidTime) > 0 && (early == null ||early.getTimestamp() > requestUid.getTimestamp())) {
-									early = requestUid;
-								}
+						// 2: report先回来 ，report是会多个连接过来，有多线程问题
+						// 遍历出来以“ uidPrefix” 开头的key, 任选一个回传
+
+						// 多个线程同时遍历，避免两个线程选择到同一个
+						synchronized (destsrcuidMap) {
+							// 拿到锁后，再判断一次是不是response刚好回来，就不用再遍历了
+							uid = destsrcuidMap.remove(destsrc + reportMsgId);
+							if (uid != null) {
+								sendBackReport(uid, e);
+							} else {
+
+								// 还是没有再遍历
+								ddd(destsrcuidMap, e);
 							}
-						}
-						
-						//就回传这个了
-						UniqueLongMsgId targerUid = early == null ? any : early;
-//						logger.info("report  先回来  uid {}" ,targerUid);
-						if(targerUid == null) {
-							//这里有可能是状态先回来，立即response回来后删除requestUid。因此遍历完也是空
-							//此时可按response先回来再试一次
-							UniqueLongMsgId responseUid = destsrcuidMap.remove(destsrc+reportMsgId);
-							if(responseUid!=null) {
-//								logger.info("不是空，发送。{} =,= {}",reportMsgId,responseUid);
-								sendBackReport(responseUid,e);
-							}else {
-								//还是空，没办法了,只能再任意先一个发走
-								itor =destsrcuidMap.entrySet().iterator();
-								while (itor.hasNext()) {
-									Entry<String, UniqueLongMsgId> entry = itor.next();
-									any = entry.getValue();
-									break;
-								}
-//								logger.info("还是空，真没办法了。{} =,= {}",reportMsgId,any);
-								sendBackReport(any,e);
-							}
-						}else {
-							destsrcuidMap.remove(uidPrefix+targerUid.getId()+targerUid.getPknumber());//先删除发送request时保存的uid
-							sendBackReport(targerUid,e);
 						}
 					}
-					
-					//状态发送后，这里为空，把map清除
-					if(destsrcuidMap.size() == 0) {
+
+					// 状态发送后，这里为空，把map清除
+					synchronized (destsrcuidMap) {
+						if (destsrcuidMap.size() == 0) {
 //						logger.info("remove {}" ,destsrc);
-//						msgIdMap.remove(destsrc);
+							msgIdMap.remove(destsrc);
+						}
 					}
-					
+
 				}
 			}
 
@@ -153,7 +123,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 			if (e.getRegisteredDelivery() == 1) {
 				// 记录response的Msgid ,用于状态报告回复
 				UniqueLongMsgId uid = e.getUniqueLongMsgId(); // 相同长短信分片uid.getId()相同
-				Map<Integer, MsgId> l_msgid = new HashMap<Integer, MsgId>();
+				Map<Integer, MsgId> l_msgid = new ConcurrentHashMap<Integer, MsgId>();
 				l_msgid.put(Integer.valueOf(uid.getPknumber()), resp.getMsgId());
 
 				// 左值用于记录已接收到状态个数，状态收全了再给下游发
@@ -173,22 +143,28 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 				String destsrc = req.getSrcIdAndDestId();
 				MsgId resMsgid = ((CmppSubmitResponseMessage) msg).getMsgId();
 				UniqueLongMsgId uid = req.getUniqueLongMsgId();
-				// 收到response了
+				// 收到response了,
 				Map<String, UniqueLongMsgId> destsrcuidMap = msgIdMap.get(destsrc);
-				// destsrcuidMap 一定不为空
-				
-				//这里要考虑，reponse回来晚了，状态报告先回来并且已回传
-//				logger.info("  receive {} ,uid:{} ,remove  {}" ,resMsgid,uid,uidPrefix+uid.getId()+uid.getPknumber());
-				UniqueLongMsgId requestUid = destsrcuidMap.get(uidPrefix+uid.getId()+uid.getPknumber());
-				//通过判断这个发送时保存的requestUid是否存在，判断有没有回传report
-				//如果已回传过了，这个response失去意义了
-				if(requestUid != null) {
-					//requestUid还在，状态报告没有回传，
-					destsrcuidMap.put(destsrc + resMsgid.toString(), uid);
-					destsrcuidMap.remove(uidPrefix+uid.getId()+uid.getPknumber());
-				}else {
-					//requestUid不在了，状态报告已回传
-					
+				// destsrcuidMap 一定不为空，且是全局的,是有多线程同时处理一个对象的情况
+				if(destsrcuidMap!=null) {
+					// 这里要考虑，reponse回来晚了，状态报告先回来并且已回传
+//					logger.info("  receive {} ,uid:{} ,remove  {}" ,resMsgid,uid,uidPrefix+uid.getId()+uid.getPknumber());
+					UniqueLongMsgId requestUid = destsrcuidMap.get(uidPrefix + uid.getId() + uid.getPknumber());
+					// 通过判断这个发送时保存的requestUid是否存在，判断有没有回传report
+
+					// 如果已回传过了
+					if (requestUid != null) {
+						// requestUid还在，说明状态报告没有回传
+						synchronized (destsrcuidMap) {
+							// 加锁保证同时只有一个线程在增，删。这里不考虑跨进程的情况
+							UniqueLongMsgId oldtt = destsrcuidMap.remove(uidPrefix + uid.getId() + uid.getPknumber());
+							// 获取锁后，再判断一次report有没有回传
+							if (oldtt != null)
+								destsrcuidMap.put(destsrc + resMsgid.toString(), uid);
+						}
+					} else {
+						// requestUid不在了，状态报告已回传，
+					}
 				}
 			}
 		}
@@ -203,20 +179,22 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 			String srcAndDest = submit.getSrcIdAndDestId();
 			// 发送前放入Map
 			Map<String, UniqueLongMsgId> map = new ConcurrentHashMap<String, UniqueLongMsgId>();
-			UniqueLongMsgId uid = new UniqueLongMsgId(submit.getUniqueLongMsgId(),submit.generateFrame());
-			
+
+			// 此时msg还没有设置pkTol,pKnumber信息。这里设置一下
+			UniqueLongMsgId uid = new UniqueLongMsgId(submit.getUniqueLongMsgId(), submit.generateFrame());
+
 			if (uid != null) {
-				//这里放的对象，收到response和report的时候会删除掉。如果没有收到估计会内存泄露，因此要有过期回收机制
-				map.put(uidPrefix+uid.getId()+uid.getPknumber(), uid);
-				
-				//发送的时候就知道要收几个状态报告了
+				// 这里放的对象，收到response和report的时候会删除掉。如果没有收到估计会内存泄露，因此要有过期回收机制
+				map.put(uidPrefix + uid.getId() + uid.getPknumber(), uid);
+
+				// 发送的时候就知道要收几个状态报告了
 				ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>> p = uidMap
 						.get(uid.getId());
 				p.left.compareAndSet(0, uid.getPktotal());// 根据分片总烽，知道有几个report
-			}else {
-				//uid没有，说明不是通过channel收上来的消息，是通过new创建出来的消息
-				// 这种也要设置一个标示这个消息从哪里，状态报告要送回哪里的信息(uid就是这个作用)。 这里暂不处理 
-				//TODO
+			} else {
+				// uid没有，说明不是通过channel收上来的消息，是通过new创建出来的消息
+				// 这种也要设置一个标示这个消息从哪里，状态报告要送回哪里的信息(uid就是这个作用)。 这里暂不处理
+				// TODO
 			}
 //			logger.info("srcAndDest {} ,map {}" ,srcAndDest,map);
 
@@ -225,6 +203,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 				// 这个消息的uid没放进去msgIdMap，新put一次
 				old.putAll(map);
 			}
+
 		}
 		ctx.write(msg, promise);
 	}
@@ -235,18 +214,82 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 		ch.writeAndFlush(msg);
 	}
 
-	private void sendBackReport(UniqueLongMsgId uid, CmppDeliverRequestMessage deliver)  throws Exception{
+	private void ddd(Map<String, UniqueLongMsgId> destsrcuidMap, CmppDeliverRequestMessage e) throws Exception {
+		CmppReportRequestMessage report = e.getReportRequestMessage();
+		String reportMsgId = report.getMsgId().toString();
+		String MMddHHmmss = reportMsgId.substring(0, 10);
+		String destsrc = e.getSrcIdAndDestId();
+
+		UniqueLongMsgId early = null;
+		UniqueLongMsgId any = null; // 当early为空时，任选一个发回
+		Iterator<Entry<String, UniqueLongMsgId>> itor = destsrcuidMap.entrySet().iterator();
+		while (itor.hasNext()) {
+			Entry<String, UniqueLongMsgId> entry = itor.next();
+
+			if (entry.getKey().startsWith(uidPrefix)) {
+				UniqueLongMsgId requestUid = entry.getValue();
+				any = requestUid;
+				String uidTime = DateFormatUtils.format(requestUid.getTimestamp(), "MMddHHmmss");
+				// 状态时间要大于请求发送时间
+				if (MMddHHmmss.compareTo(uidTime) >= 0
+						&& (early == null || early.getTimestamp() >= requestUid.getTimestamp())) {
+					early = requestUid;
+				}
+			}
+		}
+
+		// 就回传这个了
+		UniqueLongMsgId targerUid = early == null ? any : early;
+//	logger.info("report  先回来  uid {}" ,targerUid);
+
+		if (targerUid != null) {
+			// 有可两个线程选择到同一个，再判断一次是否还有
+			targerUid = destsrcuidMap.remove(uidPrefix + targerUid.getId() + targerUid.getPknumber());// 先删除发送request时保存的uid
+
+			if (targerUid != null) {
+				sendBackReport(targerUid, e);
+			} else {
+				logger.info("1 已经有锁了，不应执行到这里 {}", destsrc);
+			}
+
+		} else {
+
+			// 前边回来的状态和respones已经把map里的 Request创建的requestId 都删除了，现在只剩下response生成的msgid-uid了
+
+			// 因为是同一个手机号，端口号，没办法了只能再任意先一个发走
+			itor = destsrcuidMap.entrySet().iterator();
+			while (itor.hasNext()) {
+				Entry<String, UniqueLongMsgId> entry = itor.next();
+				any = entry.getValue();
+				itor.remove();
+				break;
+			}
+//			
+			if (any != null)
+				sendBackReport(any, e);
+			else
+				logger.info("走到这里，没办法了，只能依赖状态报告超时自动回传了，把接收时保存的msgid构造一个状态回复。{}, {}", destsrc, reportMsgId);
+		}
+	}
+
+	private void sendBackReport(UniqueLongMsgId uid, CmppDeliverRequestMessage deliver) throws Exception {
 		ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>> t = uidMap.get(uid.getId());
 		CmppReportRequestMessage report = deliver.getReportRequestMessage();
 		MsgId reportMsgId = report.getMsgId();
-		
+
+		if (t == null) {
+			logger.info("t 是空，说明这个report在这之前已经被回传了 {}", uid);
+			return;
+		}
 		int cnt = t.left.decrementAndGet();
 		// 考虑这个短信拆分后发给上游的个数，与从下游接收的个数不一样
 		if (cnt <= 0) {
 			// 状态收全了，这是最后一个状态了
 			// 获取早先回复给下游的msgId
 			UniqueLongMsgId originUid = t.right.left;
+			
 			MsgId msgId = t.right.right.remove(Integer.valueOf(uid.getPknumber()));
+			
 			if (msgId != null) {
 				report.setMsgId(msgId); // 重写msgid
 				// 转发给下游
@@ -254,34 +297,43 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 			}
 
 			// 接收的分片，比发给上游的分片多，把剩下的都回复报告
-			Iterator<Entry<Integer, MsgId>> itor = t.right.right.entrySet().iterator();
-			while (itor.hasNext()) {
-				Entry<Integer, MsgId> entry = itor.next();
-				MsgId originMsgId = entry.getValue();
-				CmppDeliverRequestMessage cloned = deliver.clone();
-				cloned.setMsgId(new MsgId());
-				cloned.setSequenceNo(DefaultSequenceNumberUtil.getSequenceNo());
+			
+			synchronized (t.right.right) {
+				Set<Entry<Integer, MsgId>> entrySet = t.right.right.entrySet();
+				Iterator<Entry<Integer, MsgId>> itor = entrySet.iterator();
+				
+				while (itor.hasNext()) {
+					Entry<Integer, MsgId> entry = itor.next();
+					MsgId originMsgId = entry.getValue();
+					CmppDeliverRequestMessage cloned = deliver.clone();
+					cloned.setMsgId(new MsgId());
+					cloned.setSequenceNo(DefaultSequenceNumberUtil.getSequenceNo());
 
-				// 创建一个新的Report对象
-				CmppReportRequestMessage newReport = new CmppReportRequestMessage();
-				newReport.setDestterminalId(cloned.getSrcterminalId());
-				newReport.setMsgId(originMsgId);
-				newReport.setSubmitTime(cloned.getReportRequestMessage().getSubmitTime());
-				newReport.setDoneTime(cloned.getReportRequestMessage().getDoneTime());
-				newReport.setStat("DELIVRD");
-				newReport.setSmscSequence(0);
-				cloned.setReportRequestMessage(newReport);
+					// 创建一个新的Report对象
+					CmppReportRequestMessage newReport = new CmppReportRequestMessage();
+					newReport.setDestterminalId(cloned.getSrcterminalId());
+					newReport.setMsgId(originMsgId);
+					newReport.setSubmitTime(cloned.getReportRequestMessage().getSubmitTime());
+					newReport.setDoneTime(cloned.getReportRequestMessage().getDoneTime());
+					newReport.setStat("DELIVRD");
+					newReport.setSmscSequence(0);
+					cloned.setReportRequestMessage(newReport);
 
-				writeToEntity(originUid.getEntityId(), cloned);
-				itor.remove();
+					writeToEntity(originUid.getEntityId(), cloned);
+					itor.remove();
+				}
 			}
+		
 			// 最近一个了，清除uidMap，以后没机会了
 			uidMap.remove(uid.getId());
 
 		} else {
 			// 获取早先回复给下游的msgId
 			UniqueLongMsgId originUid = t.right.left;
-			MsgId msgId = t.right.right.remove(Integer.valueOf(uid.getPknumber()));
+			MsgId msgId;
+			synchronized (t.right.right) {
+				msgId = t.right.right.remove(Integer.valueOf(uid.getPknumber()));
+			}
 			if (msgId != null) {
 				report.setMsgId(msgId); // 重写msgid
 				// 转发给下游
