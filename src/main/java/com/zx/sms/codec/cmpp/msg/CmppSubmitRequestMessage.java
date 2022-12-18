@@ -436,10 +436,25 @@ public class CmppSubmitRequestMessage extends DefaultMessage implements LongSMSM
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("CmppSubmitRequestMessage [msgid=").append(msgid).append(", serviceId=").append(serviceId).append(", srcId=").append(srcId)
-				.append(", msgsrc=").append(msgsrc).append(", destterminalId=").append(Arrays.toString(destterminalId)).append(", msgContent=")
-				.append(getMsgContent()).append(", sequenceId=").append(getHeader().getSequenceId()).append(", ").append(getUniqueLongMsgId()).append("]");
+		StringBuilder sb = new StringBuilder("CmppSubmitRequestMessage [");
+		UniqueLongMsgId uid = getUniqueLongMsgId();
+		sb.append("msgid=").append(msgid);
+		
+		if(uid != null) sb.append(", pkseq=").append(uid.getPkseq());
+		
+		if(msgfmt != null) sb.append(", dcs=").append(msgfmt.getValue());
+		
+		sb.append(", serviceId=").append(serviceId);
+		
+		if(StringUtils.isNotBlank(valIdTime)) sb.append(", valIdTime=").append(valIdTime);
+		if(StringUtils.isNotBlank(atTime)) sb.append(", atTime=").append(atTime);
+		
+		sb.append(", srcId=").append(srcId)
+		.append(", msgsrc=").append(msgsrc)
+		.append(", destterminalId=").append(Arrays.toString(destterminalId))
+		.append(", msgContent=").append(getMsgContent())
+		.append(", sequenceId=").append(getHeader().getSequenceId())
+		.append("]");
 		return sb.toString();
 	}
 

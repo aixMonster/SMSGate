@@ -224,7 +224,7 @@ public enum LongMessageFrameHolder {
 				// 超过一帧的，进行长短信合并
 				String mapKey = longSmsKey+"."+fh.frameKey+"."+fh.getTotalLength();
 				
-				//设置短信处分的接收时间
+				//设置短信的接收时间
 				frame.setTimestamp(((BaseMessage)msg).getTimestamp());
 
 				//将新收到的分片保存，并获取全部的分片。因为多个分片可能同时从不同连接到达，因此这个方法要线程安全。
