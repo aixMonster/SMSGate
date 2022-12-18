@@ -72,7 +72,6 @@ public class ForwardHander extends AbstractBusinessHandler {
 						return inited;
 					}
 				}, rate * 1000);
-				
 			}
 		}
 		ctx.fireUserEventTriggered(evt);

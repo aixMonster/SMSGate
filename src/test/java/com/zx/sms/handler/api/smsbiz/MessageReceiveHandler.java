@@ -1,7 +1,9 @@
 package com.zx.sms.handler.api.smsbiz;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.slf4j.Logger;
@@ -9,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
-import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
@@ -26,14 +27,14 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 	protected static final Logger logger = LoggerFactory.getLogger(MessageReceiveHandler.class);
 	private int rate = 1;
 
-	private AtomicLong cnt = new AtomicLong();
 	private long lastNum = 0;
-	private volatile static boolean inited = false;
+	private static Map<String,AtomicLong> initedMap = new ConcurrentHashMap<String,AtomicLong>();
 	
 	private static final Object lock = new Object();
 
 	public AtomicLong getCnt() {
-		return cnt;
+		AtomicLong count = initedMap.get(getEndpointEntity().getId());
+		return count;
 	}
 
 	@Override
@@ -43,11 +44,17 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 
 	public synchronized void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 		synchronized (lock) {
-			if (evt == SessionState.Connect && !inited) {
+			AtomicLong count = initedMap.get(getEndpointEntity().getId());
+			
+			if (evt == SessionState.Connect && count == null) {
+				initedMap.put(getEndpointEntity().getId(), new AtomicLong());
+				
 				EventLoopGroupFactory.INS.submitUnlimitCircleTask(new Callable<Boolean>() {
 
 					@Override
 					public Boolean call() throws Exception {
+						AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
+						
 							long nowcnt = cnt.get();
 							EndpointConnector conn = getEndpointEntity().getSingletonConnector();
 							
@@ -59,11 +66,10 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 				}, new ExitUnlimitCirclePolicy() {
 					@Override
 					public boolean notOver(Future future) {
-						inited = getEndpointEntity().getSingletonConnector().getConnectionNum()>0;
+						boolean inited = getEndpointEntity().getSingletonConnector().getConnectionNum() > 0;
 						return inited;
 					}
 				}, rate * 1000);
-				inited = true;
 			}
 		}
 		ctx.fireUserEventTriggered(evt);
@@ -88,11 +94,13 @@ public abstract class MessageReceiveHandler extends AbstractBusinessHandler {
 			future.addListener(new GenericFutureListener() {
 				@Override
 				public void operationComplete(Future future) throws Exception {
-					if(msg instanceof LongSMSMessage)
+					if(msg instanceof LongSMSMessage) {
+						AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
 						cnt.incrementAndGet();
+					}
+						
 				}
 			});
-
 	}
 
 	public MessageReceiveHandler clone() throws CloneNotSupportedException {
