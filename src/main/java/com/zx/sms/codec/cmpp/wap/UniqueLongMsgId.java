@@ -97,6 +97,10 @@ public class UniqueLongMsgId implements Serializable{
 		this.createdByRead = createdByRead;
 	}
 	
+	public UniqueLongMsgId(EndpointEntity entity,LongSMSMessage lmsg  ){
+		this(entity,null,lmsg,false);
+	}
+	
 	public UniqueLongMsgId(UniqueLongMsgId id ,LongMessageFrame frame ){
 		this.id = id.getId();
 		this.entityId = id.getEntityId();
