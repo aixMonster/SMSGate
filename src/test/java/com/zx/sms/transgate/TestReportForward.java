@@ -67,15 +67,15 @@ public class TestReportForward {
 		
 		int port = 26890;
 		ForwardHander forward = new ForwardHander(null);
-		String s1Id = createS1(port,forward); // 创建运营商
+		String s1Id = createS1(port,forward); // 创建运营商，模拟最终接收短信，并回复状态报告
 		Thread.sleep(1000);
-		String tcId = createTc(port); // 转发器连到运营商
+		String tcId = createTc(port); // 创建转发器客户端并连到运营商
 		Thread.sleep(1000);
 		int tsport = 26891;
-		String tsId = createTS(tcId, tsport); // 转发器的服务端收到的消息都转到tcId
+		String tsId = createTS(tcId, tsport); // 创建转发器的服务端，给Sp提供账号，收到的消息都转到tcId
 		Thread.sleep(1000);
 
-		String cid = "C1";
+		String cid = "C1"; //下边是创建模拟Sp ,提交短信，并等待状态报告回来
 		CMPPClientEndpointEntity client = new CMPPClientEndpointEntity();
 		client.setId(cid + "client");
 //		client.setLocalhost("127.0.0.1");
@@ -177,6 +177,8 @@ public class TestReportForward {
 		};
 		clienthandlers.add(sender);
 		client.setBusinessHandlerSet(clienthandlers);
+		
+		//模拟SP开启5个连接
 		EndpointManager.INS.openEndpoint(client);
 		Thread.sleep(100);
 		EndpointManager.INS.openEndpoint(client);
@@ -196,7 +198,7 @@ public class TestReportForward {
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-		int cnt = 10;
+		int cnt = 20;
 		while (uidMap.size() > 0 && cnt > 0 ) {
 			logger.info("等待所有状态报告回来...." +"size...." + uidMap.size() + ".." );
 			Thread.sleep(1000);
@@ -221,6 +223,7 @@ public class TestReportForward {
 				checkErr++ ;
 			}
 		}
+		logger.info("检查状态报告是否完全匹配上....{}..." ,checkErr);
 		Assert.assertTrue(checkErr == 0); 
 		Assert.assertTrue(count<=forward.getTotalReceiveCnt());  //多连接下，实际收到的要比发送的多
 	}

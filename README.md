@@ -128,7 +128,19 @@
 
 将消息转发给通道后，当接收到`submitResponse后`，通过`response.getRequest()`获取对应的`request` 。注意此时有两个`msgID`，一个是通道给你的`msgID`，一个是你给来源客户的。在数据库里记录相关信息（至少包括消息来源客户，消息出去的通道，两个`msgId`,消息详情）。之后在接收到状态报告后，通过通道给你的`msgId`更新消息回执状态，并根据来源客户将回执回传给客户，注意回传`reportMessage`里的`msgId`要使用你给客户回复`response`时用的`msgId`.  [详见流程图](https://www.processon.com/view/link/598c16ace4b02e9a26eeed11)
 
-在Test包里有一个模拟匹配状态报告的测试用例，逻辑供参考： `com.zx.sms.transgate.TestReportForward`
+- `关于长短信类 LongSMSMessage 中 UniqueLongMsgId 的使用`
+
+框架默认实现长短信的拆分与合并，接收Sp发送的MT消息并匹配上游状态报告时，由于缺少短信唯一标识，从Sp接收的短信和最终发送给运营商的短信之间没有关联标识，
+造成状态报告回来时难以匹配，实现起来很复杂。为了解决接收的短信与发送出去的短信关联问题，给长短信增加了这个`UniqueLongMsgId`。
+
+`UniqueLongMsgId` 中id 是唯一标识,即使在极短时间内收到相同手机号端口号的短信也能保持唯一性。该ID当短信从网络上接收到还未合并时进行设置，直到转发给运营商通道都不会变化，并且相同长短信的不同分片的ID也相同。
+<DIV>
+<img src="./doc/QQ20221219154405.jpg" width="25%" height="25%">
+<DIV>
+
+`UniqueLongMsgId` 除了 id 以外，还包含其它信息如：从消息从哪个通道账号Id提交的，从哪个IP端口提交的、长短信的分片ID、总分片数、分片序号以及消息序列号、时间戳。
+在Test包里有一个模拟匹配状态报告的测试用例用是用 `UniqueLongMsgId` 实现的，并且经过相同手机号、端口号在极限并发压力下的匹配测试，单JVM多线程安全。逻辑供参考： [`com.zx.sms.transgate.TestReportForward`](./src/test/java/com/zx/sms/transgate/TestReportForward.java)
+
 
 - `集群环境如何平均分配上游连接数?`
 
