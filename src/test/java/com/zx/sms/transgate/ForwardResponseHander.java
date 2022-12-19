@@ -123,7 +123,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 			if (e.getRegisteredDelivery() == 1) {
 				// 记录response的Msgid ,用于状态报告回复
 				UniqueLongMsgId uid = e.getUniqueLongMsgId(); // 相同长短信分片uid.getId()相同
-				
+
 				Map<Integer, MsgId> l_msgid = new ConcurrentHashMap<Integer, MsgId>();
 				l_msgid.put(Integer.valueOf(uid.getPknumber()), resp.getMsgId());
 
@@ -309,31 +309,31 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 
 			// 接收的分片，比发给上游的分片多，把剩下的都回复报告
 
-			synchronized (t.right.right) {
-				Set<Entry<Integer, MsgId>> entrySet = t.right.right.entrySet();
-				Iterator<Entry<Integer, MsgId>> itor = entrySet.iterator();
+//			synchronized (t.right.right) {
+			Set<Entry<Integer, MsgId>> entrySet = t.right.right.entrySet();
+			Iterator<Entry<Integer, MsgId>> itor = entrySet.iterator();
 
-				while (itor.hasNext()) {
-					Entry<Integer, MsgId> entry = itor.next();
-					MsgId originMsgId = entry.getValue();
-					CmppDeliverRequestMessage cloned = deliver.clone();
-					cloned.setMsgId(new MsgId());
-					cloned.setSequenceNo(DefaultSequenceNumberUtil.getSequenceNo());
+			while (itor.hasNext()) {
+				Entry<Integer, MsgId> entry = itor.next();
+				MsgId originMsgId = entry.getValue();
+				CmppDeliverRequestMessage cloned = deliver.clone();
+				cloned.setMsgId(new MsgId());
+				cloned.setSequenceNo(DefaultSequenceNumberUtil.getSequenceNo());
 
-					// 创建一个新的Report对象
-					CmppReportRequestMessage newReport = new CmppReportRequestMessage();
-					newReport.setDestterminalId(cloned.getSrcterminalId());
-					newReport.setMsgId(originMsgId);
-					newReport.setSubmitTime(cloned.getReportRequestMessage().getSubmitTime());
-					newReport.setDoneTime(cloned.getReportRequestMessage().getDoneTime());
-					newReport.setStat("DELIVRD");
-					newReport.setSmscSequence(0);
-					cloned.setReportRequestMessage(newReport);
+				// 创建一个新的Report对象
+				CmppReportRequestMessage newReport = new CmppReportRequestMessage();
+				newReport.setDestterminalId(cloned.getSrcterminalId());
+				newReport.setMsgId(originMsgId);
+				newReport.setSubmitTime(cloned.getReportRequestMessage().getSubmitTime());
+				newReport.setDoneTime(cloned.getReportRequestMessage().getDoneTime());
+				newReport.setStat("DELIVRD");
+				newReport.setSmscSequence(0);
+				cloned.setReportRequestMessage(newReport);
 
-					writeToEntity(originUid.getEntityId(), cloned);
-					itor.remove();
-				}
+				writeToEntity(originUid.getEntityId(), cloned);
+				itor.remove();
 			}
+//			}
 
 			// 最近一个了，清除uidMap，以后没机会了
 			uidMap.remove(uid.getId());
@@ -341,10 +341,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 		} else {
 			// 获取早先回复给下游的msgId
 			UniqueLongMsgId originUid = t.right.left;
-			MsgId msgId;
-			synchronized (t.right.right) {
-				msgId = t.right.right.remove(Integer.valueOf(uid.getPknumber()));
-			}
+			MsgId msgId = t.right.right.remove(Integer.valueOf(uid.getPknumber()));
 			if (msgId != null) {
 				report.setMsgId(msgId); // 重写msgid
 				// 转发给下游

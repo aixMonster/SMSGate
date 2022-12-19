@@ -59,7 +59,6 @@ public class TestReportForward {
 
 	private Map<String, ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>>> uidMap = new ConcurrentHashMap<String, ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>>>();
 	private Map<String, Map<String, UniqueLongMsgId>> msgIdMap = new ConcurrentHashMap<String, Map<String, UniqueLongMsgId>>();
-	private Map<String, BaseMessage> repeatMsgId = new ConcurrentHashMap<String, BaseMessage>();
 
 	@Test
 	public void testReportForward() throws InterruptedException {
@@ -130,7 +129,7 @@ public class TestReportForward {
 		    		SmsTextMessage sms = (SmsTextMessage)msg.getSmsMessage();
 		    		SmsDcs mydcs = new SmsDcs(sms.getDcs().getValue()) {
 		    			public int getMaxMsglength() {
-		    				return RandomUtils.nextInt(70,150);
+		    				return RandomUtils.nextInt(70,140);
 		    			}
 		    		};
 		    		msg.setMsg(new SmsTextMessage(sms.getText(),mydcs));
