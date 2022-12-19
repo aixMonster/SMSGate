@@ -48,6 +48,7 @@ public interface GlobalConstance {
     public final static String loggerNamePrefix = "entity.%s";
     public final static String codecName = "codecName";
     public final static String sessionHandler = "sessionStateManager";
+    public static final Boolean Use8bitSmsConcatMessage = Boolean.valueOf(PropertiesUtils.getproperties("smsUse8bit", "true"));
 	
     public final static int MESSAGE_DELAY_USER_DEFINED_WRITABILITY_INDEX = 31;
 }

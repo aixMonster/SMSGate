@@ -341,28 +341,28 @@ public enum LongMessageFrameHolder {
 			LongMessageFrame frame = new LongMessageFrame();
 			
 			SmsUdhElement[] udhe = aMsgPdu.getUdhElements_();
-			short pkseq  = 1;
-			byte pktot  = 1;
-			byte pknum  = 1;
+			int pkseq  = 1;
+			short pktot  = 1;
+			short pknum  = 1;
 			if(udhe!=null && udhe.length>0) {
 				SmsUdhElement  firstudh = udhe[0];
 				
 				if(SmsUdhIei.CONCATENATED_8BIT.equals(firstudh.getUdhIei_())) {
 					byte[] udhdata = firstudh.getUdhIeiData();
-					pkseq = (short)(udhdata[0] & 0xff);
-					pktot = udhdata[1];
-					pknum = udhdata[2];
+					pkseq = byteToInt(udhdata[0]);
+					pktot = (short)byteToInt(udhdata[1]);
+					pknum = (short)byteToInt(udhdata[2]);
 				}else if(SmsUdhIei.CONCATENATED_16BIT.equals(firstudh.getUdhIei_())) {
 					byte[] udhdata = firstudh.getUdhIeiData();
-					pkseq = (short)((((udhdata[0] & 0xff )<<8) | (udhdata[1]&0xff)) & 0xffff);
-					pktot = udhdata[2];
-					pknum = udhdata[3];
+					pkseq = (int)((((udhdata[0] & 0xff )<<8) | (udhdata[1]&0xff)) & 0x0ffff);
+					pktot = (short)byteToInt(udhdata[2]);
+					pknum = (short)byteToInt(udhdata[3]);
 				}
 			}
 			
-			frame.setPkseq( pkseq);
-			frame.setPktotal( pktot);
-			frame.setPknumber( pknum);
+			frame.setPkseq(pkseq);
+			frame.setPktotal(pktot);
+			frame.setPknumber(pknum);
 			frame.setMsgfmt(aMsgPdu.getDcs());
 			
 			frame.setTpudhi(udh != null ? (short) 1: (short) 0);
@@ -415,41 +415,40 @@ public enum LongMessageFrameHolder {
 			InformationElement appudhinfo = null;
 			int i = 0;
 			int frameKey = 0;
-			int pknumber = 0;
-			int pkTotle = 0;
+			short pknumber = 1;
+			short pkTotle = 1;
 			for (InformationElement udhi : header.infoElement) {
 				if (SmsUdhIei.CONCATENATED_8BIT.equals(udhi.udhIei)) {
-					frameKey = udhi.infoEleData[i];
-					i++;
-					pkTotle = byteToInt(udhi.infoEleData[i]);
+					frameKey = byteToInt(udhi.infoEleData[i++]);
+					pkTotle = (short)byteToInt(udhi.infoEleData[i++]);
 					frameholder = new FrameHolder(frameKey, pkTotle);
-					pknumber = byteToInt(udhi.infoEleData[i + 1]) - 1;
+					pknumber =  (short)(byteToInt(udhi.infoEleData[i++]));
 					//设置frame里的分片序列号，唯一ID
-					frame.setPkseq((short)frameKey);
+					frame.setPkseq(frameKey);
 					//设置frame里的总分片数
-					frame.setPktotal((byte)pkTotle);
+					frame.setPktotal(pkTotle);
 					//设置frame里的分片序号
-					frame.setPknumber((byte)(pknumber + 1));
+					frame.setPknumber(pknumber);
 					
 				} else if (SmsUdhIei.CONCATENATED_16BIT.equals(udhi.udhIei)) {
-					frameKey = (((udhi.infoEleData[i] & 0xff) << 8) | (udhi.infoEleData[i + 1] & 0xff) & 0x0ffff);
+					frameKey = (int)(((udhi.infoEleData[i] & 0xff) << 8) | (udhi.infoEleData[i + 1] & 0xff) & 0x0ffff);
 					i += 2;
-					pkTotle = byteToInt(udhi.infoEleData[i]);
+					pkTotle = (short)byteToInt(udhi.infoEleData[i++]);
 					frameholder = new FrameHolder(frameKey,pkTotle );
-					pknumber = byteToInt(udhi.infoEleData[i + 1]) - 1;
+					pknumber = (short)byteToInt(udhi.infoEleData[i++]);
 					//设置frame里的分片序列号，唯一ID
-					frame.setPkseq((short)frameKey);
+					frame.setPkseq(frameKey);
 					//设置frame里的总分片数
-					frame.setPktotal((byte)pkTotle);
+					frame.setPktotal(pkTotle);
 					//设置frame里的分片序号
-					frame.setPknumber((byte)(pknumber + 1));
+					frame.setPknumber(pknumber);
 				} else {
 					appudhinfo = udhi;
 				}
 			}
 			// 不是续列短信
 			if (frameholder == null) {
-				frameholder = new FrameHolder(0x0, 1);
+				frameholder = new FrameHolder(0, 1);
 			}
 			// 如果没有app的udh，默认为文本短信
 
@@ -457,7 +456,7 @@ public enum LongMessageFrameHolder {
 			frameholder.setMsgfmt(frame.getMsgfmt());
 			frameholder.setSequence(frame.getSequence());
 			frameholder.setServiceNum(serviceNum);
-			frameholder.merge(frame,frame.getPayloadbytes(header.headerlength), pknumber);
+			frameholder.merge(frame,frame.getPayloadbytes(header.headerlength), pknumber - 1 );
 			
 			return frameholder;
 		}

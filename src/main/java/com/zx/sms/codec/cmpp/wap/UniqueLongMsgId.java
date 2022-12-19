@@ -26,9 +26,9 @@ public class UniqueLongMsgId implements Serializable{
 	private SocketAddress localAddr;
 	private long timestamp;
 	private int sequenceNo;
-	private short pkseq ;
-	private byte pktotal ;
-	private byte pknumber ;
+	private int pkseq ;
+	private short pktotal ;
+	private short pknumber ;
 	private boolean createdByRead; 
 	
 	//只有从channel接收消息时才用
@@ -140,15 +140,15 @@ public class UniqueLongMsgId implements Serializable{
 		return sequenceNo;
 	}
 
-	public short getPkseq() {
+	public int getPkseq() {
 		return pkseq;
 	}
 
-	public byte getPktotal() {
+	public short getPktotal() {
 		return pktotal;
 	}
 
-	public byte getPknumber() {
+	public short getPknumber() {
 		return pknumber;
 	}
 

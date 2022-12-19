@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.config.PropertiesUtils;
 
 /**
@@ -64,7 +65,7 @@ import com.zx.sms.config.PropertiesUtils;
 public abstract class SmsConcatMessage implements SmsMessage {
 	private static final Logger logger = LoggerFactory.getLogger(SmsConcatMessage.class);
 	private static final AtomicInteger rnd_ = new AtomicInteger((new Random()).nextInt(0xffff));
-	private static final Boolean Use8bit = Boolean.valueOf(PropertiesUtils.getproperties("smsUse8bit", "true"));
+	private static final Boolean Use8bit = GlobalConstance.Use8bitSmsConcatMessage;
 	// 长短信拆分，要使用 rnd_ 生成统一的长短信ID,但在针对同一个号码，下发多条长短信，并且高并发情况下，随机生成的ID,有机率带来同一个号码
 	// ID重复，冲突，造成短信无法展示
 	private String seqNoKey;

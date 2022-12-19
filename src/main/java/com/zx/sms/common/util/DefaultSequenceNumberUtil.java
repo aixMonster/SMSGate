@@ -58,7 +58,7 @@ public class DefaultSequenceNumberUtil {
 	}
 
 	public static int getSequenceNo() {
-		return sequenceId.incrementAndGet();
+		return sequenceId.incrementAndGet() & 0x7fffffff;  //避免序列号是负数
 	}
 	
 	private final static AtomicInteger sequenceId = new AtomicInteger(RandomUtils.nextInt());
