@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
@@ -16,6 +17,7 @@ import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.connect.manager.EventLoopGroupFactory;
 import com.zx.sms.connect.manager.ExitUnlimitCirclePolicy;
+import com.zx.sms.connect.manager.ServerEndpoint;
 import com.zx.sms.handler.api.AbstractBusinessHandler;
 import com.zx.sms.session.cmpp.SessionState;
 
@@ -41,6 +43,7 @@ public class ForwardHander extends AbstractBusinessHandler {
 	private long lastNum = 0;
 
 	private static final Object lock = new Object();
+
 
 	public synchronized void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
 		synchronized (lock) {
@@ -74,6 +77,15 @@ public class ForwardHander extends AbstractBusinessHandler {
 				}, rate * 1000);
 			}
 		}
+		
+		//作为Server时有连接上来，先发一个submit消息，用于测试非channel上接收的消息
+
+		if(getEndpointEntity() instanceof ServerEndpoint) {
+			CmppSubmitRequestMessage submit = CmppSubmitRequestMessage.create("13800180000", "1234567890", "作为Server时有连接上来，先发一个submit消息，用于测试非channel上接收的消息，CmppSubmitRequestMessage");
+			submit.setRegisteredDelivery((short)1);
+			sendMsg(submit);
+		}
+	
 		ctx.fireUserEventTriggered(evt);
 	}
 
@@ -100,16 +112,7 @@ public class ForwardHander extends AbstractBusinessHandler {
 			// 转发给上游服务
 			if (StringUtils.isNotBlank(forwardEid)) {
 
-				EndpointConnector conn = EndpointManager.INS.getEndpointConnector(forwardEid);
-				Channel ch = conn.fetch(); // 获取连接，保证必写成功
-				ChannelFuture future = ch.writeAndFlush(submit);
-				future.addListener(new GenericFutureListener() {
-					@Override
-					public void operationComplete(Future future) throws Exception {
-						AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
-						cnt.incrementAndGet();
-					}
-				});
+				sendMsg(submit);
 			}else {
 				AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
 				cnt.incrementAndGet();
@@ -129,6 +132,27 @@ public class ForwardHander extends AbstractBusinessHandler {
 	@Override
 	public String name() {
 		return "ForwardHander";
+	}
+	
+	private void sendMsg(BaseMessage submit) {
+		if (StringUtils.isNotBlank(forwardEid)) {
+
+			EndpointConnector conn = EndpointManager.INS.getEndpointConnector(forwardEid);
+			Channel ch = conn.fetch(); // 获取连接，保证必写成功
+			ChannelFuture future = ch.writeAndFlush(submit);
+			future.addListener(new GenericFutureListener() {
+				@Override
+				public void operationComplete(Future future) throws Exception {
+					
+					if(future.isSuccess()) {
+						AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
+						cnt.incrementAndGet();
+					}else {
+						future.cause().printStackTrace();
+					}
+				}
+			});
+		}
 	}
 
 }
