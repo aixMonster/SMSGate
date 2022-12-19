@@ -198,11 +198,18 @@ public class TestReportForward {
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
-		int cnt = 20;
-		while (uidMap.size() > 0 && cnt > 0 ) {
-			logger.info("等待所有状态报告回来...." +"size...." + uidMap.size() + ".." );
+		int cnt = uidMap.size();
+		int checksize = 0;
+		while ( cnt > 0 ) {
+			logger.info("等待所有状态报告回来...." +"size...{}.." ,cnt );
 			Thread.sleep(1000);
-			cnt -- ;
+			
+			if(cnt == uidMap.size()) {
+				//连接5次size大小都不变即退出
+				if(checksize++ > 5)
+					break;
+			}
+			cnt = uidMap.size();
 		}
 		Thread.sleep(10000);
 		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(client.getId()));
@@ -219,7 +226,7 @@ public class TestReportForward {
 			Entry<String,AtomicInteger> entry = itor.next();
 			check = entry.getValue().get();
 			if(check != 0) {
-				logger.info("状态报告没有完全匹配上....{}" ,entry.getKey());
+				logger.info("checking report undelived count....{}" ,entry.getKey());
 				checkErr++ ;
 			}
 		}

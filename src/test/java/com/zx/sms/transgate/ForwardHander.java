@@ -3,6 +3,8 @@ package com.zx.sms.transgate;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.commons.lang3.StringUtils;
@@ -37,6 +39,8 @@ public class ForwardHander extends AbstractBusinessHandler {
 	}
 
 	private static Map<String,AtomicLong> initedMap = new ConcurrentHashMap<String,AtomicLong>();
+	
+	private static final ExecutorService executor = Executors.newFixedThreadPool(10);
 	
 	private int rate = 10;
 
@@ -99,7 +103,7 @@ public class ForwardHander extends AbstractBusinessHandler {
 		} else if (msg instanceof CmppSubmitRequestMessage) {
 			// 作为服务端收submit消息
 			// 短信合并完成了
-			CmppSubmitRequestMessage submit = (CmppSubmitRequestMessage) msg;
+			final CmppSubmitRequestMessage submit = (CmppSubmitRequestMessage) msg;
 
 //    		//重新设置最大拆分长度
 //    		SmsTextMessage sms = (SmsTextMessage)submit.getSmsMessage();
@@ -111,8 +115,20 @@ public class ForwardHander extends AbstractBusinessHandler {
 //    		submit.setMsg(new SmsTextMessage(sms.getText(),mydcs));
 			// 转发给上游服务
 			if (StringUtils.isNotBlank(forwardEid)) {
+				
+				executor.submit(new Runnable() {
 
-				sendMsg(submit);
+					@Override
+					public void run() {
+						try {
+							sendMsg(submit);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+					}
+				});
+				
+				
 			}else {
 				AtomicLong cnt = initedMap.get(getEndpointEntity().getId());
 				cnt.incrementAndGet();
@@ -134,7 +150,7 @@ public class ForwardHander extends AbstractBusinessHandler {
 		return "ForwardHander";
 	}
 	
-	private void sendMsg(BaseMessage submit) {
+	private void sendMsg(BaseMessage submit) throws InterruptedException {
 		if (StringUtils.isNotBlank(forwardEid)) {
 
 			EndpointConnector conn = EndpointManager.INS.getEndpointConnector(forwardEid);
@@ -152,6 +168,8 @@ public class ForwardHander extends AbstractBusinessHandler {
 					}
 				}
 			});
+			if(!ch.isWritable())
+				future.sync();
 		}
 	}
 
