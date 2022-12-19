@@ -69,7 +69,7 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 				report.setSmscSequence(0);
 				deliver.setReportRequestMessage(report);
 
-				 delay = RandomUtils.nextInt(0,100);
+				 delay = RandomUtils.nextInt(1500,5000);
 				ctx.executor().schedule(new Runnable() {
 					public void run() {
 						 EndpointConnector conn = EndpointManager.INS.getEndpointConnector(getEndpointEntity());
@@ -91,7 +91,7 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 			}
 			//模拟状态报告先于response回来
 			//随机延迟，response和状态不一定谁先回
-				delay = isDelay ?RandomUtils.nextInt(0,100):0;
+				delay = isDelay ?RandomUtils.nextInt(50,300):0;
 				ctx.executor().schedule(new Runnable() {
 					public void run() {
 						//response从同一连接回去
