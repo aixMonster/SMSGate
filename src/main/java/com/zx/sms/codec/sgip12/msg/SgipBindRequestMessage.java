@@ -99,8 +99,8 @@ public class SgipBindRequestMessage extends SgipDefaultMessage {
 	 */
 	@Override
 	public String toString() {
-		return String.format("BindRequestMessage [loginType=%s, loginName=%s, loginPassowrd=%s, reserve=%s, seq=%s, header=%s]", loginType, loginName,
-				loginPassowrd, reserve, getSequenceNumber(),getHeader());
+		return String.format("BindRequestMessage [loginType=%s, loginName=%s, reserve=%s, seq=%s, header=%s]", loginType, loginName,
+				 reserve, getSequenceNumber(),getHeader());
 	}
 
 }
