@@ -105,7 +105,7 @@ public class TestCMPPEndPoint {
 		client.setUseSSL(false);
 //		 client.setWriteLimit(150);
 		client.setWindow(16);
-		client.setReSendFailMsg(false);
+		client.setReSendFailMsg(TestConstants.isReSendFailMsg);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		

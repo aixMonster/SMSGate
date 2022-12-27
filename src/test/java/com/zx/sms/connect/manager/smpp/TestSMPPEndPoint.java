@@ -72,7 +72,7 @@ public class TestSMPPEndPoint {
 		client.setMaxChannels((short)1);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);
-		client.setReSendFailMsg(false);
+		client.setReSendFailMsg(TestConstants.isReSendFailMsg);
 //		client.setWriteLimit(200);
 //		client.setReadLimit(200);
 		client.setSupportLongmsg(SupportLongMessage.SEND);  //接收长短信时不自动合并

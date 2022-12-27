@@ -94,7 +94,7 @@ public class TestReportForward {
 		client.setUseSSL(false);
 //		 client.setWriteLimit(600);
 		client.setWindow(64);
-		client.setReSendFailMsg(false);
+		client.setReSendFailMsg(TestConstants.isReSendFailMsg);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		
@@ -259,7 +259,7 @@ public class TestReportForward {
 		child.setRetryWaitTimeSec((short) 30);
 		child.setMaxRetryCnt((short) 3);
 
-		child.setReSendFailMsg(false);
+		child.setReSendFailMsg(TestConstants.isReSendFailMsg);
 		List<BusinessHandlerInterface> serverhandlers = new ArrayList<BusinessHandlerInterface>();
 		forward.setEndpointEntity(child);
 		serverhandlers.add(forward);
@@ -306,7 +306,7 @@ public class TestReportForward {
 		client.setUseSSL(false);
 //		 client.setWriteLimit(150);
 		client.setWindow(100);
-		client.setReSendFailMsg(false);
+		client.setReSendFailMsg(TestConstants.isReSendFailMsg);
 		client.setSupportLongmsg(SupportLongMessage.BOTH);
 		List<BusinessHandlerInterface> clienthandlers = new ArrayList<BusinessHandlerInterface>();
 		clienthandlers.add(new AbstractBusinessHandler() {
@@ -359,7 +359,7 @@ public class TestReportForward {
 		child.setRetryWaitTimeSec((short) 30);
 		child.setMaxRetryCnt((short) 3);
 
-		child.setReSendFailMsg(false);
+		child.setReSendFailMsg(TestConstants.isReSendFailMsg);
 
 		child.setWindow(64); //加大窗口，加大状态报告发送速度
 		
@@ -405,7 +405,7 @@ public class TestReportForward {
 		child.setRetryWaitTimeSec((short) 30);
 		child.setMaxRetryCnt((short) 3);
 
-		child.setReSendFailMsg(false);
+		child.setReSendFailMsg(TestConstants.isReSendFailMsg);
 
 		child.setWindow(64); //加大窗口，加大状态报告发送速度
 		

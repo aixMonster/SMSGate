@@ -40,7 +40,7 @@ jobs:
     - name: Change-TestConstants.Count
       run: echo 'TestConstants.Count=100000' >> src/test/resources/global.properties
     - name: Build with Maven
-      run: mvn -B test --file pom.xml
+      run: mvn -B -DisReSendFailMsg=true test --file pom.xml
       env:
         # The hostname used to communicate with the Redis service container
         REDIS_HOST: localhost

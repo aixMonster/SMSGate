@@ -70,7 +70,7 @@ public class TestSgipEndPoint {
 		client.setMaxChannels((short) 1);
 		client.setRetryWaitTimeSec((short) 100);
 		client.setUseSSL(false);
-		client.setReSendFailMsg(false);
+		client.setReSendFailMsg(TestConstants.isReSendFailMsg);
 		client.setIdleTimeSec((short) 120);
 //		client.setWriteLimit(200);
 //		client.setReadLimit(200);
