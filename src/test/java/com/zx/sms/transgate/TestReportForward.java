@@ -104,7 +104,8 @@ public class TestReportForward {
 		DefaultPromise sendover = new DefaultPromise(GlobalEventExecutor.INSTANCE);
 		final AtomicInteger seq = new AtomicInteger(0);
 		SessionConnectedHandler sender = new SessionConnectedHandler(new AtomicInteger(count),sendover) {
-
+			
+			
 			@Override
 			protected BaseMessage createTestReq(String content) {
 				CmppSubmitRequestMessage msg = new CmppSubmitRequestMessage();
@@ -125,13 +126,8 @@ public class TestReportForward {
 				}
 				
 				if(RandomUtils.nextBoolean() && RandomUtils.nextBoolean() ) {
-				
 		    		SmsTextMessage sms = (SmsTextMessage)msg.getSmsMessage();
-		    		SmsDcs mydcs = new SmsDcs(sms.getDcs().getValue()) {
-		    			public int getMaxMsglength() {
-		    				return RandomUtils.nextInt(70,140);
-		    			}
-		    		};
+		    		SmsDcs mydcs = new TestSmsDcs(sms.getDcs().getValue());
 		    		msg.setMsg(new SmsTextMessage(sms.getText(),mydcs));
 				}
 				msg.setRegisteredDelivery((short) 1);
