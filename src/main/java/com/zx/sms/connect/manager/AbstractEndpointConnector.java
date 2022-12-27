@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageMarkerReadHandler;
-import com.zx.sms.codec.cmpp.wap.LongMessageMarkerWriteHandler;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.NotSupportedException;
 import com.zx.sms.common.storedMap.BDBStoredMapFactoryImpl;
@@ -218,15 +217,10 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 			ch.pipeline().addAfter(GlobalConstance.codecName, "msgLog", new MessageLogHandler(endpoint));
 			
 			//添加长短信标识Handler : LongMessageMarkerHandler
-			//用于给长短信类型的msg打上标识
+			//用于给长短信类型的msg打上唯一标识
 			LongMessageMarkerReadHandler h_readMarker = new LongMessageMarkerReadHandler(endpoint);
 			ch.pipeline().addAfter(GlobalConstance.codecName, h_readMarker.name(),h_readMarker );
 
-			//添加长短信标识Handler : LongMessageMarkerHandler
-			//用于给长短信类型的msg打上标识
-			LongMessageMarkerWriteHandler h_writeMarker = new LongMessageMarkerWriteHandler(endpoint);
-			ch.pipeline().addBefore(GlobalConstance.sessionHandler, h_writeMarker.name(),h_writeMarker );
-			
 			//添加各个协议的业务Handler
 			bindHandler(ch.pipeline(), endpoint);
 			
@@ -379,6 +373,14 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		private AtomicInteger indexSeq = new AtomicInteger();
 	}
 
+	public ChannelFuture asynwriteUncheck(Object msg) {
+		Channel ch = fetch();
+		if (ch == null)
+			return null;
+		ChannelFuture future = ch.writeAndFlush(msg);
+		return future;
+	}
+	
 	public ChannelFuture asynwrite(Object msg) {
 		Channel ch = fetchOneWritable();
 		if (ch == null)
@@ -386,9 +388,25 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		ChannelFuture future = ch.writeAndFlush(msg);
 		return future;
 	}
-
+	
+	public <T extends BaseMessage> Promise<T> synwriteUncheck(T message) {
+		return synwrite(message,false);
+	}
+	
+	public <T extends BaseMessage> List<Promise<T>> synwriteUncheck(List<T> msgs) {
+		return synwrite(msgs,false);
+	}
+	
 	public <T extends BaseMessage> List<Promise<T>> synwrite(List<T> msgs) {
-		Channel ch = fetchOneWritable();
+		return synwrite(msgs,true);
+	}
+	public <T extends BaseMessage> Promise<T> synwrite(T message) {
+		return synwrite(message,true);
+	}
+	
+
+	private <T extends BaseMessage> List<Promise<T>> synwrite(List<T> msgs,boolean checkWritable) {
+		Channel ch = checkWritable ? fetchOneWritable() : fetch();
 		if (ch == null)
 			return null;
 		AbstractSessionStateManager session =  ch.attr(GlobalConstance.sessionKey).get();
@@ -402,8 +420,8 @@ public abstract class AbstractEndpointConnector implements EndpointConnector<End
 		return arrPromise;
 	}
 
-	public <T extends BaseMessage> Promise<T> synwrite(T message) {
-		Channel ch = fetchOneWritable();
+	private <T extends BaseMessage> Promise<T> synwrite(T message,boolean checkWritable) {
+		Channel ch = checkWritable ? fetchOneWritable() : fetch();
 		if (ch == null)
 			return null;
 		AbstractSessionStateManager session = ch.attr(GlobalConstance.sessionKey).get();

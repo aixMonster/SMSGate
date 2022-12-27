@@ -12,6 +12,7 @@ import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.EndpointManager;
@@ -34,28 +35,31 @@ public class ChannelUtil {
 
 	public static ChannelFuture asyncWriteToEntity(String entity, Object msg) {
 		EndpointEntity e = EndpointManager.INS.getEndpointEntity(entity);
-		if(e == null)
+		if (e == null)
 			return null;
 		EndpointConnector connector = e.getSingletonConnector();
 		return asyncWriteToEntity(connector, msg, null);
 	}
 
-	public static ChannelFuture asyncWriteToEntity(final EndpointEntity entity, final Object msg, GenericFutureListener listner) {
+	public static ChannelFuture asyncWriteToEntity(final EndpointEntity entity, final Object msg,
+			GenericFutureListener listner) {
 
 		EndpointConnector connector = entity.getSingletonConnector();
 		return asyncWriteToEntity(connector, msg, listner);
 	}
 
-	public static ChannelFuture asyncWriteToEntity(final String entity, final Object msg, GenericFutureListener listner) {
+	public static ChannelFuture asyncWriteToEntity(final String entity, final Object msg,
+			GenericFutureListener listner) {
 
 		EndpointEntity e = EndpointManager.INS.getEndpointEntity(entity);
-		if(e == null)
+		if (e == null)
 			return null;
 		EndpointConnector connector = e.getSingletonConnector();
 		return asyncWriteToEntity(connector, msg, listner);
 	}
 
-	private static ChannelFuture asyncWriteToEntity(EndpointConnector connector, final Object msg, GenericFutureListener listner) {
+	private static ChannelFuture asyncWriteToEntity(EndpointConnector connector, final Object msg,
+			GenericFutureListener listner) {
 		if (connector == null || msg == null)
 			return null;
 
@@ -83,64 +87,91 @@ public class ChannelUtil {
 		return promise;
 	}
 
-	public static <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(EndpointEntity e, BaseMessage msg) throws Exception {
+	public static <T extends BaseMessage> List<T> splitLongSmsMessage(EndpointEntity e, T msg) throws Exception {
+		List<T> msgs = new ArrayList<T>();
 
-		EndpointConnector connector = e.getSingletonConnector();
-		if(connector == null) return null;
-		
 		if (msg instanceof LongSMSMessage) {
-			LongSMSMessage<BaseMessage> lmsg = (LongSMSMessage<BaseMessage>) msg;
+			LongSMSMessage<T> lmsg = (LongSMSMessage<T>) msg;
 			if (!lmsg.isReport()) {
 				// 长短信拆分
 				SmsMessage msgcontent = lmsg.getSmsMessage();
-				
-				if(msgcontent instanceof SmsConcatMessage) {
-					((SmsConcatMessage)msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+
+				if (msgcontent instanceof SmsConcatMessage) {
+					((SmsConcatMessage) msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
 				}
 
 				List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
+				// 生成长短信唯一ID
+				UniqueLongMsgId uniqueId = null;
+				// 保证同一条长短信，通过同一个tcp连接发送
 
-				//保证同一条长短信，通过同一个tcp连接发送
-				List<BaseMessage> msgs = new ArrayList<BaseMessage>();
 				for (LongMessageFrame frame : frameList) {
-					BaseMessage basemsg = (BaseMessage) lmsg.generateMessage(frame);
-					msgs.add(basemsg);
+					LongSMSMessage<T> t = (LongSMSMessage) lmsg.generateMessage(frame);
+					if (uniqueId == null) {
+						uniqueId = new UniqueLongMsgId(e, t);
+						t.setUniqueLongMsgId(uniqueId);
+					} else {
+						frame.setTimestamp(((T)t).getTimestamp());
+						frame.setSequence(((T)t).getSequenceNo());
+						t.setUniqueLongMsgId(new UniqueLongMsgId(uniqueId, frame));
+					}
+					msgs.add((T) t);
 				}
-				return connector.synwrite(msgs);
+				return msgs;
 			}
-		}
+		} 
+		
+		msgs.add(msg);
+		
+		return msgs;
+	}
 
-		Promise promise = connector.synwrite(msg);
-		if (promise == null) {
-			// 为空，可能是连接断了,直接返回
+	public static <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(EndpointEntity e, BaseMessage msg)
+			throws Exception {
+
+		EndpointConnector connector = e.getSingletonConnector();
+		if (connector == null)
 			return null;
+
+		if (msg instanceof LongSMSMessage && !((LongSMSMessage<BaseMessage>) msg).isReport()) {
+			LongSMSMessage<BaseMessage> lmsg = (LongSMSMessage<BaseMessage>) msg;
+
+			List<BaseMessage> msgs = splitLongSmsMessage(e, msg);
+			return connector.synwrite(msgs);
+		} else {
+			Promise promise = connector.synwrite(msg);
+			if (promise == null) {
+				// 为空，可能是连接断了,直接返回
+				return null;
+			}
+			List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
+			arrPromise.add(promise);
+			return arrPromise;
 		}
-		List<Promise<T>> arrPromise = new ArrayList<Promise<T>>();
-		arrPromise.add(promise);
-		return arrPromise;
 	}
 
 	/**
 	 * 同步发送长短信类型 <br/>
 	 * 注意：该方法将拆分后的短信直接发送，不会再调用BusinessHandler里的write方法了。
 	 */
-	public static <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(String entity, BaseMessage msg) throws Exception {
+	public static <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(String entity, BaseMessage msg)
+			throws Exception {
 		EndpointEntity e = EndpointManager.INS.getEndpointEntity(entity);
-		if(e==null) {
-			logger.warn("EndpointEntity {} is null",entity);
+		if (e == null) {
+			logger.warn("EndpointEntity {} is null", entity);
 			return null;
 		}
-		return syncWriteLongMsgToEntity(e,msg);
+		return syncWriteLongMsgToEntity(e, msg);
 	}
 
 	/**
 	 * 同步发送消息类型 <br/>
 	 * 注意：该方法将直接发送至编码器，不会再调用BusinessHandler里的write方法了。
 	 * 因此对于Deliver和Submit消息必须自己进行长短信拆分，设置PDU等相关字段
-	 *一般此方法用来发送二进制短信等特殊短信，需要自己生成短信的二进制内容。
-	 *正常短信下发要使用 syncWriteLongMsgToEntity 方法
+	 * 一般此方法用来发送二进制短信等特殊短信，需要自己生成短信的二进制内容。 正常短信下发要使用 syncWriteLongMsgToEntity 方法
 	 */
-	public static <T extends BaseMessage> Promise<T> syncWriteBinaryMsgToEntity(String entity, BaseMessage msg) throws Exception {
+	public static <T extends BaseMessage> Promise<T> syncWriteBinaryMsgToEntity(String entity, BaseMessage msg)
+			throws Exception {
 		EndpointEntity e = EndpointManager.INS.getEndpointEntity(entity);
 		EndpointConnector connector = e.getSingletonConnector();
 

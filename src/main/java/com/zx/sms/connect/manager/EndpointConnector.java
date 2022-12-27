@@ -52,17 +52,36 @@ public interface EndpointConnector<T extends EndpointEntity> {
 	public Channel[] getallChannel();
 	
 	/**
-	 *异步发送消息，消息发送至网卡（写入tcp协议栈即表示完成）
+	 *异步发送消息，消息发送至网卡（写入tcp协议栈即表示完成）,发送前不检查连接是否可写
 	 */
 	ChannelFuture asynwrite(Object msg);
 	
+	
 	/**
-	 *同步发送消息，消息收到回复表示完成
+	 *异步发送消息，消息发送至网卡（写入tcp协议栈即表示完成）,发送前不检查连接是否可写
+	 */
+	ChannelFuture asynwriteUncheck(Object msg);
+	
+	/**
+	 *同步发送消息，消息收到回复表示完成, 发送前检查连接是否可写
 	 */
 	<K extends BaseMessage> Promise<K> synwrite(K msg);
 	
 	/**
-	 *通过同一个连接同步发送一组消息
+	 *通过同一个连接同步发送一组消息, 发送前检查连接是否可写
 	 */
 	<K extends BaseMessage> List<Promise<K>> synwrite(List<K> msgs);
+	
+	
+	/**
+	 *同步发送消息，消息收到回复表示完成,不检查连接是否可写
+	 */
+	<K extends BaseMessage> Promise<K> synwriteUncheck(K msg);
+	
+	/**
+	 *通过同一个连接同步发送一组消息,不检查连接是否可写
+	 */
+	<K extends BaseMessage> List<Promise<K>> synwriteUncheck(List<K> msgs);
+	
+	
 }

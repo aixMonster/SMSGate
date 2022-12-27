@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
+import com.zx.sms.LongSMSMessage;
+import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.SendFailException;
 import com.zx.sms.common.SmsLifeTerminateException;
@@ -609,6 +611,13 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 	}
 	
 	public Promise<T> writeMessagesync(T message){
+		
+		//设置长短信 UniqueLongMsgId的ChannelId remoteAddr属性
+		if (message instanceof LongSMSMessage && ((LongSMSMessage)message).getUniqueLongMsgId()!=null && ((LongSMSMessage)message).getUniqueLongMsgId().getChannelId() == null) {
+			LongSMSMessage lmsg = (LongSMSMessage)message;
+			lmsg.setUniqueLongMsgId(new UniqueLongMsgId(lmsg.getUniqueLongMsgId(), ctx.channel()));
+		}
+		
 		return safewrite(ctx,message,ctx.newPromise(),true);
 	}
 

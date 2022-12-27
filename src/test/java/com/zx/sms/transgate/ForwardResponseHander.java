@@ -184,19 +184,22 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 				String srcAndDest = submit.getSrcIdAndDestId();
 				// 发送前放入Map
 				Map<String, UniqueLongMsgId> map = new ConcurrentHashMap<String, UniqueLongMsgId>();
-				// 此时msg还没有设置pkTol,pKnumber信息。这里设置一下
 				if (submit.getUniqueLongMsgId() != null) {
 
-					UniqueLongMsgId uid = new UniqueLongMsgId(submit.getUniqueLongMsgId(), submit.generateFrame());
+					UniqueLongMsgId uid = submit.getUniqueLongMsgId();
 
-					if (uid != null) {
+					if (uid != null ) {
 						// 这里放的对象，收到response和report的时候会删除掉。如果没有收到估计会内存泄露，因此要有过期回收机制
 						map.put(uidPrefix + uid.getId() + uid.getPknumber(), uid);
 
-						// 发送的时候就知道要收几个状态报告了
-						ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>> p = uidMap
-								.get(uid.getId());
-						p.left.compareAndSet(0, uid.getPktotal());// 根据分片总烽，知道有几个report
+						//从channel里收到的消息，才会有  uidMap 的值 
+						if( uid.isCreatedByRead()) {
+							
+							// 发送的时候就知道要收几个状态报告了
+							ImmutablePair<AtomicInteger, ImmutablePair<UniqueLongMsgId, Map<Integer, MsgId>>> p = uidMap
+									.get(uid.getId());
+							p.left.compareAndSet(0, uid.getPktotal());// 根据分片总烽，知道有几个report
+						}
 					} else {
 						// uid没有，说明不是通过channel收上来的消息，是通过new创建出来的消息
 						// 这种也要设置一个标示这个消息从哪里，状态报告要送回哪里的信息(uid就是这个作用)。 这里暂不处理
@@ -278,8 +281,10 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 //			
 			if (any != null)
 				sendBackReport(any, e);
-			else
+			else {
+				
 				logger.info("走到这里，没办法了，只能依赖状态报告超时自动回传了，把接收时保存的msgid构造一个状态回复。{}, {}", destsrc, reportMsgId);
+			}
 		}
 	}
 
@@ -289,7 +294,7 @@ public class ForwardResponseHander extends AbstractBusinessHandler {
 		MsgId reportMsgId = report.getMsgId();
 
 		if (t == null) {
-			logger.info("t 是空，说明有重复的uid,这个report在这之前已经被回传了 {}", uid);
+			logger.info("t 是空，说明有重复的uid,这个report在这之前已经被回传了；或者这个消息不用回传Report {}", uid);
 			return;
 		}
 		int cnt = t.left.decrementAndGet();

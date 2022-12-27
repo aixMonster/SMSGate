@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
+import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 
@@ -19,34 +20,39 @@ import io.netty.handler.codec.MessageToMessageCodec;
 public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends MessageToMessageCodec<T, T> {
 	private final Logger logger = LoggerFactory.getLogger(AbstractLongMessageHandler.class);
 
-	private EndpointEntity  entity;
-	
+	private EndpointEntity entity;
+
 	public AbstractLongMessageHandler(EndpointEntity entity) {
 		this.entity = entity;
 	}
-	
+
 	@Override
 	protected void decode(ChannelHandlerContext ctx, T msg, List<Object> out) throws Exception {
-		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.RECV) && msg instanceof LongSMSMessage && ((LongSMSMessage)msg).needHandleLongMessage()) {
-			LongSMSMessage lmsg = (LongSMSMessage)msg;
-			UniqueLongMsgId uniqueId = lmsg.getUniqueLongMsgId();
+		if ((entity == null || entity.getSupportLongmsg() == SupportLongMessage.BOTH|| entity.getSupportLongmsg() == SupportLongMessage.RECV)
+				&& msg instanceof LongSMSMessage
+				&& ((LongSMSMessage) msg).needHandleLongMessage()) {
 			
+			LongSMSMessage lmsg = (LongSMSMessage) msg;
+			UniqueLongMsgId uniqueId = lmsg.getUniqueLongMsgId();
+
 			try {
-				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget( entity,uniqueId.getId(),lmsg,entity !=null && entity.isRecvLongMsgOnMultiLink());
+				SmsMessageHolder hoder = LongMessageFrameHolder.INS.putAndget(entity, uniqueId.getId(), lmsg,
+						entity != null && entity.isRecvLongMsgOnMultiLink());
 
 				if (hoder != null) {
-					
-					//合并完成，及时删除UniqueLongMsgId中的uniqeId缓存
+
+					// 合并完成，及时删除UniqueLongMsgId中的uniqeId缓存
 					uniqueId.clearCacheKey();
-					
-					resetMessageContent((T)hoder.msg, hoder.smsMessage);
-					
-					//长短信合并完成，返回的这个msg里已经包含了所有的短信短断。后边的handler响应response时要包含这些片断。
+
+					resetMessageContent((T) hoder.msg, hoder.smsMessage);
+
+					// 长短信合并完成，返回的这个msg里已经包含了所有的短信短断。后边的handler响应response时要包含这些片断。
 					out.add(hoder.msg);
-				} 
+				}
 			} catch (Exception ex) {
 				// 长短信解析失败，直接给网关回复 resp . 并丢弃这个短信
-				logger.error("Decode Message Error ,entity : {} ,uniqueId : {} , msg dump :{}",entity.getId(),uniqueId, ByteBufUtil.hexDump(lmsg.generateFrame().getMsgContentBytes()));
+				logger.error("Decode Message Error ,entity : {} ,uniqueId : {} , msg dump :{}", entity.getId(),
+						uniqueId, ByteBufUtil.hexDump(lmsg.generateFrame().getMsgContentBytes()));
 			}
 		} else {
 			out.add(msg);
@@ -55,20 +61,33 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 
 	@Override
 	protected void encode(ChannelHandlerContext ctx, T requestMessage, List<Object> out) throws Exception {
-		
-		if ((entity==null || entity.getSupportLongmsg() == SupportLongMessage.BOTH||entity.getSupportLongmsg() == SupportLongMessage.SEND) && requestMessage instanceof LongSMSMessage  &&  ((LongSMSMessage)requestMessage).needHandleLongMessage()) {
-			LongSMSMessage lmsg = (LongSMSMessage)requestMessage;
+
+		if ((entity == null || entity.getSupportLongmsg() == SupportLongMessage.BOTH|| entity.getSupportLongmsg() == SupportLongMessage.SEND) 
+				&& requestMessage instanceof LongSMSMessage
+				&& ((LongSMSMessage) requestMessage).needHandleLongMessage()) {
+			
+			LongSMSMessage lmsg = (LongSMSMessage) requestMessage;
 			SmsMessage msgcontent = lmsg.getSmsMessage();
-			
-			if(msgcontent instanceof SmsConcatMessage) {
-				((SmsConcatMessage)msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+
+			if (msgcontent instanceof SmsConcatMessage) {
+				((SmsConcatMessage) msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
 			}
-			
+
 			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
 			
+			//生成长短信唯一ID
+			UniqueLongMsgId uniqueId = null;
 			
 			for (LongMessageFrame frame : frameList) {
-				T t = (T)lmsg.generateMessage(frame);
+				LongSMSMessage t = (LongSMSMessage) lmsg.generateMessage(frame);
+				if(uniqueId == null) {
+					uniqueId = new UniqueLongMsgId(entity, ctx.channel(), t,DefaultSequenceNumberUtil.getSequenceNo(), false);
+					t.setUniqueLongMsgId(uniqueId);
+				}else {
+					frame.setTimestamp(((T)t).getTimestamp());
+					frame.setSequence(((T)t).getSequenceNo());
+					t.setUniqueLongMsgId(new UniqueLongMsgId(uniqueId,frame));
+				}
 				out.add(t);
 			}
 		} else {
@@ -76,6 +95,5 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 		}
 	}
 	
-
 	protected abstract void resetMessageContent(T t, SmsMessage content);
 }
