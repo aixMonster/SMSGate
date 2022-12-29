@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,27 +106,30 @@ public class RedisLongMessageFrameCache implements LongMessageFrameCache {
 	}
 
 	private static String Lua_ge_64 = "redis.call('setbit',KEYS[1],ARGV[1],1);return redis.call('bitcount',KEYS[1])";
+	private final static AtomicInteger sequenceId = new AtomicInteger(RandomUtils.nextInt());
 	@Override
 	public Long getUniqueLongMsgId(String cacheKey) {
 		Jedis jedis = jedispool.getResource();
 		String key = userPrefix + cacheKey;
 		
 		try {
-			Long value = System.currentTimeMillis();
+			Long value = Long.valueOf(sequenceId.incrementAndGet());
 			long ret = jedis.setnx(key, value.toString());
 			if(1 ==  ret ) {
+				jedis.expire(key, ttl);
 				return value;
 			}else {
 				return Long.valueOf(jedis.get(key));
 			}
 		} finally {
-			jedis.expire(key, ttl);
 			jedis.close();
 		}
 	}
 
 	@Override
 	public void clearUniqueLongMsgIdCacheKey(String cacheKey) {
+		if(cacheKey == null)
+			return;
 		Jedis jedis = jedispool.getResource();
 		try {
 			String key = userPrefix + cacheKey;

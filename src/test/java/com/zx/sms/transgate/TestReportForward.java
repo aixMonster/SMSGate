@@ -151,19 +151,23 @@ public class TestReportForward {
 					ctx.channel().writeAndFlush(responseMessage);
 					
 					if(e.isReport()) {
-						AtomicInteger atom = checkMsgIdCnt.putIfAbsent(e.getReportRequestMessage().getMsgId().toString(), new AtomicInteger(-1));
-						if(atom!=null)
-							atom.decrementAndGet();
+						String msgId = e.getReportRequestMessage().getMsgId().toString();
+						AtomicInteger atom = checkMsgIdCnt.putIfAbsent(msgId, new AtomicInteger(-1));
+						if(atom!=null) {
+							if(atom.decrementAndGet() == 0)
+								checkMsgIdCnt.remove(msgId);
+						}
 					}
-
 				} else if (msg instanceof CmppSubmitResponseMessage) {
 					
 					//收Response
 					CmppSubmitResponseMessage e = (CmppSubmitResponseMessage) msg;
-					AtomicInteger atom = checkMsgIdCnt.putIfAbsent(e.getMsgId().toString(), new AtomicInteger(1));
-					if(atom!=null)
-						atom.incrementAndGet();
-
+					String msgId = e.getMsgId().toString();
+					AtomicInteger atom = checkMsgIdCnt.putIfAbsent(msgId, new AtomicInteger(1));
+					if(atom!=null) {
+						if(atom.incrementAndGet() == 0)
+							checkMsgIdCnt.remove(msgId);
+					}
 				}  else {
 					ctx.fireChannelRead(msg);
 				}

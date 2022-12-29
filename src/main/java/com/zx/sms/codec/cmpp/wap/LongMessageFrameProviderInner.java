@@ -6,7 +6,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,6 +51,7 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 	 */
 	private static Cache<String, ImmutablePair<BitSet,List<LongMessageFrame>>> cache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.HOURS).removalListener(removealListener).build();
 	private static ConcurrentMap<String, ImmutablePair<BitSet,List<LongMessageFrame>>> map = cache.asMap();
+	private final static AtomicInteger sequenceId = new AtomicInteger(RandomUtils.nextInt());
 	@Override
 	public LongMessageFrameCache create() {
 		return new LongMessageFrameCacheInner();
@@ -59,7 +62,7 @@ public class LongMessageFrameProviderInner implements LongMessageFrameProvider {
 	private static final LoadingCache<String, Long> UniqCache = CacheBuilder.newBuilder().expireAfterWrite(2, TimeUnit.HOURS).build(new CacheLoader<String, Long>() {
 		@Override
 		public Long load(String key) throws Exception {
-			return new Long(DefaultSequenceNumberUtil.getSequenceNo());
+			return new Long(sequenceId.incrementAndGet());
 		}
 	});
 	

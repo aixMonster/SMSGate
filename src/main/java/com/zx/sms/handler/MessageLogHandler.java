@@ -39,7 +39,8 @@ public class MessageLogHandler extends ChannelDuplexHandler {
     
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		logger.debug("Receive:{}", msg.toString());
+		if(logger.isDebugEnabled())
+			logger.debug("Receive:{}", msg.toString());
 		ctx.fireChannelRead(msg);
 	}
 
@@ -54,10 +55,10 @@ public class MessageLogHandler extends ChannelDuplexHandler {
 				if (!future.isSuccess()) {
 					logger.error("ErrSend:{},cause by", finalmsg.toString() , future.cause());
 				}else{
-					logger.debug("Send:{}", finalmsg.toString());
+					if(logger.isDebugEnabled())
+						logger.debug("Send:{}", finalmsg.toString());
 				}
 			}
 		});
 	}
-
 }

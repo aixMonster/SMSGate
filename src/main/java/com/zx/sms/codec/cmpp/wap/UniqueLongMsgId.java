@@ -215,6 +215,7 @@ public class UniqueLongMsgId implements Serializable {
 	}
 
 	void clearCacheKey() {
-		LongMessageFrameHolder.INS.clearUniqueLongMsgIdCacheKey(cacheKey, recvLongMsgOnMultiLink);
+		if(cacheKey!=null)
+			LongMessageFrameHolder.INS.clearUniqueLongMsgIdCacheKey(cacheKey, recvLongMsgOnMultiLink);
 	}
 }

@@ -1,6 +1,7 @@
 package com.zx.sms.connect.manager.cmpp;
 
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -14,6 +15,7 @@ import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitResponseMessage;
 import com.zx.sms.common.util.CachedMillisecondClock;
 import com.zx.sms.common.util.ChannelUtil;
+import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.common.util.MsgId;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointManager;
@@ -33,7 +35,7 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 
 	public CMPPResponseSenderHandler() {
 	}
-
+	private final static AtomicInteger sequenceId = new AtomicInteger(RandomUtils.nextInt());
 	@Override
 	public void channelRead(final ChannelHandlerContext ctx, Object msg) throws Exception {
 
@@ -49,7 +51,7 @@ public class CMPPResponseSenderHandler extends AbstractBusinessHandler {
 
 			final CmppSubmitResponseMessage resp = new CmppSubmitResponseMessage(e.getHeader().getSequenceId());
 			// 单元测试时，相同手机号端口号可能出现相同msgId的情况造成状态报告匹配出错，因此设置随机的gateId
-			resp.setMsgId(new MsgId(RandomUtils.nextInt(0, 4194303)));
+			resp.setMsgId(new MsgId(sequenceId.incrementAndGet() & 0x3fffff));
 			resp.setResult(0);
 
 			final CmppDeliverRequestMessage deliver = new CmppDeliverRequestMessage();
