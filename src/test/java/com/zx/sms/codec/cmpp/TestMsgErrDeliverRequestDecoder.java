@@ -19,7 +19,7 @@ import io.netty.buffer.Unpooled;
 /**
  * 数据短信，无法解析
  */
-public class MsgErrDeliverRequestDecoder extends AbstractTestMessageCodec<CmppDeliverRequestMessage> {
+public class TestMsgErrDeliverRequestDecoder extends AbstractTestMessageCodec<CmppDeliverRequestMessage> {
 	@Override
 	protected int getVersion() {
 		return 0x30;

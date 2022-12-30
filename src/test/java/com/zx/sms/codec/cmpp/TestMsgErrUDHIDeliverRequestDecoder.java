@@ -13,7 +13,7 @@ import static com.zx.sms.common.util.NettyByteBufUtil.*;
 /**
  * 数据短信，无法解析
  * */
-public class MsgErrUDHIDeliverRequestDecoder extends AbstractTestMessageCodec<CmppDeliverRequestMessage> {
+public class TestMsgErrUDHIDeliverRequestDecoder extends AbstractTestMessageCodec<CmppDeliverRequestMessage> {
 	@Override
 	protected int getVersion() {
 		return 0x20;

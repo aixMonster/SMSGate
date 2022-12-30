@@ -14,7 +14,7 @@ import com.zx.sms.codec.cmpp.packet.CmppHead;
 import com.zx.sms.codec.cmpp.packet.CmppPacketType;
 
 import static com.zx.sms.common.util.NettyByteBufUtil.*;
-public class MesnegativeArrayDecoder extends AbstractTestMessageCodec<CmppDeliverRequestMessage>{
+public class TestMesnegativeArrayDecoder extends AbstractTestMessageCodec<CmppDeliverRequestMessage>{
 	@Override
 	protected int getVersion() {
 		return 0x30;
