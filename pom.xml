@@ -96,7 +96,7 @@
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.11</version>
+			<version>1.15</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -115,18 +115,6 @@
 			<version>18.3.12</version>
 		</dependency>
 		<dependency>
-			<groupId>org.iq80.leveldb</groupId>
-			<artifactId>leveldb</artifactId>
-			<version>0.10</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>com.google.guava</groupId>
-					<artifactId>guava</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>com.chinamobile.cmos</groupId>
 			<artifactId>wbxml-stream</artifactId>
 			<version>0.4.0</version>
@@ -139,6 +127,22 @@
 				<exclusion>
 					<groupId>org.slf4j</groupId>
 					<artifactId>slf4j-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.rxtx</groupId>
+					<artifactId>rxtx</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.google.guava</groupId>
+					<artifactId>guava</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
