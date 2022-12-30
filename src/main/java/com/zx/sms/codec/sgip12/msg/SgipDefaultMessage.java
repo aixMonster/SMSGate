@@ -1,11 +1,10 @@
 package com.zx.sms.codec.sgip12.msg;
 
-import org.marre.sms.SgipSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsMsgClass;
-import org.marre.sms.SmsTextMessage;
-
+import com.chinamobile.cmos.sms.SgipSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsMsgClass;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.codec.cmpp.msg.DefaultMessage;
 import com.zx.sms.codec.cmpp.msg.Header;
 import com.zx.sms.codec.cmpp.packet.PacketType;

@@ -2,8 +2,7 @@ package com.zx.sms.handler.smgp;
 
 import java.util.List;
 
-import org.marre.sms.SMGPSmsDcs;
-
+import com.chinamobile.cmos.sms.SMGPSmsDcs;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;

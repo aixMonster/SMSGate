@@ -4,12 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.marre.sms.SMGPSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsMsgClass;
 
+import com.chinamobile.cmos.sms.SMGPSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsMsgClass;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;

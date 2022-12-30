@@ -7,14 +7,13 @@ import static com.zx.sms.common.util.NettyByteBufUtil.toArray;
 
 import java.util.List;
 
-import org.marre.sms.SmsDcs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SmsDcs;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.Message;
 import com.zx.sms.codec.cmpp.packet.PacketType;
-import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp20.packet.Cmpp20PacketType;
 import com.zx.sms.codec.cmpp20.packet.Cmpp20SubmitRequest;
 import com.zx.sms.common.GlobalConstance;

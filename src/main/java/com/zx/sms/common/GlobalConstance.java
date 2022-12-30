@@ -3,10 +3,10 @@ package com.zx.sms.common;
 import java.nio.charset.Charset;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsMsgClass;
-
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsMsgClass;
+import com.chinamobile.cmos.sms.SmsPduUtil;
 import com.zx.sms.config.PropertiesUtils;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.handler.cmpp.BlackHoleHandler;
@@ -48,7 +48,7 @@ public interface GlobalConstance {
     public final static String loggerNamePrefix = "entity.%s";
     public final static String codecName = "codecName";
     public final static String sessionHandler = "sessionStateManager";
-    public static final Boolean Use8bitSmsConcatMessage = Boolean.valueOf(PropertiesUtils.getproperties("smsUse8bit", "true"));
+    public static final Boolean Use8bitSmsConcatMessage = SmsPduUtil.Use8bit;
 	
     public final static int MESSAGE_DELAY_USER_DEFINED_WRITABILITY_INDEX = 31;
 }

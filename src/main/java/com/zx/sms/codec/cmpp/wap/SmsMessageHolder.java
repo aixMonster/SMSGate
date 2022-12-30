@@ -1,7 +1,6 @@
 package com.zx.sms.codec.cmpp.wap;
 
-import org.marre.sms.SmsMessage;
-
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.LongSMSMessage;
 
 public class SmsMessageHolder {

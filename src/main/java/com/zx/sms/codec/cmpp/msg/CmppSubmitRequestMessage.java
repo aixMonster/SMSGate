@@ -5,10 +5,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsMessage;
 
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.packet.CmppPacketType;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;

@@ -2,10 +2,10 @@ package com.zx.sms.codec.smpp;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmppSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsTextMessage;
 
+import com.chinamobile.cmos.sms.SmppSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.AbstractSMPPTestMessageCodec;
 import com.zx.sms.codec.smpp.msg.BaseSm;

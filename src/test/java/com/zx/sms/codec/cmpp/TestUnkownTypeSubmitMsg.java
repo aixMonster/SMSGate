@@ -3,8 +3,8 @@ package com.zx.sms.codec.cmpp;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Test;
-import org.marre.sms.SmsUnkownTypeMessage;
 
+import com.chinamobile.cmos.sms.SmsUnkownTypeMessage;
 import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 

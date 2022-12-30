@@ -1,4 +1,4 @@
-package org.marre.sms;
+package com.zx.sms.concat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +8,10 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import com.chinamobile.cmos.sms.SmsConcatMessage;
+import com.chinamobile.cmos.sms.SmsException;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;

@@ -5,13 +5,13 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.marre.sms.SMGPSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsMsgClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SMGPSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsMsgClass;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;

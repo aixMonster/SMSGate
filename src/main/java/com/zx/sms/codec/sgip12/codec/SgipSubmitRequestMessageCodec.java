@@ -7,10 +7,10 @@ import static com.zx.sms.common.util.NettyByteBufUtil.toArray;
 
 import java.util.List;
 
-import org.marre.sms.SgipSmsDcs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SgipSmsDcs;
 import com.zx.sms.codec.cmpp.msg.Message;
 import com.zx.sms.codec.cmpp.packet.PacketType;
 import com.zx.sms.codec.sgip12.msg.SgipSubmitRequestMessage;

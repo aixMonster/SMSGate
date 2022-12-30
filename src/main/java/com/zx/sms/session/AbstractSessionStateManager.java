@@ -235,7 +235,7 @@ public abstract class AbstractSessionStateManager<K, T extends BaseMessage> exte
 					
 					//响应延迟超过25%的超时时间,打印告警，并暂停一会
 					if(delay > (entity.getRetryWaitTimeSec() * 1000/4)){
-						errlogger.warn("{} delaycheck . delay :{} , SequenceId :{}", entity.getId(),delay,getSequenceId(response));
+						errlogger.warn("{} receive response time delay . delayTime :{} , SequenceId :{}", entity.getId(),delay,getSequenceId(response));
 						//接收response回复时延太高，有可能对端已经开始积压了，暂停发送。
 						setchannelunwritableWhenDelay(ctx,delay-minDelay);
 					}

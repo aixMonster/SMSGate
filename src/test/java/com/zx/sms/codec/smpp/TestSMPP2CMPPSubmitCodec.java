@@ -4,15 +4,15 @@ import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsPort;
-import org.marre.sms.SmsPortAddressedTextMessage;
-import org.marre.sms.SmsTextMessage;
-import org.marre.wap.push.SmsMmsNotificationMessage;
-import org.marre.wap.push.SmsWapPushMessage;
-import org.marre.wap.push.WapSIPush;
-import org.marre.wap.push.WapSLPush;
 
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsPort;
+import com.chinamobile.cmos.sms.SmsPortAddressedTextMessage;
+import com.chinamobile.cmos.sms.SmsTextMessage;
+import com.chinamobile.cmos.wap.push.SmsMmsNotificationMessage;
+import com.chinamobile.cmos.wap.push.SmsWapPushMessage;
+import com.chinamobile.cmos.wap.push.WapSIPush;
+import com.chinamobile.cmos.wap.push.WapSLPush;
 import com.zx.sms.codec.AbstractSMPPTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageMarkerReadHandler;

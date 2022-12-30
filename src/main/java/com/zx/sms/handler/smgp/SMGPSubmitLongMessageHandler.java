@@ -1,7 +1,6 @@
 package com.zx.sms.handler.smgp;
 
-import org.marre.sms.SmsMessage;
-
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.codec.cmpp.wap.AbstractLongMessageHandler;
 import com.zx.sms.codec.smgp.msg.SMGPSubmitMessage;
 import com.zx.sms.connect.manager.EndpointEntity;

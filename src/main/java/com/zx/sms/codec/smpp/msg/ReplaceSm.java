@@ -1,5 +1,14 @@
 package com.zx.sms.codec.smpp.msg;
 
+import com.zx.sms.codec.smpp.Address;
+import com.zx.sms.codec.smpp.RecoverablePduException;
+import com.zx.sms.codec.smpp.SmppConstants;
+import com.zx.sms.codec.smpp.SmppInvalidArgumentException;
+import com.zx.sms.codec.smpp.UnrecoverablePduException;
+import com.zx.sms.common.util.ByteBufUtil;
+import com.zx.sms.common.util.HexUtil;
+import com.zx.sms.common.util.PduUtil;
+
 /*
  * #%L
  * ch-smpp
@@ -21,17 +30,6 @@ package com.zx.sms.codec.smpp.msg;
  */
 
 import io.netty.buffer.ByteBuf;
-
-import org.marre.util.StringUtil;
-
-import com.zx.sms.codec.smpp.Address;
-import com.zx.sms.codec.smpp.RecoverablePduException;
-import com.zx.sms.codec.smpp.SmppConstants;
-import com.zx.sms.codec.smpp.SmppInvalidArgumentException;
-import com.zx.sms.codec.smpp.UnrecoverablePduException;
-import com.zx.sms.common.util.ByteBufUtil;
-import com.zx.sms.common.util.HexUtil;
-import com.zx.sms.common.util.PduUtil;
 
 public class ReplaceSm extends PduRequest<ReplaceSmResp> {
 

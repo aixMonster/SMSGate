@@ -2,8 +2,7 @@ package com.zx.sms.codec.cmpp.wap;
 
 import java.io.Serializable;
 
-import org.marre.sms.AbstractSmsDcs;
-
+import com.chinamobile.cmos.sms.AbstractSmsDcs;
 import com.zx.sms.common.GlobalConstance;
 
 import io.netty.buffer.ByteBufUtil;

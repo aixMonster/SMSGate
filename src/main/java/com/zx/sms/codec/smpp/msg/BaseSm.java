@@ -1,12 +1,11 @@
 package com.zx.sms.codec.smpp.msg;
 
-import org.marre.sms.SmppSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsMsgClass;
-import org.marre.sms.SmsPduUtil;
-import org.marre.sms.SmsTextMessage;
-
+import com.chinamobile.cmos.sms.SmppSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsMsgClass;
+import com.chinamobile.cmos.sms.SmsPduUtil;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;

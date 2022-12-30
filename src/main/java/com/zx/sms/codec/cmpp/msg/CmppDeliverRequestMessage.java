@@ -6,19 +6,8 @@ package com.zx.sms.codec.cmpp.msg;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsMsgClass;
-import org.marre.sms.SmsPortAddressedTextMessage;
-import org.marre.sms.SmsTextMessage;
-import org.marre.wap.push.SmsMmsNotificationMessage;
-import org.marre.wap.push.SmsWapPushMessage;
-import org.marre.wap.push.WapSIPush;
-import org.marre.wap.push.WapSLPush;
-import org.marre.wap.wbxml.WbxmlDocument;
-
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.packet.CmppPacketType;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;

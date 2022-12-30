@@ -2,11 +2,11 @@ package com.zx.sms.codec.cmpp.wap;
 
 import java.util.List;
 
-import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SmsConcatMessage;
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;

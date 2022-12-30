@@ -2,10 +2,8 @@ package com.zx.sms.connect.manager.smpp;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.marre.sms.SmsAlphabet;
-
+import com.chinamobile.cmos.sms.SmsAlphabet;
 import com.zx.sms.BaseMessage;
-import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.msg.DeliverSm;
 import com.zx.sms.codec.smpp.msg.DeliverSmReceipt;

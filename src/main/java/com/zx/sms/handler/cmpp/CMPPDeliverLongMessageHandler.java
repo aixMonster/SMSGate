@@ -1,7 +1,6 @@
 package com.zx.sms.handler.cmpp;
 
-import org.marre.sms.SmsMessage;
-
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.wap.AbstractLongMessageHandler;
 import com.zx.sms.connect.manager.EndpointEntity;

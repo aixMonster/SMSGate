@@ -14,11 +14,11 @@ import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsTextMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;

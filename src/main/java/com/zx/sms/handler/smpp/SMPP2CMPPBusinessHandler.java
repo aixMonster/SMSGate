@@ -2,9 +2,8 @@ package com.zx.sms.handler.smpp;
 
 import java.util.List;
 
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsTextMessage;
-
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;

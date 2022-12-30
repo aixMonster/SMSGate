@@ -10,12 +10,12 @@ import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmppSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsMsgClass;
-import org.marre.sms.SmsPduUtil;
-import org.marre.sms.SmsTextMessage;
 
+import com.chinamobile.cmos.sms.SmppSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMsgClass;
+import com.chinamobile.cmos.sms.SmsPduUtil;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.AbstractSMPPTestMessageCodec;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;

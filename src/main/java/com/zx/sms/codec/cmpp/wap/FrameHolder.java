@@ -3,11 +3,10 @@ package com.zx.sms.codec.cmpp.wap;
 import java.util.BitSet;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.marre.sms.AbstractSmsDcs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.zx.sms.LongSMSMessage;
+import com.chinamobile.cmos.sms.AbstractSmsDcs;
 import com.zx.sms.common.NotSupportedException;
 import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.CachedMillisecondClock;

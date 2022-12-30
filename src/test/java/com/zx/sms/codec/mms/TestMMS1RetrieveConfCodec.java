@@ -11,17 +11,17 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomUtils;
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.mime.MimeBodyPart;
-import org.marre.mime.MimeFactory;
-import org.marre.mime.MimeMultipartMixed;
-import org.marre.mms.MmsException;
-import org.marre.mms.MmsHeaders;
-import org.marre.mms.transport.mm1.Mm1Encoder;
-import org.marre.wap.mms.MmsConstants;
 
-import PduParser.GenericPdu;
-import PduParser.PduParser;
-import PduParser.RetrieveConf;
+import com.chinamobile.cmos.PduParser.GenericPdu;
+import com.chinamobile.cmos.PduParser.PduParser;
+import com.chinamobile.cmos.PduParser.RetrieveConf;
+import com.chinamobile.cmos.mime.MimeBodyPart;
+import com.chinamobile.cmos.mime.MimeFactory;
+import com.chinamobile.cmos.mime.MimeMultipartMixed;
+import com.chinamobile.cmos.mms.MmsException;
+import com.chinamobile.cmos.mms.MmsHeaders;
+import com.chinamobile.cmos.mms.transport.mm1.Mm1Encoder;
+import com.chinamobile.cmos.wap.mms.MmsConstants;
 
 public class TestMMS1RetrieveConfCodec {
 

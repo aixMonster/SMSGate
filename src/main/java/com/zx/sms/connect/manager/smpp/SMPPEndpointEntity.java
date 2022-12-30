@@ -1,7 +1,6 @@
 package com.zx.sms.connect.manager.smpp;
 
-import org.marre.sms.SmsAlphabet;
-
+import com.chinamobile.cmos.sms.SmsAlphabet;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.connect.manager.EndpointEntity;
 

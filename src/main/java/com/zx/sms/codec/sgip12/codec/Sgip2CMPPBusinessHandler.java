@@ -2,8 +2,7 @@ package com.zx.sms.codec.sgip12.codec;
 
 import java.util.List;
 
-import org.marre.sms.SgipSmsDcs;
-
+import com.chinamobile.cmos.sms.SgipSmsDcs;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverRequestMessage;
 import com.zx.sms.codec.cmpp.msg.CmppDeliverResponseMessage;
 import com.zx.sms.codec.cmpp.msg.CmppReportRequestMessage;

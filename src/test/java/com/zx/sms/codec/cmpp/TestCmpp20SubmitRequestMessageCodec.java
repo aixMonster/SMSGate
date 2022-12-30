@@ -4,9 +4,9 @@ import java.util.UUID;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsTextMessage;
 
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.common.util.MsgId;

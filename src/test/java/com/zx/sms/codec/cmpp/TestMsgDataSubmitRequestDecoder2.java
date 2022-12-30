@@ -1,18 +1,17 @@
 package com.zx.sms.codec.cmpp;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
+import static com.zx.sms.common.util.NettyByteBufUtil.toArray;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.DcsGroup;
 
 import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 
-import static com.zx.sms.common.util.NettyByteBufUtil.*;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 public class TestMsgDataSubmitRequestDecoder2 extends AbstractTestMessageCodec<CmppSubmitRequestMessage> {
 	@Override
 	protected int getVersion() {

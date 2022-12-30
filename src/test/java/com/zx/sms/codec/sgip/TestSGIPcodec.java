@@ -4,8 +4,8 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmsDcs;
 
+import com.chinamobile.cmos.sms.SmsDcs;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.AbstractSGIPTestMessageCodec;
 import com.zx.sms.codec.sgip12.msg.SgipDefaultMessage;

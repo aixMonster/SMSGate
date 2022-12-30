@@ -7,9 +7,9 @@ import java.security.PrivilegedAction;
 
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsTextMessage;
 
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.google.common.base.Preconditions;
 import com.zx.sms.common.GlobalConstance;
 

@@ -1,7 +1,8 @@
 package com.zx.sms.transgate;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.marre.sms.SmsDcs;
+
+import com.chinamobile.cmos.sms.SmsDcs;
 
 public class TestSmsDcs extends SmsDcs{
 	

@@ -4,27 +4,27 @@
 package com.zx.sms.codec.cmpp;
 
 import static com.zx.sms.common.util.NettyByteBufUtil.toArray;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.MessageToMessageCodec;
-import io.netty.util.ReferenceCountUtil;
 
 import java.util.List;
 
-import org.marre.sms.SmsDcs;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SmsDcs;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.msg.Message;
 import com.zx.sms.codec.cmpp.packet.CmppPacketType;
 import com.zx.sms.codec.cmpp.packet.CmppSubmitRequest;
 import com.zx.sms.codec.cmpp.packet.PacketType;
-import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.DefaultMsgIdUtil;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.MessageToMessageCodec;
+import io.netty.util.ReferenceCountUtil;
 /**
  * @author huzorro(huzorro@gmail.com)
  * @author Lihuanghe(18852780@qq.com)

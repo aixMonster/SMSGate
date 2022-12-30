@@ -2,8 +2,7 @@ package com.zx.sms;
 
 import java.util.List;
 
-import org.marre.sms.SmsMessage;
-
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 

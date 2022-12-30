@@ -6,8 +6,8 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmsPduUtil;
 
+import com.chinamobile.cmos.sms.SmsPduUtil;
 import com.zx.sms.common.util.ByteArrayUtil;
 import com.zx.sms.common.util.DefaultMsgIdUtil;
 import com.zx.sms.common.util.MsgId;

@@ -1,6 +1,6 @@
 package com.zx.sms.codec.cmpp.wap;
 
-import org.marre.sms.SmsUdhIei;
+import com.chinamobile.cmos.sms.SmsUdhIei;
 
 class InformationElement {
 

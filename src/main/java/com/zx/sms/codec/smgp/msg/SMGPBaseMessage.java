@@ -3,12 +3,11 @@ package com.zx.sms.codec.smgp.msg;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.marre.sms.SMGPSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsMessage;
-import org.marre.sms.SmsMsgClass;
-import org.marre.sms.SmsTextMessage;
-
+import com.chinamobile.cmos.sms.SMGPSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.sms.SmsMsgClass;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smgp.tlv.TLV;

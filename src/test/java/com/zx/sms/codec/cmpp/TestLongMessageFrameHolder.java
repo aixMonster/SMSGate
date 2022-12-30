@@ -4,19 +4,18 @@ import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.marre.sms.SmppSmsDcs;
-import org.marre.sms.SmsAlphabet;
-import org.marre.sms.SmsDcs;
-import org.marre.sms.SmsException;
-import org.marre.sms.SmsTextMessage;
 
+import com.chinamobile.cmos.sms.SmppSmsDcs;
+import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsDcs;
+import com.chinamobile.cmos.sms.SmsException;
+import com.chinamobile.cmos.sms.SmsTextMessage;
 import com.zx.sms.codec.AbstractTestMessageCodec;
 import com.zx.sms.codec.cmpp.msg.CmppSubmitRequestMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.common.GlobalConstance;
 import com.zx.sms.common.util.HexUtil;
-import com.zx.sms.config.PropertiesUtils;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

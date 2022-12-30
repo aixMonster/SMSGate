@@ -3,11 +3,11 @@ package com.zx.sms.common.util;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.marre.sms.SmsConcatMessage;
-import org.marre.sms.SmsMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.chinamobile.cmos.sms.SmsConcatMessage;
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.zx.sms.BaseMessage;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
@@ -16,9 +16,7 @@ import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.connect.manager.EndpointConnector;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.EndpointManager;
-import com.zx.sms.session.AbstractSessionStateManager;
 
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
