@@ -211,10 +211,11 @@ public class TestReportForward {
 			cnt = uidMap.size();
 		}
 		Thread.sleep(10000);
-		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(client.getId()));
-		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tsId));
-		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(tcId));
-		EndpointManager.INS.close(EndpointManager.INS.getEndpointEntity(s1Id));
+		EndpointManager.INS.remove(client.getId());
+		EndpointManager.INS.remove(tsId);
+		EndpointManager.INS.remove(tcId);
+		EndpointManager.INS.remove(s1Id);
+
 		Thread.sleep(1000);
 		logger.info("检查状态报告是否完全匹配上...." );
 		logger.info("checkMsgIdMap:{}; count : {}", checkMsgIdCnt.size(),forward.getTotalReceiveCnt());

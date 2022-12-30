@@ -94,8 +94,8 @@ public class TestWithOpenSMPP {
 		serverhandlers.add(new SMPPMessageReceiveHandler());
 		child.setBusinessHandlerSet(serverhandlers);
 		server.addchild(child);
-		manager.addEndpointEntity(server);
-		manager.openAll();
+		manager.openEndpoint(server);
+		
 		Thread.sleep(2000);
 		System.out.println("start.....");
 
