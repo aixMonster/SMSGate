@@ -30,14 +30,14 @@ public interface LongMessageFrameCache {
 	
 	/**
 	 * 接收长短信分片时，给每个长短信分配一个唯一的key，方法长短信与分片之间对应关系
- 	 * @param  CacheKey 
+ 	 * @param  cacheKey 
 	 * 短信唯一性Key,相同的key表示同一个长短信
 	 */
 	Long getUniqueLongMsgId(String cacheKey);
 
 	/**
 	 * 全部分片接收完成后,删除缓存
- 	 * @param  CacheKey 
+ 	 * @param  cacheKey 
 	 * 短信唯一性Key,相同的key表示同一个长短信
 	 */
 	void clearUniqueLongMsgIdCacheKey(String cacheKey);
