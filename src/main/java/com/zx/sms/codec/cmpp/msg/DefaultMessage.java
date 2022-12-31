@@ -38,13 +38,16 @@ public class DefaultMessage implements Message ,Cloneable {
 
 	public DefaultMessage(PacketType packetType, Header header) {
 		setPacketType(packetType);
+		Header nheader = new DefaultHeader();
+		nheader.setCommandId(packetType.getCommandId());
 		if (header == null) {
-			header = new DefaultHeader();
-
-			header.setSequenceId(DefaultSequenceNumberUtil.getSequenceNo());
+			nheader.setSequenceId(DefaultSequenceNumberUtil.getSequenceNo());
+		}else {
+			nheader.setSequenceId(header.getSequenceId());
+			nheader.setNodeId(header.getNodeId());
 		}
-		header.setCommandId(packetType.getCommandId());
-		setHeader(header);
+	
+		setHeader(nheader);
 	};
 
 	public DefaultMessage(PacketType packetType) {
