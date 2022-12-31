@@ -11,7 +11,9 @@ import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.codec.cmpp.wap.UniqueLongMsgId;
 import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.RecoverablePduException;
+import com.zx.sms.codec.smpp.SmppConstants;
 import com.zx.sms.codec.smpp.SmppInvalidArgumentException;
+import com.zx.sms.codec.smpp.Tlv;
 import com.zx.sms.codec.smpp.UnrecoverablePduException;
 import com.zx.sms.common.util.ByteBufUtil;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
@@ -277,7 +279,7 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 			buffer.writeBytes(this.shortMessage);
 		}
 	}
-
+	
 	protected BaseSm doGenerateMessage(LongMessageFrame frame) throws Exception {
 		BaseSm requestMessage = (BaseSm) this.clone();
 
@@ -310,10 +312,53 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		// udhi bit : x1xxxxxx 表示要处理长短信
 		frame.setTpudhi(getTpUdhI());
 		frame.setMsgfmt(new SmppSmsDcs(getDataCoding()));
-		frame.setMsgContentBytes(getShortMessage());
-		frame.setMsgLength((short) getMsglength());
+		byte[] messageBytes = getShortMessage()==null?new byte[0]:getShortMessage();
+		frame.setMsgContentBytes(messageBytes);
+		frame.setMsgLength((short)messageBytes.length);
+		
+		if(messageBytes.length == 0) {
+			//检查message_payload
+			Tlv messagePayload = getOptionalParameter(SmppConstants.TAG_MESSAGE_PAYLOAD);
+			if(messagePayload != null) {
+				messageBytes = messagePayload.getValue();
+				frame.setMsgContentBytes(messageBytes);
+				frame.setMsgLength((short)messageBytes.length);
+			}
+		}
+		
+		//检查 SarMsgRefNum SarTotalSegments  SarSegmentSeqnum
+		Tlv ref = getOptionalParameter(SmppConstants.TAG_SAR_MSG_REF_NUM);
+		Tlv tot = getOptionalParameter(SmppConstants.TAG_SAR_TOTAL_SEGMENTS);
+		Tlv seq = getOptionalParameter(SmppConstants.TAG_SAR_SEGMENT_SEQNUM);
+		if(ref != null && tot!=null && seq != null && tot.getValue()[0] > 1) {
+			
+			int startIndex = frame.isConcatMsg() ? 1 : 0;
+			int udhl = frame.isConcatMsg() ? messageBytes[0] : 0;
+			byte[] mergedMessageBytes = new byte[getMsglength()+7-startIndex];
+			//补充成16bit的长短信分片
+			mergedMessageBytes[0]=(byte)(udhl + 6);
+			mergedMessageBytes[1]=8;
+			mergedMessageBytes[2]=4;
+			mergedMessageBytes[3]= ref.getValue()[0];
+			mergedMessageBytes[4]= ref.getValue()[1];
+			mergedMessageBytes[5]= tot.getValue()[0];
+			mergedMessageBytes[6]= seq.getValue()[0];
+			
+			System.arraycopy(messageBytes, startIndex, mergedMessageBytes, 7, messageBytes.length-startIndex);
+			frame.setTpudhi((short)1);
+			frame.setMsgContentBytes(mergedMessageBytes);
+			
+			frame.setMsgLength((short) mergedMessageBytes.length);
+		}
+		
 		frame.setSequence(getSequenceNo());
 		return frame;
+	}
+	
+	private byte[] cutUDH(byte[] ud ,int length ) {
+		byte[] cuttedBytes = new byte[ud.length-length];
+		System.arraycopy(ud, length, cuttedBytes, 0, cuttedBytes.length);
+		return cuttedBytes;
 	}
 
 	@Override

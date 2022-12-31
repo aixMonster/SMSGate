@@ -25,8 +25,13 @@ import org.smpp.pdu.SubmitSM;
 import org.smpp.pdu.SubmitSMResp;
 import org.smpp.pdu.UnbindResp;
 import org.smpp.pdu.ValueNotSetException;
+import org.smpp.util.ByteBuffer;
 
-import com.zx.sms.common.util.StandardCharsets;
+import com.chinamobile.cmos.sms.SmsMessage;
+import com.chinamobile.cmos.wap.push.SmsWapPushMessage;
+import com.chinamobile.cmos.wap.push.WapSIPush;
+import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
+import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointManager;
 import com.zx.sms.connect.manager.smpp.SMPPMessageReceiveHandler;
@@ -37,6 +42,10 @@ import com.zx.sms.handler.api.BusinessHandlerInterface;
 public class TestWithOpenSMPP {
 
 	static Session session = null;
+	
+	enum PayloadType {
+		UDH,PAYLOAD,SAR
+	}
 
 	String systemId = "901782";
 	String password = "ICP";
@@ -80,7 +89,6 @@ public class TestWithOpenSMPP {
 		child.setId("opensmppchild");
 		child.setSystemId(systemId);
 		child.setPassword(password);
-
 		child.setValid(true);
 		child.setChannelType(ChannelType.DOWN);
 		child.setMaxChannels((short) 3);
@@ -101,23 +109,55 @@ public class TestWithOpenSMPP {
 
 		bind();
 		String randomStr = String.valueOf(RandomUtils.nextInt(0,10000));
-		sendsubmit("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|" + randomStr,Data.ENC_GSM7BIT);
-		sendsubmit("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】" + randomStr,Data.ENC_UTF16_BE);
+		sendsubmit((byte)0,("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|" + randomStr).getBytes( Data.ENC_GSM7BIT),Data.ENC_GSM7BIT,PayloadType.UDH);
+		sendsubmit((byte)0,("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】" + randomStr).getBytes( Data.ENC_UTF16_BE),Data.ENC_UTF16_BE,PayloadType.UDH);
 		
+		sendsubmit((byte)0,("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|" + randomStr).getBytes( Data.ENC_GSM7BIT),Data.ENC_GSM7BIT,PayloadType.PAYLOAD);
+		sendsubmit((byte)0,("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】" + randomStr).getBytes( Data.ENC_UTF16_BE),Data.ENC_UTF16_BE,PayloadType.PAYLOAD);
+		
+		sendsubmit((byte)0,("@£$¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞÆæßÉ !\"#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà^{}\\[~]|" + randomStr).getBytes( Data.ENC_GSM7BIT),Data.ENC_GSM7BIT,PayloadType.SAR);
+		sendsubmit((byte)0,("尊敬的客户,您好！您于2016-03-23 14:51:36通过中国移动10085销售专线订购的【一加手机高清防刮保护膜】" + randomStr).getBytes( Data.ENC_UTF16_BE),Data.ENC_UTF16_BE,PayloadType.SAR);
+		
+		WapSIPush si = new WapSIPush("http://www.baidu.com?", "baidu");
+		SmsMessage wap = new SmsWapPushMessage(si);
+		
+		List<LongMessageFrame> frame = LongMessageFrameHolder.INS.splitmsgcontent(wap);
+		sendsubmit((byte)64,frame.get(0).getMsgContentBytes(),Data.ENC_ISO8859_1,PayloadType.SAR);
+		sendsubmit((byte)64,frame.get(0).getMsgContentBytes(),Data.ENC_ISO8859_1,PayloadType.UDH);
+		sendsubmit((byte)64,frame.get(0).getMsgContentBytes(),Data.ENC_ISO8859_1,PayloadType.PAYLOAD);
+		
+		Thread.sleep(2000);
 		unbind();
 	}
 
-	public void sendsubmit(String msg,String  charencoding) throws Exception {
+	public void sendsubmit(byte emsclass ,byte[] msg,String  charencoding,PayloadType pType) throws Exception {
 		SubmitSM request = new SubmitSM();
 		request.setServiceType("");
 		request.setSourceAddr(new Address((byte) 5, (byte) 0, "10088"));
 		request.setDestAddr(new Address((byte) 1, (byte) 1, "13800138001"));
 		request.setReplaceIfPresentFlag((byte) 0);
-
-		request.setShortMessage(msg, charencoding);
+		
+		ByteBuffer buf = new ByteBuffer();
+		buf.appendBytes(msg);
+		switch(pType) {
+			case PAYLOAD:
+				request.setShortMessage("");
+				request.setMessagePayload(buf);
+				break;
+			case UDH:
+				request.setShortMessageData(buf);
+				break;
+			case SAR:
+				request.setShortMessageData(buf);
+				request.setSarMsgRefNum((byte) 0);
+				request.setSarTotalSegments((byte) 1);
+				request.setSarSegmentSeqnum((byte) 1);
+				break;
+		}
+		
 		request.setScheduleDeliveryTime("");
 		request.setValidityPeriod("");
-		request.setEsmClass((byte) 0);
+		request.setEsmClass(emsclass);
 		request.setProtocolId((byte) 0);
 		request.setPriorityFlag((byte) 0);
 		request.setRegisteredDelivery((byte) 0);
@@ -130,16 +170,14 @@ public class TestWithOpenSMPP {
 		request.setSourceAddrSubunit((byte) 0);
 		request.setDestinationPort((byte) 0);
 		request.setDestAddrSubunit((byte) 0);
-		request.setSarMsgRefNum((byte) 0);
-		request.setSarTotalSegments((byte) 0);
-		request.setSarSegmentSeqnum((byte) 0);
+
 		request.setPayloadType((byte) 0);
 		request.setPrivacyIndicator((byte) 0);
 		request.setCallbackNumPresInd((byte) 0);
 		// send the request
 
 		request.assignSequenceNumber(true);
-		byte[] origin = msg.getBytes(StandardCharsets.UTF_8);
+		byte[] origin = msg;
 		String expected = DigestUtils.md5Hex(origin);
 		System.out.println("SubmitSM request " + request.debugString());
 		SubmitSMResp response = session.submit(request);

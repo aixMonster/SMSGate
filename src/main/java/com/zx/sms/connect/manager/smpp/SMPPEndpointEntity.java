@@ -2,6 +2,7 @@ package com.zx.sms.connect.manager.smpp;
 
 import com.chinamobile.cmos.sms.SmsAlphabet;
 import com.zx.sms.codec.smpp.Address;
+import com.zx.sms.codec.smpp.SmppSplitType;
 import com.zx.sms.connect.manager.EndpointEntity;
 
 public abstract class SMPPEndpointEntity extends EndpointEntity {
@@ -21,6 +22,12 @@ public abstract class SMPPEndpointEntity extends EndpointEntity {
     private boolean isAddZeroByte = false;
     
     private SmsAlphabet defauteSmsAlphabet = SmsAlphabet.GSM;
+    
+    /**
+     * 设置消息payLoad是放在UD里还是 OptionParameter里
+     */
+    
+    private SmppSplitType splitType = SmppSplitType.UDH;
     
 	public String getSystemId() {
 		return systemId;
@@ -64,4 +71,12 @@ public abstract class SMPPEndpointEntity extends EndpointEntity {
 	public void setDefauteSmsAlphabet(SmsAlphabet defauteSmsAlphabet) {
 		this.defauteSmsAlphabet = defauteSmsAlphabet;
 	}
+	public SmppSplitType getSplitType() {
+		//smpp34才支持OptionParameter
+		return getInterfaceVersion() < 0x34 ? SmppSplitType.UDH : splitType;
+	}
+	public void setSplitType(SmppSplitType splitType) {
+		this.splitType = splitType;
+	}
+	
 }

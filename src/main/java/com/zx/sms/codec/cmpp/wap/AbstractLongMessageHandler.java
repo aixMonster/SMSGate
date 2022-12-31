@@ -79,7 +79,7 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 			UniqueLongMsgId uniqueId = null;
 			
 			for (LongMessageFrame frame : frameList) {
-				LongSMSMessage t = (LongSMSMessage) lmsg.generateMessage(frame);
+				LongSMSMessage t = generateMessage(requestMessage,frame,entity);
 				if(uniqueId == null) {
 					uniqueId = new UniqueLongMsgId(entity, ctx.channel(), t,DefaultSequenceNumberUtil.getSequenceNo(), false);
 					t.setUniqueLongMsgId(uniqueId);
@@ -96,4 +96,8 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 	}
 	
 	protected abstract void resetMessageContent(T t, SmsMessage content);
+	
+	protected LongSMSMessage generateMessage(T lmsg ,LongMessageFrame frame ,EndpointEntity entity) throws Exception{
+		return (LongSMSMessage)((LongSMSMessage) lmsg).generateMessage(frame);
+	}
 }
