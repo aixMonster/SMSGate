@@ -6,6 +6,7 @@ import com.zx.sms.codec.cmpp.wap.AbstractLongMessageHandler;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrame;
 import com.zx.sms.codec.smpp.msg.BaseSm;
 import com.zx.sms.connect.manager.EndpointEntity;
+import com.zx.sms.connect.manager.smpp.SMPPEndpointEntity;
 
 public class SMPPLongMessageHandler extends AbstractLongMessageHandler<BaseSm> {
 	
@@ -23,8 +24,12 @@ public class SMPPLongMessageHandler extends AbstractLongMessageHandler<BaseSm> {
 //	requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray(frame.getPkseq())));
 //	requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray(frame.getPktotal())));
 //	requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray(frame.getPknumber())));
+	@Override
 	protected LongSMSMessage generateMessage(BaseSm lmsg ,LongMessageFrame frame ,EndpointEntity entity) throws Exception{
-		return (LongSMSMessage)((LongSMSMessage) lmsg).generateMessage(frame);
+		if(entity != null) {
+			return (LongSMSMessage)((BaseSm) lmsg).generateMessage(frame,((SMPPEndpointEntity)entity).getSplitType());
+		}
+		return super.generateMessage(lmsg, frame, entity);
 	}
 	
 }

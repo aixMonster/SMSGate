@@ -8,4 +8,6 @@ public enum SmppSplitType {
 	UDH,  //smpp3.3支持
 	PAYLOAD, //smpp3.4支持
 	PAYLOADPARAM //smpp3.4支持
+	;
+	
 }

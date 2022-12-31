@@ -1,5 +1,7 @@
 package com.zx.sms.codec.smpp.msg;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.chinamobile.cmos.sms.SmppSmsDcs;
 import com.chinamobile.cmos.sms.SmsAlphabet;
 import com.chinamobile.cmos.sms.SmsMessage;
@@ -13,8 +15,11 @@ import com.zx.sms.codec.smpp.Address;
 import com.zx.sms.codec.smpp.RecoverablePduException;
 import com.zx.sms.codec.smpp.SmppConstants;
 import com.zx.sms.codec.smpp.SmppInvalidArgumentException;
+import com.zx.sms.codec.smpp.SmppSplitType;
 import com.zx.sms.codec.smpp.Tlv;
 import com.zx.sms.codec.smpp.UnrecoverablePduException;
+import com.zx.sms.common.GlobalConstance;
+import com.zx.sms.common.util.ByteArrayUtil;
 import com.zx.sms.common.util.ByteBufUtil;
 import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.common.util.HexUtil;
@@ -280,6 +285,61 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		}
 	}
 	
+	public BaseSm generateMessage(LongMessageFrame frame,SmppSplitType splitType) throws Exception {
+		BaseSm requestMessage = (BaseSm) this.clone();
+
+		byte old = requestMessage.getEsmClass();
+		requestMessage.setEsmClass((byte) ((frame.getTpudhi() << 6) | old));
+		requestMessage.setDataCoding(frame.getMsgfmt().getValue());
+		
+		requestMessage.setMsglength(frame.getMsgLength());
+		requestMessage.setShortMessage(frame.getMsgContentBytes());
+		
+		switch(splitType) {
+			case UDHPARAM:
+				if(frame.isConcatMsg()) {
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray((short)frame.getPkseq())));
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray((byte)frame.getPktotal())));
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray((byte)frame.getPknumber())));
+					int udhl = frame.getMsgContentBytes()[0]+1;
+					byte[] newContent = ArrayUtils.subarray(frame.getMsgContentBytes(), 6, frame.getMsgContentBytes().length);
+					requestMessage.setEsmClass((byte) (old & 0xbf));
+					requestMessage.setMsglength((short)newContent.length);
+					requestMessage.setShortMessage(newContent);
+					break;
+				}
+			case UDH:
+				requestMessage.setMsglength(frame.getMsgLength());
+				requestMessage.setShortMessage(frame.getMsgContentBytes());
+				break;
+			case PAYLOADPARAM:
+				if(frame.isConcatMsg()) {
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray((short)frame.getPkseq())));
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray((byte)frame.getPktotal())));
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray((byte)frame.getPknumber())));
+					
+					int udhl = frame.getMsgContentBytes()[0]+1;
+					byte[] newContent = ArrayUtils.subarray(frame.getMsgContentBytes(), 6, frame.getMsgContentBytes().length);
+					requestMessage.setEsmClass((byte) (old & 0xbf));
+					requestMessage.setMsglength((short)0);
+					requestMessage.setShortMessage(GlobalConstance.emptyBytes);
+					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_MESSAGE_PAYLOAD,newContent));
+					break;
+				}
+			case PAYLOAD:
+				requestMessage.setMsglength((short)0);
+				requestMessage.setShortMessage(GlobalConstance.emptyBytes);
+				requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_MESSAGE_PAYLOAD,frame.getMsgContentBytes()));
+				break;
+		}
+		if (frame.getPknumber() != 1) {
+			requestMessage.setSequenceNumber((int) DefaultSequenceNumberUtil.getSequenceNo());
+		}
+		
+		requestMessage.setSmsMsg((SmsMessage) null);
+
+		return requestMessage;
+	}
 	protected BaseSm doGenerateMessage(LongMessageFrame frame) throws Exception {
 		BaseSm requestMessage = (BaseSm) this.clone();
 
@@ -334,7 +394,7 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 			
 			int startIndex = frame.isConcatMsg() ? 1 : 0;
 			int udhl = frame.isConcatMsg() ? messageBytes[0] : 0;
-			byte[] mergedMessageBytes = new byte[getMsglength()+7-startIndex];
+			byte[] mergedMessageBytes = new byte[messageBytes.length+7-startIndex];
 			//补充成16bit的长短信分片
 			mergedMessageBytes[0]=(byte)(udhl + 6);
 			mergedMessageBytes[1]=8;
