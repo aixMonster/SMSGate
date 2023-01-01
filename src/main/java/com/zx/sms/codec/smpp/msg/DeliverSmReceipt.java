@@ -132,40 +132,41 @@ public class DeliverSmReceipt extends DeliverSm {
     
 	//不能修改shortMessage字段
 	public byte[] getShortMessage() {
-
-			StringBuffer sb = new StringBuffer();
-			sb.append("id:").append(id);
-			
-			if(StringUtils.isNotBlank(sub))
-				sb.append(" sub:").append(sub);
-			
-			if(StringUtils.isNotBlank(dlvrd))
-				sb.append(" dlvrd:").append(dlvrd);
-			
-			if(StringUtils.isNotBlank(submit_date))
-				sb.append(" submit date:").append(submit_date);
-			
-			if(StringUtils.isNotBlank(done_date))
-				sb.append(" done date:").append(done_date);
-			
-			if(StringUtils.isNotBlank(stat))
-				sb.append(" stat:").append(stat);
-			
-			if(StringUtils.isNotBlank(err))
-				sb.append(" err:").append(err);
-
-			if(StringUtils.isNotBlank(text))
-				sb.append(" text:").append(text);
-			
 			try {
-				byte[] shortMessage =  sb.toString().getBytes("ISO-8859-1");
+				byte[] shortMessage =  buildContent().getBytes("ISO-8859-1");
 				return shortMessage;
 			} catch (Exception e) {
 				logger.error("",e);
 			}
-
 		return new byte[0];
     }
+	
+	private String buildContent() {
+		StringBuffer sb = new StringBuffer();
+		sb.append("id:").append(id);
+		
+		if(StringUtils.isNotBlank(sub))
+			sb.append(" sub:").append(sub);
+		
+		if(StringUtils.isNotBlank(dlvrd))
+			sb.append(" dlvrd:").append(dlvrd);
+		
+		if(StringUtils.isNotBlank(submit_date))
+			sb.append(" submit date:").append(submit_date);
+		
+		if(StringUtils.isNotBlank(done_date))
+			sb.append(" done date:").append(done_date);
+		
+		if(StringUtils.isNotBlank(stat))
+			sb.append(" stat:").append(stat);
+		
+		if(StringUtils.isNotBlank(err))
+			sb.append(" err:").append(err);
+
+		if(StringUtils.isNotBlank(text))
+			sb.append(" text:").append(text);
+		return sb.toString();
+	}
     
     private Map<String ,String> parseReport(byte[] value){
     	Map<String ,String> kv = new HashMap<String ,String>();
@@ -222,4 +223,7 @@ public class DeliverSmReceipt extends DeliverSm {
     	return k == null?"":k;
     }
     
+	public String getMsgContent() {
+		return buildContent();
+	}
 }

@@ -325,8 +325,7 @@ public abstract class EndpointEntity implements Serializable {
 		return "EndpointEntity [Id=" + Id + ", Desc=" + Desc + ", channelType="
 				+ channelType + ", host=" + host + ", port=" + port
 				+ ", maxChannels="
-				+ maxChannels + ", valid=" + valid + ", businessHandlerSet="
-				+ businessHandlerSet + "]";
+				+ maxChannels + ", valid=" + valid + "]";
 	}
 	
 }
