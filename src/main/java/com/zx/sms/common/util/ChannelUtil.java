@@ -84,46 +84,7 @@ public class ChannelUtil {
 		}
 		return promise;
 	}
-
-	public static <T extends BaseMessage> List<T> splitLongSmsMessage(EndpointEntity e, T msg) throws Exception {
-		List<T> msgs = new ArrayList<T>();
-
-		if (msg instanceof LongSMSMessage) {
-			LongSMSMessage<T> lmsg = (LongSMSMessage<T>) msg;
-			if (!lmsg.isReport()) {
-				// 长短信拆分
-				SmsMessage msgcontent = lmsg.getSmsMessage();
-
-				if (msgcontent instanceof SmsConcatMessage) {
-					((SmsConcatMessage) msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
-				}
-
-				List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
-				// 生成长短信唯一ID
-				UniqueLongMsgId uniqueId = null;
-				// 保证同一条长短信，通过同一个tcp连接发送
-
-				for (LongMessageFrame frame : frameList) {
-					LongSMSMessage<T> t = (LongSMSMessage) lmsg.generateMessage(frame);
-					if (uniqueId == null) {
-						uniqueId = new UniqueLongMsgId(e, t);
-						t.setUniqueLongMsgId(uniqueId);
-					} else {
-						frame.setTimestamp(((T)t).getTimestamp());
-						frame.setSequence(((T)t).getSequenceNo());
-						t.setUniqueLongMsgId(new UniqueLongMsgId(uniqueId, frame));
-					}
-					msgs.add((T) t);
-				}
-				return msgs;
-			}
-		} 
-		
-		msgs.add(msg);
-		
-		return msgs;
-	}
-
+	
 	public static <T extends BaseMessage> List<Promise<T>> syncWriteLongMsgToEntity(EndpointEntity e, BaseMessage msg)
 			throws Exception {
 
@@ -132,9 +93,8 @@ public class ChannelUtil {
 			return null;
 
 		if (msg instanceof LongSMSMessage && !((LongSMSMessage<BaseMessage>) msg).isReport()) {
-			LongSMSMessage<BaseMessage> lmsg = (LongSMSMessage<BaseMessage>) msg;
 
-			List<BaseMessage> msgs = splitLongSmsMessage(e, msg);
+			List<BaseMessage> msgs = LongMessageFrameHolder.splitLongSmsMessage(e, msg);
 			return connector.synwrite(msgs);
 		} else {
 			Promise promise = connector.synwrite(msg);

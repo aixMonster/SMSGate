@@ -3,6 +3,7 @@ package com.zx.sms.codec.cmpp.wap;
 import java.io.Serializable;
 
 import com.chinamobile.cmos.sms.AbstractSmsDcs;
+import com.chinamobile.cmos.sms.SmsUdhIei;
 import com.zx.sms.common.GlobalConstance;
 
 import io.netty.buffer.ByteBufUtil;
@@ -19,6 +20,7 @@ public class LongMessageFrame implements Serializable{
 	private short pknumber = 1;
 	private short tppid = 0;// 0是普通GSM 类型，点到点方式 ,127 :写sim卡
 	private short tpudhi = 0; // 0:msgcontent不带协议头。1:带有协议头
+	private boolean isConcat = false;
 	private AbstractSmsDcs msgfmt = GlobalConstance.defaultmsgfmt;
 	// encode septet
 	private byte[] msgContentBytes = GlobalConstance.emptyBytes;
@@ -158,8 +160,26 @@ public class LongMessageFrame implements Serializable{
 		}
 	}
 	
-	public boolean isConcatMsg() {
+	public boolean isHasTpudhi() {
 		return (this.getTpudhi() & 0x41) != 0;
+	}
+	
+
+	public boolean isConcat() {
+		return isConcat;
+	}
+
+	public void setConcat(boolean isConcat) {
+		this.isConcat = isConcat;
+	}
+	
+	public boolean isConcatOnly() {
+		int udhl = getMsgContentBytes()[0];
+		int concatType = getMsgContentBytes()[1];
+		int udhiel =  getMsgContentBytes()[2];
+		return (udhl == 5 && concatType == SmsUdhIei.CONCATENATED_8BIT.getValue() && udhiel == 3) //包含8bit拼接短信头
+				|| (udhl == 6 && concatType == SmsUdhIei.CONCATENATED_16BIT.getValue() && udhiel == 4) ;//包含6bit的拼接短信头
+		
 	}
 
 	@Override

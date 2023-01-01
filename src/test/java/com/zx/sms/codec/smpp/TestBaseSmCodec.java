@@ -13,18 +13,24 @@ import org.junit.Test;
 
 import com.chinamobile.cmos.sms.SmppSmsDcs;
 import com.chinamobile.cmos.sms.SmsAlphabet;
+import com.chinamobile.cmos.sms.SmsMessage;
 import com.chinamobile.cmos.sms.SmsMsgClass;
 import com.chinamobile.cmos.sms.SmsPduUtil;
 import com.chinamobile.cmos.sms.SmsTextMessage;
+import com.chinamobile.cmos.wap.push.SmsWapPushMessage;
+import com.chinamobile.cmos.wap.push.WapSLPush;
 import com.zx.sms.LongSMSMessage;
 import com.zx.sms.codec.AbstractSMPPTestMessageCodec;
 import com.zx.sms.codec.cmpp.wap.LongMessageFrameHolder;
+import com.zx.sms.codec.cmpp.wap.SmsMessageHolder;
 import com.zx.sms.codec.smpp.android.gsm.GsmAlphabet;
 import com.zx.sms.codec.smpp.msg.BaseSm;
 import com.zx.sms.codec.smpp.msg.DeliverSm;
 import com.zx.sms.codec.smpp.msg.DeliverSmReceipt;
 import com.zx.sms.codec.smpp.msg.SubmitSm;
 import com.zx.sms.common.util.HexUtil;
+import com.zx.sms.connect.manager.EndpointEntity;
+import com.zx.sms.connect.manager.smpp.SMPPClientEndpointEntity;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -290,7 +296,105 @@ public class TestBaseSmCodec extends AbstractSMPPTestMessageCodec<BaseSm> {
 			sb.append(gsmstr.charAt(RandomUtils.nextInt() % gsmstr.length()));
 			TestGsmAlphabet(sb.toString());
 		}
+	}
+	
+	protected EndpointEntity buildEndpointEntity() {
+		SMPPClientEndpointEntity entity = new SMPPClientEndpointEntity();
+		entity.setId("testAllSplitType");
+		entity.setSplitType(SmppSplitType.PAYLOADPARAM);
+		entity.setInterfaceVersion((byte)0x34);
+		return entity;
+	}
+	
+	@Test 
+	public void testAllWapSplitType() throws Exception {
+		BaseSm pdu = createMsg();
+		String origin = "http://www.baidu.com?123这个链接的访问记录，跟普通链ssage(content,SmsDcs.getGeneralDataC"+RandomUtils.nextInt();
+		origin = RandomUtils.nextBoolean()?origin:(origin+origin);
+		origin = RandomUtils.nextBoolean()?origin:(origin+origin);
+		WapSLPush sl = new WapSLPush(origin);
+		SmsMessage wap = new SmsWapPushMessage(sl);
 		
+		pdu.setSmsMsg(wap);
+		
+		channel().writeOutbound(pdu);
+		ByteBuf buf =(ByteBuf)channel().readOutbound();
+		ByteBuf copybuf = Unpooled.buffer();
+	    while(buf!=null){
+	    	copybuf.writeBytes(buf);
+			int length = buf.readableBytes();   
+			buf =(ByteBuf)channel().readOutbound();
+	    }
+	    
+	    BaseSm result = decode(copybuf);
+		
+		System.out.println(result);
+		Assert.assertNotNull(((LongSMSMessage)result).getUniqueLongMsgId().getId());
+		System.out.println(((LongSMSMessage)result).getUniqueLongMsgId());
+		Assert.assertEquals(origin, ((WapSLPush)((SmsWapPushMessage)result.getSmsMessage()).getWbxml()).getUri());
+		System.out.println();
+		
+		for(SmppSplitType type : SmppSplitType.values()) {
+			SMPPClientEndpointEntity entity = (SMPPClientEndpointEntity)buildEndpointEntity();
+			entity.setSplitType(type);
+			List<BaseSm> splitted = LongMessageFrameHolder.INS.splitLongSmsMessage(entity, pdu);
+			System.out.println("SlitType :"+type +"     \tsplitted Size :" + splitted.size());
+			//打乱顺序
+			Collections.shuffle(splitted);
+			//再合并
+			for(BaseSm sm : splitted) {
+				SmsMessageHolder merged = LongMessageFrameHolder.INS.putAndget(entity, ((LongSMSMessage)sm).getSrcIdAndDestId(), (LongSMSMessage)sm, false);
+				if(merged != null) {
+					//合并完成
+					SmsMessage sms = merged.getSmsMessage();
+					System.out.println(sms);
+					Assert.assertEquals(origin, ((WapSLPush)((SmsWapPushMessage)sms).getWbxml()).getUri());
+				}
+			}
+		}
+	}
+	
+	@Test 
+	public void testAllTextSplitType() throws Exception {
+		BaseSm pdu = createMsg();
+		String origin = "123这个链接的访问记录，跟普通链ssage(content,SmsDcs.getGeneralDataC"+RandomUtils.nextInt();
+		origin = RandomUtils.nextBoolean()?origin:(origin+origin);
+		origin = RandomUtils.nextBoolean()?origin:(origin+origin);
+		pdu.setSmsMsg(new SmsTextMessage(origin, SmppSmsDcs.getGeneralDataCodingDcs(SmsAlphabet.UCS2, SmsMsgClass.CLASS_UNKNOWN)));
+		
+		//测试网络收发
+		testlongCodec(pdu);
+		System.out.println();
+		//多种
+		for(SmppSplitType type : SmppSplitType.values()) {
+			SMPPClientEndpointEntity entity = new SMPPClientEndpointEntity();
+			entity.setId("testAllSplitType");
+			entity.setSplitType(type);
+			List<BaseSm> splitted = LongMessageFrameHolder.INS.splitLongSmsMessage(entity, pdu);
+			System.out.println("SlitType :"+type +"     \tsplitted Size :" + splitted.size());
+			//打乱顺序
+			Collections.shuffle(splitted);
+			//再合并
+			for(BaseSm sm : splitted) {
+				SmsMessageHolder merged = LongMessageFrameHolder.INS.putAndget(entity, ((LongSMSMessage)sm).getSrcIdAndDestId(), (LongSMSMessage)sm, false);
+				if(merged != null) {
+					//合并完成
+					SmsMessage sms = merged.getSmsMessage();
+					System.out.println(sms);
+					Assert.assertEquals(origin, ((SmsTextMessage)sms).getText());
+				}
+			}
+			
+		}
+	}
+	
+	private BaseSm createMsg() {
+		SubmitSm pdu = new SubmitSm();
+    	pdu.setDestAddress(new Address((byte)1,(byte)1,"447712345678"));
+    	pdu.setSourceAddress(new Address((byte)5,(byte)0,"MelroseLabs"));
+    	
+    	pdu.setRegisteredDelivery((byte)1);
+    	return pdu;
 	}
 	
 	

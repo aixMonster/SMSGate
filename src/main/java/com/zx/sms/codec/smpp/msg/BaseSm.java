@@ -297,13 +297,22 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		
 		switch(splitType) {
 			case UDHPARAM:
-				if(frame.isConcatMsg()) {
+				if(frame.isConcat()) { //有UDH的，不一定是拼接短信。比如端口短信
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray((short)frame.getPkseq())));
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray((byte)frame.getPktotal())));
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray((byte)frame.getPknumber())));
-					int udhl = frame.getMsgContentBytes()[0]+1;
-					byte[] newContent = ArrayUtils.subarray(frame.getMsgContentBytes(), 6, frame.getMsgContentBytes().length);
-					requestMessage.setEsmClass((byte) (old & 0xbf));
+					
+					//UDH有可能包含多个UDH项目，这里解析出所有项目后，删除concat类型的项目
+					byte[] newContent = null;
+					if(frame.isConcatOnly()) { //只包含长短信的拼接短信头
+						int udhl = frame.getMsgContentBytes()[0];
+						newContent = ArrayUtils.subarray(frame.getMsgContentBytes(), udhl + 1, frame.getMsgContentBytes().length);
+						requestMessage.setEsmClass((byte) (old & 0xbf)); //没有UDH了，清除UDHI标识
+						
+					}else {
+						//端口短信，长短信，有两或者更多个头
+						newContent = LongMessageFrameHolder.INS.removeConcatUDHie(frame.getMsgContentBytes());
+					}
 					requestMessage.setMsglength((short)newContent.length);
 					requestMessage.setShortMessage(newContent);
 					break;
@@ -313,14 +322,21 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 				requestMessage.setShortMessage(frame.getMsgContentBytes());
 				break;
 			case PAYLOADPARAM:
-				if(frame.isConcatMsg()) {
+				if(frame.isConcat()) {
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray((short)frame.getPkseq())));
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray((byte)frame.getPktotal())));
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray((byte)frame.getPknumber())));
 					
-					int udhl = frame.getMsgContentBytes()[0]+1;
-					byte[] newContent = ArrayUtils.subarray(frame.getMsgContentBytes(), 6, frame.getMsgContentBytes().length);
-					requestMessage.setEsmClass((byte) (old & 0xbf));
+					byte[] newContent = null;
+					if(frame.isConcatOnly()) {  //只包含长短信的拼接短信头
+						int udhl = frame.getMsgContentBytes()[0];
+						newContent = ArrayUtils.subarray(frame.getMsgContentBytes(), udhl + 1, frame.getMsgContentBytes().length);
+						requestMessage.setEsmClass((byte) (old & 0xbf));
+						
+					}else {
+						//端口短信，长短信，有两或者更多个头
+						newContent = LongMessageFrameHolder.INS.removeConcatUDHie(frame.getMsgContentBytes());
+					}
 					requestMessage.setMsglength((short)0);
 					requestMessage.setShortMessage(GlobalConstance.emptyBytes);
 					requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_MESSAGE_PAYLOAD,newContent));
@@ -353,12 +369,6 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		}
 		
 		requestMessage.setSmsMsg((SmsMessage) null);
-		//已有UDH头进行的分片短信，不用再设置下面三个可选参数
-//		if(frame.getPktotal()>1) {
-//			requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray(frame.getPknumber())));
-//			requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray(frame.getPktotal())));
-//			requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray(frame.getPkseq())));
-//		}
 		return requestMessage;
 	}
 
@@ -392,8 +402,8 @@ public abstract class BaseSm<R extends PduResponse> extends PduRequest<R> {
 		Tlv seq = getOptionalParameter(SmppConstants.TAG_SAR_SEGMENT_SEQNUM);
 		if(ref != null && tot!=null && seq != null && tot.getValue()[0] > 1) {
 			
-			int startIndex = frame.isConcatMsg() ? 1 : 0;
-			int udhl = frame.isConcatMsg() ? messageBytes[0] : 0;
+			int startIndex = frame.isHasTpudhi() ? 1 : 0;
+			int udhl = frame.isHasTpudhi() ? messageBytes[0] : 0;
 			byte[] mergedMessageBytes = new byte[messageBytes.length+7-startIndex];
 			//补充成16bit的长短信分片
 			mergedMessageBytes[0]=(byte)(udhl + 6);

@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,5 +56,24 @@ public class TestSmsConcatMessage {
 			}
 		}
 		Assert.assertTrue(!checkExists);
+	}
+	
+	@Test
+	public void  testRemoveConcatUDHie() throws DecoderException {
+		byte[] contents = Hex.decodeHex("050003870301a1f208".toCharArray());
+		byte[] last = LongMessageFrameHolder.INS.removeConcatUDHie(contents);
+		System.out.println(new String(  Hex.encodeHex(last)));
+		Assert.assertArrayEquals(Hex.decodeHex("a1f208".toCharArray()), last);
+		
+		contents = Hex.decodeHex("0b0003870301050401020304a1f208".toCharArray());
+		last = LongMessageFrameHolder.INS.removeConcatUDHie(contents);
+		System.out.println(new String(  Hex.encodeHex(last)));
+		Assert.assertArrayEquals(Hex.decodeHex("06050401020304a1f208".toCharArray()), last);
+	
+		contents = Hex.decodeHex("0c080400870301050401020304a1f208".toCharArray());
+		last = LongMessageFrameHolder.INS.removeConcatUDHie(contents);
+		System.out.println(new String(  Hex.encodeHex(last)));
+		Assert.assertArrayEquals(Hex.decodeHex("06050401020304a1f208".toCharArray()), last);
+	
 	}
 }

@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.zx.sms.codec.smpp.SmppSplitType;
 import com.zx.sms.connect.manager.EndpointEntity.ChannelType;
 import com.zx.sms.connect.manager.EndpointEntity.SupportLongMessage;
 import com.zx.sms.connect.manager.EndpointManager;
@@ -68,7 +69,8 @@ public class TestSMPPEndPoint {
 		client.setSystemId("901782");
 		client.setPassword("ICP");
 		client.setChannelType(ChannelType.DUPLEX);
-
+		client.setSplitType(SmppSplitType.PAYLOADPARAM);
+		client.setInterfaceVersion((byte)0x34);
 		client.setMaxChannels((short)1);
 		client.setRetryWaitTimeSec((short)100);
 		client.setUseSSL(false);

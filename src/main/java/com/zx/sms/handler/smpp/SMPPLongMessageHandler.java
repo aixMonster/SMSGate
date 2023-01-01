@@ -20,16 +20,4 @@ public class SMPPLongMessageHandler extends AbstractLongMessageHandler<BaseSm> {
 		t.setSmsMsg(content);
 	}
 	
-	//TODO 暂时没实现payLoad保存消息，
-//	requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_MSG_REF_NUM,ByteArrayUtil.toByteArray(frame.getPkseq())));
-//	requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_TOTAL_SEGMENTS,ByteArrayUtil.toByteArray(frame.getPktotal())));
-//	requestMessage.addOptionalParameter(new Tlv(SmppConstants.TAG_SAR_SEGMENT_SEQNUM,ByteArrayUtil.toByteArray(frame.getPknumber())));
-	@Override
-	protected LongSMSMessage generateMessage(BaseSm lmsg ,LongMessageFrame frame ,EndpointEntity entity) throws Exception{
-		if(entity != null) {
-			return (LongSMSMessage)((BaseSm) lmsg).generateMessage(frame,((SMPPEndpointEntity)entity).getSplitType());
-		}
-		return super.generateMessage(lmsg, frame, entity);
-	}
-	
 }

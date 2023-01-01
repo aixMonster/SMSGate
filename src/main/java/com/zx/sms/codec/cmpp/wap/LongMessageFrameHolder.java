@@ -17,6 +17,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.stax.StAXSource;
 
+import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -30,6 +31,7 @@ import com.chinamobile.cmos.PduParser.PduHeaders;
 import com.chinamobile.cmos.PduParser.PduParser;
 import com.chinamobile.cmos.sms.AbstractSmsDcs;
 import com.chinamobile.cmos.sms.SmppSmsDcs;
+import com.chinamobile.cmos.sms.SmsConcatMessage;
 import com.chinamobile.cmos.sms.SmsException;
 import com.chinamobile.cmos.sms.SmsMessage;
 import com.chinamobile.cmos.sms.SmsPdu;
@@ -54,6 +56,7 @@ import com.zx.sms.codec.smpp.msg.BaseSm;
 import com.zx.sms.common.NotSupportedException;
 import com.zx.sms.common.util.CMPPCommonUtil;
 import com.zx.sms.common.util.CachedMillisecondClock;
+import com.zx.sms.common.util.DefaultSequenceNumberUtil;
 import com.zx.sms.common.util.StandardCharsets;
 import com.zx.sms.connect.manager.EndpointEntity;
 import com.zx.sms.connect.manager.smpp.SMPPEndpointEntity;
@@ -61,6 +64,7 @@ import com.zx.sms.connect.manager.smpp.SMPPEndpointEntity;
 import es.rickyepoderi.wbxml.definition.WbXmlInitialization;
 import es.rickyepoderi.wbxml.stream.WbXmlInputFactory;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.Channel;
 
 
 //短信片断持久化需要集中保存，因为同一短信的不同分片会从不同的连接发送。可能不在同一台主机。
@@ -160,7 +164,7 @@ public enum LongMessageFrameHolder {
 	 * 
 	 **/
 	public String getPartTextMsg(LongMessageFrame frame) {
-		if (!frame.isConcatMsg()) {
+		if (!frame.isHasTpudhi()) {
 			return buildTextMessage(frame.getPayloadbytes(0), frame.getMsgfmt()).getText();
 		} else {
 			UserDataHeader header = parseUserDataHeader(frame.getMsgContentBytes());
@@ -174,7 +178,7 @@ public enum LongMessageFrameHolder {
 	 */
 	public FrameHolder parseFrameKey(LongMessageFrame frame) {
 		
-		if (frame.isConcatMsg()) {
+		if (frame.isHasTpudhi()) {
 			try {
 				FrameHolder fh = createFrameHolder("", frame);
 				return fh ;
@@ -203,7 +207,7 @@ public enum LongMessageFrameHolder {
         该问题据说是以前一直遗留下来的，没有正式的文档规范说明，所以一直都是发送0X40(64)。 
 		 */
 		// udhi只取第1个bit和第7个bit同时为0时，表示不包含UDH
-		if (!frame.isConcatMsg()) {
+		if (!frame.isHasTpudhi()) {
 			// 短信内容不带协议头，直接获取短信内容
 			SmsTextMessage smsmsg =  buildTextMessage(frame.getPayloadbytes(0), frame.getMsgfmt());
 			
@@ -211,6 +215,7 @@ public enum LongMessageFrameHolder {
 		} else {
 
 			try {
+				//包含UDH，调用createFrameHolder进行UDH解析
 				FrameHolder fh = createFrameHolder(longSmsKey, frame);
 //
 				if(fh == null)
@@ -331,6 +336,103 @@ public enum LongMessageFrameHolder {
 		}
 	}
 	
+	public static <T extends BaseMessage> List<T> splitLongSmsMessage(EndpointEntity e, T msg) throws Exception {
+		return splitLongSmsMessage(e,msg,null);
+	}
+	
+	public static <T extends BaseMessage> List<T> splitLongSmsMessage(EndpointEntity e, T msg,Channel ch) throws Exception {
+		List<T> msgs = new ArrayList<T>();
+
+		if (msg instanceof LongSMSMessage) {
+			LongSMSMessage<T> lmsg = (LongSMSMessage<T>) msg;
+			if (!lmsg.isReport()) {
+				// 长短信拆分
+				SmsMessage msgcontent = lmsg.getSmsMessage();
+
+				if (msgcontent instanceof SmsConcatMessage) {
+					((SmsConcatMessage) msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
+				}
+
+				List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
+				// 生成长短信唯一ID
+				UniqueLongMsgId uniqueId = null;
+				// 保证同一条长短信，通过同一个tcp连接发送
+
+				for (LongMessageFrame frame : frameList) {
+					LongSMSMessage<T> t = null;
+					if(e != null && e instanceof SMPPEndpointEntity && msg instanceof BaseSm) {
+						//SMPP协议判断SmppSplitType
+						t = (LongSMSMessage) ((BaseSm)msg).generateMessage(frame, ((SMPPEndpointEntity)e).getSplitType());
+					}else {
+						t = (LongSMSMessage) lmsg.generateMessage(frame);
+					}
+					if (uniqueId == null) {
+						if(ch!=null) {
+							uniqueId = new UniqueLongMsgId(e, ch, t,DefaultSequenceNumberUtil.getSequenceNo(), false);
+						}else {
+							uniqueId = new UniqueLongMsgId(e, t);
+						}
+						t.setUniqueLongMsgId(uniqueId);
+					} else {
+						frame.setTimestamp(((T)t).getTimestamp());
+						frame.setSequence(((T)t).getSequenceNo());
+						t.setUniqueLongMsgId(new UniqueLongMsgId(uniqueId, frame));
+					}
+					msgs.add((T) t);
+				}
+				return msgs;
+			}
+		} 
+		
+		msgs.add(msg);
+		
+		return msgs;
+	}
+	
+	//用于SMPP协议，以optionalParameter方式发送长短信时，删掉messageContents里的长短信头
+	public  byte[] removeConcatUDHie(byte[] msgcontent){
+
+		UserDataHeader header = parseUserDataHeader(msgcontent);
+		List<InformationElement> newIE = new ArrayList<InformationElement>();
+		if (header.infoElement.size() > 0) {
+			for (InformationElement udhi : header.infoElement) {
+				if (!SmsUdhIei.CONCATENATED_8BIT.equals(udhi.udhIei) && !SmsUdhIei.CONCATENATED_16BIT.equals(udhi.udhIei)) {
+					newIE.add(udhi);
+				}
+			}
+			int udhl = msgcontent[0];
+			byte[] realcontents = ArrayUtils.subarray(msgcontent, udhl + 1, msgcontent.length);
+			//剩下的UDH的长度
+			int lastUDHL = 0;
+			for (InformationElement udhi : newIE) {
+				lastUDHL += (udhi.infoEleLength+2);
+			}
+			
+			//剩下的UDHData数据
+			if(lastUDHL>0) {
+				byte[] lashUDHData = new byte[lastUDHL+1];
+				int i = 0;
+				lashUDHData[i++] = (byte)lastUDHL;
+				for (InformationElement udhi : newIE) {
+					lashUDHData[i++] = udhi.udhIei.getValue();
+					lashUDHData[i++] = (byte)udhi.infoEleLength;
+					System.arraycopy(udhi.infoEleData, 0, lashUDHData, i, udhi.infoEleLength);
+					i+=udhi.infoEleLength;
+				}
+
+				//合并 lashUDHData realcontents返回
+				byte[] finalyContent = new byte[lashUDHData.length + realcontents.length];
+				System.arraycopy(lashUDHData, 0, finalyContent, 0, lashUDHData.length);
+				System.arraycopy(realcontents, 0, finalyContent, lashUDHData.length, realcontents.length);
+				return finalyContent;
+			}else {
+				return realcontents;
+			}
+
+		}
+		return msgcontent;
+	}
+	
 	public List<LongMessageFrame> splitmsgcontent(SmsMessage content) throws SmsException {
 
 		List<LongMessageFrame> result = new ArrayList<LongMessageFrame>();
@@ -352,11 +454,13 @@ public enum LongMessageFrameHolder {
 					pkseq = byteToInt(udhdata[0]);
 					pktot = (short)byteToInt(udhdata[1]);
 					pknum = (short)byteToInt(udhdata[2]);
+					frame.setConcat(true);
 				}else if(SmsUdhIei.CONCATENATED_16BIT.equals(firstudh.getUdhIei_())) {
 					byte[] udhdata = firstudh.getUdhIeiData();
 					pkseq = (int)((((udhdata[0] & 0xff )<<8) | (udhdata[1]&0xff)) & 0x0ffff);
 					pktot = (short)byteToInt(udhdata[2]);
 					pknum = (short)byteToInt(udhdata[3]);
+					frame.setConcat(true);
 				}
 			}
 			

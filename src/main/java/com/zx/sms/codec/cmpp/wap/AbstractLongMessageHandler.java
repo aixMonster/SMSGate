@@ -66,38 +66,13 @@ public abstract class AbstractLongMessageHandler<T extends BaseMessage> extends 
 				&& requestMessage instanceof LongSMSMessage
 				&& ((LongSMSMessage) requestMessage).needHandleLongMessage()) {
 			
-			LongSMSMessage lmsg = (LongSMSMessage) requestMessage;
-			SmsMessage msgcontent = lmsg.getSmsMessage();
-
-			if (msgcontent instanceof SmsConcatMessage) {
-				((SmsConcatMessage) msgcontent).setSeqNoKey(lmsg.getSrcIdAndDestId());
-			}
-
-			List<LongMessageFrame> frameList = LongMessageFrameHolder.INS.splitmsgcontent(msgcontent);
+			List<T> splittedMsg = LongMessageFrameHolder.INS.splitLongSmsMessage(entity, requestMessage,ctx.channel());
 			
-			//生成长短信唯一ID
-			UniqueLongMsgId uniqueId = null;
-			
-			for (LongMessageFrame frame : frameList) {
-				LongSMSMessage t = generateMessage(requestMessage,frame,entity);
-				if(uniqueId == null) {
-					uniqueId = new UniqueLongMsgId(entity, ctx.channel(), t,DefaultSequenceNumberUtil.getSequenceNo(), false);
-					t.setUniqueLongMsgId(uniqueId);
-				}else {
-					frame.setTimestamp(((T)t).getTimestamp());
-					frame.setSequence(((T)t).getSequenceNo());
-					t.setUniqueLongMsgId(new UniqueLongMsgId(uniqueId,frame));
-				}
-				out.add(t);
-			}
+			out.addAll(splittedMsg);
 		} else {
 			out.add(requestMessage);
 		}
 	}
 	
 	protected abstract void resetMessageContent(T t, SmsMessage content);
-	
-	protected LongSMSMessage generateMessage(T lmsg ,LongMessageFrame frame ,EndpointEntity entity) throws Exception{
-		return (LongSMSMessage)((LongSMSMessage) lmsg).generateMessage(frame);
-	}
 }
